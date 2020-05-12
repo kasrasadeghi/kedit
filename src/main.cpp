@@ -77,7 +77,8 @@ int main() {
   Profiler pr;
 
   Editor editor;
-  editor.loadFile("README.md");
+  // editor.loadFile("README.md");
+  editor.loadFile("/home/kasra/notes/life.md");
 
   while (window.isOpen()) {
 
@@ -135,24 +136,16 @@ int main() {
     glViewport(0, 0, window.width(), window.height());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
     for (Buffer& buffer : editor._buffers) {
       uint64_t line_number = 0;
 
-      char* char_iter = buffer.file_contents._data;
-      while (char_iter < buffer.file_contents.end()) {
-        // chomp a line into acc
-        StringView acc {char_iter, 1};
-        while (char_iter < buffer.file_contents.end() && *char_iter != '\n') {
-          ++ acc._length;
-          ++ char_iter;
-        }
+      for (StringView line : buffer.contents.lines) {
 
-        // remove the '\n' and render line
-        -- acc._length;
-        tr.renderText(acc.stringCopy(), 200, 50 + (30 * line_number), 1);
+        tr.renderText(line.stringCopy(), 200, 50 + (30 * line_number), 1);
+        if ((50 + (30 * line_number)) > (uint64_t)(window.height())) {
+          break;
+        }
         ++ line_number;
-        ++ char_iter;
       }
     }
 

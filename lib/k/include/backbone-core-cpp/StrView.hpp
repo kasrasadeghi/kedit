@@ -18,7 +18,7 @@ struct StringView {
   const char* data()
     { return _data; }
 
-  const char* end()
+  const char* end() const
     { return _data + _length; }
 };
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Rope.hpp"
+
 #include <backbone-core-cpp/File.hpp>
 
 #include <string>
