@@ -9,7 +9,7 @@ FOREACH(cmake ${cmakes})
 	INCLUDE(${cmake})
 ENDFOREACH(cmake)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 
 # NOTE:
 #   stdgl_libraries ::= opengl related libraries are stored in

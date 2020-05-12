@@ -23,32 +23,32 @@ build:
 run:
 	[ -d build ] || mkdir build
 	(cd build; cmake -DCMAKE_BUILD_TYPE=Debug -DGTEST=FALSE ..; make -j8)
-	build/bin/minecraft
+	bin/$(execname)
 
 fast:
 	[ -d build ] || mkdir build
 	(cd build; cmake -DCMAKE_BUILD_TYPE=Release -DGTEST=FALSE ..; make -j8)
-	build/bin/minecraft
+	bin/$(execname)
 
 .PHONY: test
 test:
 	[ -d build ] || mkdir build
 	(cd build; cmake -DCMAKE_BUILD_TYPE=Debug -DGTEST=TRUE ..; make -j8)
-	build/bin/test
+	bin/test
 
 time:
 	[ -d build ] || mkdir build
 	(cd build; cmake -DCMAKE_BUILD_TYPE=Release -DGTEST=TRUE ..; make -j8)
-	build/bin/test
+	bin/test
 
 gdb: build
-	gdb -q -ex run --args build/bin/minecraft
+	gdb -q -ex run --args bin/$(execname)
 
 clean:
 	rm -rf build
 
 .PHONY: profile
 profile:
-	valgrind --tool=callgrind build/bin/minecraft
+	valgrind --tool=callgrind bin/$(execname)
 	kcachegrind callgrind.out.*
 	rm -f callgrind.out.*

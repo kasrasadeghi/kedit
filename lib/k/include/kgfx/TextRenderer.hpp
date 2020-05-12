@@ -1,3 +1,5 @@
+#pragma once
+
 // From https://learnopengl.com/In-Practice/Text-Rendering
 
 // GL includes
@@ -27,7 +29,7 @@ struct Character {
   GLuint Advance;     // Horizontal offset to advance to next glyph
 };
 
-void checkShaderCompileErrors(GLuint shader, std::string type) {
+inline void checkShaderCompileErrors(GLuint shader, std::string type) {
   GLint success;
   GLchar infoLog[1024];
   if (type != "PROGRAM") {
@@ -58,10 +60,10 @@ uniform sampler2D text;
 uniform vec4 textColor;
 
 void main()
-{    
+{
   vec4 sampled = vec4(1.0, 1.0, 1.0, texture(text, TexCoords).r);
   color = textColor * sampled;
-}  
+}
 )zzz";
 
 inline const char* text_vertex_shader = R"zzz(
@@ -85,9 +87,9 @@ class TextRenderer {
   GLuint _shaderID = 0;
   GLuint _shader_proj_loc = 0;
   GLuint _shader_color_loc = 0;
-  
+
 public:
-  TextRenderer(float window_width, float window_height) {
+  inline TextRenderer(float window_width, float window_height) {
     if (_shaderID == 0) {
       _shaderID = makeShader();
     }
@@ -163,7 +165,7 @@ public:
     glBindVertexArray(0);
   }
 
-  GLuint makeShader() {
+  inline GLuint makeShader() {
     // vertex shader
     GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex, 1, &text_vertex_shader, NULL);
@@ -186,7 +188,7 @@ public:
     return ID;
   }
 
-  GLfloat renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec4 color = glm::vec4(1)) {
+  inline GLfloat renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec4 color = glm::vec4(1)) {
     // Activate corresponding render state
     glEnable(GL_BLEND);
     glUseProgram(_shaderID);
@@ -208,7 +210,7 @@ public:
       // clang-format off
       // Update VBO for each character
       GLfloat vertices[6][4] = {
-        {xpos,     ypos - h, 0, 0},   
+        {xpos,     ypos - h, 0, 0},
         {xpos,     ypos,     0, 1},
         {xpos + w, ypos - h, 1, 0},
 
@@ -237,7 +239,7 @@ public:
     return x;
   }
 
-  GLfloat textWidth(std::string text, GLfloat scale = 1) {
+  inline GLfloat textWidth(std::string text, GLfloat scale = 1) {
     // Iterate through all characters
     std::string::const_iterator c;
     GLfloat width = 0;
