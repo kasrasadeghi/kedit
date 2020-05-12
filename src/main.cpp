@@ -43,6 +43,7 @@ int main() {
   window.setCursorCallback([&](double mouse_x, double mouse_y) {
   });
 
+  // TODO smooth scrolling?
   window.setScrollCallback([&](double scroll_x, double scroll_y) {
     editor.verticalScroll(scroll_y);
   });
@@ -158,16 +159,10 @@ int main() {
         double xpos = 200;
         double ypos = (20 * buffer.scroll_offset) + (50 + (30 * line_number));
 
-        status(str(ypos));
-        if (ypos > (uint64_t)(window.height())) {
-          ++ line_number;
-          continue;
+        // TODO "+ 30" should be "+ text_height"
+        if (ypos < (uint64_t)(window.height() + 30) && ypos > (uint64_t)(0)) {
+          tr.renderText(line.stringCopy(), 200, ypos, 1);
         }
-        if (ypos < (uint64_t)(0)) {
-          ++ line_number;
-          continue;
-        }
-        tr.renderText(line.stringCopy(), 200, ypos, 1);
         ++ line_number;
       }
     }
