@@ -78,7 +78,7 @@ int main() {
 
   Editor editor;
   // editor.loadFile("README.md");
-  editor.loadFile("/home/kasra/notes/life.md");
+  editor.loadFile("/home/kasra/notes/projects.md");
 
   while (window.isOpen()) {
 
@@ -141,10 +141,13 @@ int main() {
 
       for (StringView line : buffer.contents.lines) {
 
-        tr.renderText(line.stringCopy(), 200, 50 + (30 * line_number), 1);
         if ((50 + (30 * line_number)) > (uint64_t)(window.height())) {
-          break;
+          continue;
         }
+        if ((50 + (30 * line_number)) < (uint64_t)(0)) {
+          continue;
+        }
+        tr.renderText(line.stringCopy(), 200, 50 + (30 * line_number), 1);
         ++ line_number;
       }
     }
