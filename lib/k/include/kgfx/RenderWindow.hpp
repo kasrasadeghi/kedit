@@ -13,21 +13,27 @@
 // this plumbing is necessary because
 // a lambda that captures can't be used as a function ptr
 using KeyCallback = std::function<void(int, int, int, int)>;
-static KeyCallback __keyCallback;
-static void __keyCallbackWrapper(GLFWwindow* window, int k, int s, int a, int m) {
-  __keyCallback(k, s, a, m);
+static KeyCallback _RenderWindow_keyCallback;
+static void _RenderWindow_keyCallbackWrapper(GLFWwindow* window, int k, int s, int a, int m) {
+  _RenderWindow_keyCallback(k, s, a, m);
 }
 
 using MouseCallback = std::function<void(int, int, int)>;
-static MouseCallback __mouseCallback;
-static void __mouseCallbackWrapper(GLFWwindow* window, int b, int a, int m) {
-  __mouseCallback(b, a, m);
+static MouseCallback _RenderWindow_mouseCallback;
+static void _RenderWindow_mouseCallbackWrapper(GLFWwindow* window, int b, int a, int m) {
+  _RenderWindow_mouseCallback(b, a, m);
 }
 
 using CursorCallback = std::function<void(double, double)>;
-static CursorCallback __cursorCallback;
-static void __cursorCallbackWrapper(GLFWwindow* window, double x, double y) {
-  __cursorCallback(x, y);
+static CursorCallback _RenderWindow_cursorCallback;
+static void _RenderWindow_cursorCallbackWrapper(GLFWwindow* window, double x, double y) {
+  _RenderWindow_cursorCallback(x, y);
+}
+
+using ScrollCallback = std::function<void(double, double)>;
+static ScrollCallback _RenderWindow_scrollCallback;
+static void _RenderWindow_scrollCallbackWrapper(GLFWwindow* window, double x, double y) {
+  _RenderWindow_scrollCallback(x, y);
 }
 
 class RenderWindow {
@@ -136,15 +142,19 @@ public:
   }
 
   void setKeyCallback(KeyCallback keyCallback) {
-    __keyCallback = keyCallback;
-    glfwSetKeyCallback(_window, __keyCallbackWrapper);
+    _RenderWindow_keyCallback = keyCallback;
+    glfwSetKeyCallback(_window, _RenderWindow_keyCallbackWrapper);
   }
   void setMouseCallback(MouseCallback mouseCallback) {
-    __mouseCallback = mouseCallback;
-    glfwSetMouseButtonCallback(_window, __mouseCallbackWrapper);
+    _RenderWindow_mouseCallback = mouseCallback;
+    glfwSetMouseButtonCallback(_window, _RenderWindow_mouseCallbackWrapper);
   }
   void setCursorCallback(CursorCallback cursorCallback) {
-    __cursorCallback = cursorCallback;
-    glfwSetCursorPosCallback(_window, __cursorCallbackWrapper);
+    _RenderWindow_cursorCallback = cursorCallback;
+    glfwSetCursorPosCallback(_window, _RenderWindow_cursorCallbackWrapper);
+  }
+  void setScrollCallback(ScrollCallback scrollCallback) {
+    _RenderWindow_scrollCallback = scrollCallback;
+    glfwSetScrollCallback(_window, _RenderWindow_scrollCallbackWrapper);
   }
 };
