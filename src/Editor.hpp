@@ -13,4 +13,5 @@ struct Editor {
 
   void loadFile(StringView file_path);
   void verticalScroll(double scroll_y);
+  void tick(double delta_time);
 };

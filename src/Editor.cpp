@@ -14,5 +14,13 @@ void Editor::loadFile(StringView file_path)
 void Editor::verticalScroll(double scroll_y)
   {
     Buffer& curr = _buffers.back();
-    curr.scroll_offset += scroll_y;
+    curr.line_scroller.target += scroll_y;
+  }
+
+void Editor::tick(double delta_time)
+  {
+    for (Buffer& buffer : _buffers)
+      {
+        buffer.tick(delta_time);
+      }
   }

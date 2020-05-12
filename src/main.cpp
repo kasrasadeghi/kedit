@@ -90,6 +90,7 @@ int main() {
     if constexpr(PROFILING) { pr.startFrame(); }
 
     /// Update Frame Data ===----------------------------------------------------------------===///
+
     framecounter ++;
 
     constexpr int geometric_falloff_rate = 16; // try for power of 2
@@ -115,19 +116,10 @@ int main() {
 
     if constexpr(PROFILING) { pr.event("handle updates"); }
 
-    /// Build Instances ===-------------------------------------------------------===///
-
-    // world.build(instances);
-
-    // glUseProgram(program_id);
-    // glBindVertexArray(worldVAO);
-
-    // glBindBuffer(GL_ARRAY_BUFFER, VBO.instances_buffer);
-    // glBufferData(GL_ARRAY_BUFFER, sizeof(Instance) * instances.size(), instances.data(), GL_STATIC_DRAW);
-
-    if constexpr(PROFILING) { pr.event("copy over instances"); }
+    editor.tick(delta_time);
 
     /// PreRender Compution ===----------------------------------------------------------------===///
+
     float aspect = static_cast<float>(window.width()) / window.height();
     glm::mat4 projection_matrix(0);
     glm::mat4 view_matrix(0);
@@ -141,6 +133,7 @@ int main() {
 		glDepthFunc(GL_LESS);
 
     /// Render to Screen ===-----------------------------------------------------===///
+
     // GL options
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -151,13 +144,20 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for (Buffer& buffer : editor._buffers) {
-      status(str(buffer.scroll_offset));
+      status(str(buffer.line_scroller.position));
+      status(str(buffer.line_scroller.target));
+
+      constexpr auto signed_normalize = [](double x) { return x > 0 ? 1 : x < 0 ? -1 : 0; };
+      auto acceleration = 0.1 * signed_normalize(buffer.line_scroller.target - buffer.line_scroller.position);
+      status(str(acceleration));
+
       uint64_t line_number = 0;
 
       for (StringView line : buffer.contents.lines) {
 
         double xpos = 200;
-        double ypos = (20 * buffer.scroll_offset) + (50 + (30 * line_number));
+        double current_offset = (30 * buffer.line_scroller.position);
+        double ypos = current_offset + (50 + (30 * line_number));
 
         // TODO "+ 30" should be "+ text_height"
         if (ypos < (uint64_t)(window.height() + 30) && ypos > (uint64_t)(0)) {
@@ -176,6 +176,7 @@ int main() {
     tr.renderText("~FPS: " + str(moving_avg_framerate), window.width() - 300, 80, 1);
 
     /// Render Messages ===--------------------------------------------------===///
+
     auto list_text = [&tr](std::vector<std::string> xs, glm::ivec2 start_pos) {
       int count = 0;
       for (std::string x : xs) {
