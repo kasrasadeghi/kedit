@@ -10,4 +10,5 @@ struct Buffer {
   File file;
   StringView file_contents = "";
   Rope contents;
+  double scroll_offset = 0;
 };

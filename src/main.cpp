@@ -16,6 +16,10 @@ int main() {
 
   glfwSwapInterval(1); // framerate set: 0 for uncapped, 1 for monitor refresh rate
 
+  Editor editor;
+  // editor.loadFile("README.md");
+  editor.loadFile("/home/kasra/notes/projects.md");
+
   window.setKeyCallback([&](int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_ESCAPE) {
       window.close();
@@ -37,6 +41,10 @@ int main() {
   });
 
   window.setCursorCallback([&](double mouse_x, double mouse_y) {
+  });
+
+  window.setScrollCallback([&](double scroll_x, double scroll_y) {
+    editor.verticalScroll(scroll_y);
   });
 
   /// GL Options ===-------------------------------------------------------------------------===///
@@ -76,10 +84,6 @@ int main() {
 
   Profiler pr;
 
-  Editor editor;
-  // editor.loadFile("README.md");
-  editor.loadFile("/home/kasra/notes/projects.md");
-
   while (window.isOpen()) {
 
     if constexpr(PROFILING) { pr.startFrame(); }
@@ -94,6 +98,15 @@ int main() {
     moving_avg_framerate = ((moving_avg_framerate * (geometric_falloff_rate - 1)) + framerate) / geometric_falloff_rate;
 
     if constexpr(PROFILING) { pr.event("update frame data"); }
+
+    /// Development Messages ===-------------------------------------------------------------===///
+
+    std::vector<std::string> status_messages;
+    status_messages.push_back("status");
+    status_messages.push_back("------");
+    auto status = [&status_messages](std::string m) {
+      status_messages.push_back(m);
+    };
 
     /// Handle Updates ===-------------------------------------------------------------------===///
 
@@ -137,17 +150,24 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for (Buffer& buffer : editor._buffers) {
+      status(str(buffer.scroll_offset));
       uint64_t line_number = 0;
 
       for (StringView line : buffer.contents.lines) {
 
-        if ((50 + (30 * line_number)) > (uint64_t)(window.height())) {
+        double xpos = 200;
+        double ypos = (20 * buffer.scroll_offset) + (50 + (30 * line_number));
+
+        status(str(ypos));
+        if (ypos > (uint64_t)(window.height())) {
+          ++ line_number;
           continue;
         }
-        if ((50 + (30 * line_number)) < (uint64_t)(0)) {
+        if (ypos < (uint64_t)(0)) {
+          ++ line_number;
           continue;
         }
-        tr.renderText(line.stringCopy(), 200, 50 + (30 * line_number), 1);
+        tr.renderText(line.stringCopy(), 200, ypos, 1);
         ++ line_number;
       }
     }
@@ -168,10 +188,7 @@ int main() {
       }
     };
 
-    std::vector<std::string> status_messages {
-    };
-
-    list_text(status_messages, {100, 50});
+    list_text(status_messages, {window.width() - 500, window.height() - 500});
 
     if constexpr(PROFILING) {
       pr.event("render text");
@@ -182,8 +199,8 @@ int main() {
         pr.removeLastFrame();
       }
       std::vector<std::string> frame_messages;
-      frame_messages.push_back("log");
-      frame_messages.push_back("---");
+      frame_messages.push_back("frames");
+      frame_messages.push_back("------");
       if (not pr._frames.empty()) {
         for (const Event& event : pr._frames.back()._events) {
           frame_messages.emplace_back(event.name + str(": ") + str(event.elapsed_time) + "s");

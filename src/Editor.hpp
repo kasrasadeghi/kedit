@@ -12,4 +12,5 @@ struct Editor {
   std::vector<Buffer> _buffers;
 
   void loadFile(StringView file_path);
+  void verticalScroll(double scroll_y);
 };
