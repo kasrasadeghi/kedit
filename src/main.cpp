@@ -144,13 +144,6 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for (Buffer& buffer : editor._buffers) {
-      status(str(buffer.line_scroller.position));
-      status(str(buffer.line_scroller.target));
-
-      constexpr auto signed_normalize = [](double x) { return x > 0 ? 1 : x < 0 ? -1 : 0; };
-      auto acceleration = 0.1 * signed_normalize(buffer.line_scroller.target - buffer.line_scroller.position);
-      status(str(acceleration));
-
       uint64_t line_number = 0;
 
       for (StringView line : buffer.contents.lines) {

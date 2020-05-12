@@ -30,7 +30,7 @@ struct Rope {
               ++ char_iter;
             }
 
-          // remove the '\n' and render line
+          // remove the newline, '\n'
           -- acc._length;
 
           lines.push_back(acc);
