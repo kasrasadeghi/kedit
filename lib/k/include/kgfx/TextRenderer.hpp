@@ -21,6 +21,10 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
+
+constexpr const char* FONT_NAME = "fonts/SourceCodePro-Regular.ttf";
+// constexpr const char* FONT_NAME = "fonts/arial.ttf";
+
 /// Holds all state information relevant to a character as loaded using FreeType
 struct Character {
   GLuint TextureID;   // ID handle of the glyph texture
@@ -114,7 +118,7 @@ public:
 
     // Load font as face
     FT_Face face;
-    if (FT_New_Face(ft, "fonts/arial.ttf", 0, &face))
+    if (FT_New_Face(ft, FONT_NAME, 0, &face))
       std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
 
     // Set size to load glyphs as

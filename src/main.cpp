@@ -182,13 +182,15 @@ int main() {
         pr.removeLastFrame();
       }
       std::vector<std::string> frame_messages;
+      frame_messages.push_back("log");
+      frame_messages.push_back("---");
       if (not pr._frames.empty()) {
         for (const Event& event : pr._frames.back()._events) {
           frame_messages.emplace_back(event.name + str(": ") + str(event.elapsed_time) + "s");
         }
       }
 
-      list_text(frame_messages, {800, 200});
+      list_text(frame_messages, {window.width() - 500, 200});
     }
 
     /// Poll Events and Swap ===------------------------------------------------------===///
