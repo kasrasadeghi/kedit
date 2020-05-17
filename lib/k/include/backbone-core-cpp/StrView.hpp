@@ -7,6 +7,8 @@ struct StringView {
   char* _data = nullptr;
   uint64_t _length = 0;
 
+  StringView(std::string& s) : _data(const_cast<char*>(s.c_str())), _length(s.length()) {}
+
   StringView(char* cstr, uint64_t len) : _data(cstr), _length(len) {}
 
   template <int N>
