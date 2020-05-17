@@ -4,15 +4,17 @@
 #include "Scroller.hpp"
 
 #include <backbone-core-cpp/File.hpp>
+#include <backbone-core-cpp/Texp.hpp>
 #include <kgfx/RenderWindow.hpp>
-#include <kgfx/TextRenderer.hpp>
 
 #include <string>
 
-struct Buffer {
-  File file;
-  StringView file_contents = "";
-  Rope contents;
+// like buffer, but with interactive options
+struct Menu {
+  Texp layout;
+  std::string _layout_alloc;  // layout.tabs() backing
+
+  Rope rope; // refers to _layout_alloc
   Scroller line_scroller;
 
   void tick(double delta_time)
@@ -22,9 +24,8 @@ struct Buffer {
     {
       uint64_t line_number = 0;
 
-      for (StringView line : contents.lines)
+      for (StringView line : rope.lines)
         {
-
           double xpos = 200;
           double current_offset = (30 * line_scroller.position);
           double ypos = current_offset + (50 + (30 * line_number));

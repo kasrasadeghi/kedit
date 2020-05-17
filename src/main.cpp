@@ -17,10 +17,13 @@ int main() {
   glfwSwapInterval(1); // framerate set: 0 for uncapped, 1 for monitor refresh rate
 
   Editor editor;
-  // editor.loadFile("README.md");
-  editor.loadFile("/home/kasra/notes/projects.md");
+  editor.openBrowser();
 
   window.setKeyCallback([&](int key, int scancode, int action, int mods) {
+    if (key == GLFW_KEY_B) {
+      editor.openBrowser();
+    }
+
     if (key == GLFW_KEY_ESCAPE) {
       window.close();
     }
@@ -143,22 +146,7 @@ int main() {
     glViewport(0, 0, window.width(), window.height());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    for (Buffer& buffer : editor._buffers) {
-      uint64_t line_number = 0;
-
-      for (StringView line : buffer.contents.lines) {
-
-        double xpos = 200;
-        double current_offset = (30 * buffer.line_scroller.position);
-        double ypos = current_offset + (50 + (30 * line_number));
-
-        // TODO "+ 30" should be "+ text_height"
-        if (ypos < (uint64_t)(window.height() + 30) && ypos > (uint64_t)(0)) {
-          tr.renderText(line.stringCopy(), 200, ypos, 1);
-        }
-        ++ line_number;
-      }
-    }
+    editor.render(window, tr);
 
     if constexpr(PROFILING) { pr.event("render to screen"); }
 

@@ -19,6 +19,8 @@ struct Rope {
 
   inline void make(const StringView text)
     {
+      lines.clear();
+
       char* char_iter = text._data;
       while (char_iter < text.end())
         {
