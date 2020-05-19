@@ -13,6 +13,7 @@
 struct Editor {
   std::vector<Buffer> _buffers;
   std::vector<Menu>   _menus;
+  bool control_mode = false;
 
 inline void loadFile(StringView file_path)
   {
@@ -61,4 +62,16 @@ inline void render(RenderWindow& window, TextRenderer& tr)
     }
   }
 
+inline void handleKeyPress(int key, int mods)
+  {
+    if (key == GLFW_KEY_LEFT_CONTROL)
+      {
+        control_mode = true;
+      }
+
+    if (key == GLFW_KEY_B)
+      {
+        openBrowser();
+      }
+  }
 };

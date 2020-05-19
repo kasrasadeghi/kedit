@@ -1,9 +1,13 @@
 #include "Editor.hpp"
+#include "Shaders.hpp"
+#include "DebugCallback.hpp"
 
 #include <kgfx/RenderWindow.hpp>
 #include <kgfx/TextRenderer.hpp>
 #include <kgfx/Profiler.hpp>
 #include <kgfx/Str.hpp>
+#include <kgfx/ShaderUtil.hpp>
+
 
 constexpr bool PROFILING = true;
 
@@ -19,13 +23,21 @@ int main() {
   Editor editor;
   editor.openBrowser();
 
-  window.setKeyCallback([&](int key, int scancode, int action, int mods) {
-    if (key == GLFW_KEY_B) {
-      editor.openBrowser();
-    }
+  bool wireframe_mode = false;
 
+  window.setKeyCallback([&](int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_ESCAPE) {
       window.close();
+      return;
+    }
+
+    if (key == GLFW_KEY_F) {
+      wireframe_mode = not wireframe_mode;
+      return;
+    }
+
+    if (action == GLFW_PRESS) {
+      editor.handleKeyPress(key, mods);
     }
   });
 
@@ -53,16 +65,17 @@ int main() {
 
   /// GL Options ===-------------------------------------------------------------------------===///
 
+  glEnable(GL_DEBUG_OUTPUT);
+  glDebugMessageCallback(GLDebugMessageCallback, 0);
+
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LESS);
 
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_BACK);
+  // glEnable(GL_CULL_FACE);
+  // glCullFace(GL_BACK);
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  glEnable(GL_MULTISAMPLE);
 
   /// Load Screen ===------------------------------------------------------------------------===///
 
@@ -74,9 +87,116 @@ int main() {
   tr.renderText("loading", window.width()/2 - 100, window.height()/2, 1, glm::vec4(1));
   window.swapBuffers();
 
+  // OpenGL Setup ===------------------------------------------------------------------------===///
+
   // Set up OpenGL stuff
   // - Generate base vertices and faces
   // - Set up VAO, VBO, and uniform stuff
+
+  /// Rectangle Shader Setup
+  // create vertices and indices
+  // - indices are for elements array, lets you reuse vertices
+
+/*
+ *  A  D
+ *  |\
+ *  | \
+ *  B--C
+ */
+  std::vector<glm::vec2> corner_vertices;
+  corner_vertices.emplace_back(0, 0);
+  corner_vertices.emplace_back(1, 0);
+  corner_vertices.emplace_back(1, 1);
+
+  std::vector<glm::uvec3> corner_indices;
+  corner_indices.emplace_back(0, 1, 2);
+
+  struct Instance {
+    Instance(glm::vec2 p, glm::vec2 dim):
+      tlx(p.x), tly(p.y), dx(dim.x), dy(dim.y) {}
+    float tlx;
+    float tly;
+
+    float dx;
+    float dy;
+  } __attribute__((packed));
+
+  std::vector<Instance> instances;
+  instances.emplace_back(glm::vec2{0.0, 0.0}, glm::vec2{1.0, 1.0});
+
+  // set up VAO, VBO, and uniforms
+	// glCreateVertexArrays(1, &rect_program.VAO);
+	// glCreateBuffers(1, &rect_program.VBO);
+	// glCreateBuffers(1, &rect_program.IBO);
+
+	glGenVertexArrays(1, &rect_program.VAO);
+	glBindVertexArray(rect_program.VAO);
+	glGenBuffers(3, (GLuint*)(&rect_program.buffer));
+
+  const auto VAO = rect_program.VAO;
+  const auto VBO = rect_program.buffer.vertex;
+  const auto EBO = rect_program.buffer.elements;
+  const auto IBO = rect_program.buffer.instance;
+
+  constexpr auto vertex_position = rect_program.attrib.vertex_position;
+  constexpr auto instance_rect = rect_program.attrib.instance_offset;
+
+  // // load data for buffer objects
+  // glNamedBufferData(VBO, sizeof(glm::vec2) * corner_vertices.size(), corner_vertices.data(), GL_STATIC_DRAW);
+  // glNamedBufferData(IBO, sizeof(Instance) * instances.size(), instances.data(), GL_STATIC_DRAW);
+
+  // // enable the attributes for rect_program
+  // glEnableVertexArrayAttrib(VAO, vertex_position);
+  // glEnableVertexArrayAttrib(VAO, instance_offset);
+
+  // // set the bindings for the attributes
+  // GLuint vertex_binding = 0;
+  // GLuint instance_binding = 1;
+  // glVertexArrayAttribBinding(VAO, vertex_position, vertex_binding);
+  // glVertexArrayAttribBinding(VAO, instance_offset, instance_binding);
+
+  // // args: (count, data type, normalized, relative-offset)
+  // // - def relative-offset: offset from the base
+  // glVertexArrayAttribFormat(VAO, vertex_position, 2, GL_FLOAT, GL_FALSE, 0);
+  // glVertexArrayAttribFormat(VAO, instance_offset, 4, GL_FLOAT, GL_FALSE, 0);
+
+  // // def field-offset: the offset of a field within a struct
+  // // - e.g. the offset of z in {int x,y,z; } is 2*sizeof(int)
+  // glVertexArrayVertexBuffer(VAO,   vertex_binding, VBO, /*field-offset*/0, /*stride*/sizeof(glm::vec2));
+  // glVertexArrayVertexBuffer(VAO, instance_binding, VBO, /*field-offset*/0, /*stride*/sizeof(Instance));
+
+  // glVertexArrayBindingDivisor(VAO, instance_binding, 1);
+
+
+	// Setup element array buffer.
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(glm::uvec3) * corner_indices.size(), corner_indices.data(), GL_STATIC_DRAW);
+
+  // Bind vertex attributes: first per-vertex, then per-instance.
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * corner_vertices.size(), corner_vertices.data(), GL_STATIC_DRAW);
+    glEnableVertexAttribArray(vertex_position);
+    glVertexAttribPointer(    vertex_position, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+  glBindBuffer(GL_ARRAY_BUFFER, IBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Instance) * instances.size(), instances.data(), GL_STATIC_DRAW);
+    glEnableVertexAttribArray(instance_rect);
+    glVertexAttribPointer(    instance_rect, 4, GL_FLOAT, GL_FALSE, sizeof(Instance), (void*)(0));
+    glVertexAttribDivisor(    instance_rect, 1);  // sets this attribute to be instanced
+
+  // compile shader program
+  GLuint rect_program_id = CreateProgram(rect_program.sources, {"vertex_position", "instance_rect"});
+  glUseProgram(rect_program_id);
+
+  struct uniform_ {
+    GLint view = 0;
+    GLint wireframe = 0;
+  } uniform;
+
+  uniform.view      = glGetUniformLocation(rect_program_id, "view");
+  uniform.wireframe = glGetUniformLocation(rect_program_id, "wireframe");
+
+  glm::mat4 view {1};
 
   /// Render Loop ===------------------------------------------------------------------------===///
 
@@ -124,9 +244,7 @@ int main() {
     /// PreRender Compution ===----------------------------------------------------------------===///
 
     float aspect = static_cast<float>(window.width()) / window.height();
-    glm::mat4 projection_matrix(0);
     glm::mat4 view_matrix(0);
-    glm::mat4 light_space_matrix(0);
 
     // glUseProgram(program_id);
     // glEnable(GL_CULL_FACE);
@@ -146,7 +264,16 @@ int main() {
     glViewport(0, 0, window.width(), window.height());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    editor.render(window, tr);
+    // Pass in Uniform
+    glUseProgram(rect_program_id);
+    glUniformMatrix4fv(uniform.view, 1, GL_FALSE, &view[0][0]);
+    glUniform1i(       uniform.wireframe, wireframe_mode);
+
+    glBindVertexArray(VAO);
+
+    glDrawElementsInstanced(GL_TRIANGLES, corner_indices.size() * 3, GL_UNSIGNED_INT, NULL, instances.size());
+
+    // editor.render(window, tr);
 
     if constexpr(PROFILING) { pr.event("render to screen"); }
 

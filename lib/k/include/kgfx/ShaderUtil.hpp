@@ -5,8 +5,8 @@
 
 struct ShaderSource {
 	const char* vertex = nullptr;
-	const char* fragment = nullptr;
 	const char* geometry = nullptr;
+	const char* fragment = nullptr;
 };
 
 GLuint
