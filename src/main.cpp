@@ -21,9 +21,17 @@ int main() {
   Editor editor;
   editor.openBrowser();
 
+  bool wireframe_mode = false;
+
   window.setKeyCallback([&](int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_B) {
       editor.openBrowser();
+    }
+
+    if (key == GLFW_KEY_W && action == GLFW_PRESS) {
+      if (wireframe_mode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+      else                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+      wireframe_mode = !wireframe_mode;
     }
 
     if (key == GLFW_KEY_ESCAPE) {
@@ -65,6 +73,9 @@ int main() {
   // glEnable(GL_CULL_FACE);
   // glCullFace(GL_BACK);
 
+  glDisable(GL_CULL_FACE);
+  glFrontFace(GL_CCW);
+
   // glEnable(GL_BLEND);
   // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -89,15 +100,15 @@ int main() {
   // - indices are for elements array, lets you reuse vertices
 
 /*
- *  A  D
- *  |\
- *  | \
- *  B--C
+ *  A  D        0
+ *  |\   order: |\   so it's clockwise
+ *  | \         | \
+ *  B--C        2--1
  */
   std::vector<glm::vec2> corner_vertices;
-  corner_vertices.emplace_back(0, 0);
-  corner_vertices.emplace_back(1, 0);
-  corner_vertices.emplace_back(1, 1);
+  corner_vertices.emplace_back(0,  0); // 0
+  corner_vertices.emplace_back(0, -1); // 2
+  corner_vertices.emplace_back(1, -1); // 1
 
   std::vector<glm::uvec3> corner_indices;
   corner_indices.emplace_back(0, 1, 2);
@@ -220,6 +231,7 @@ int main() {
     // GL options
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_CULL_FACE);
 
     // Clear
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
