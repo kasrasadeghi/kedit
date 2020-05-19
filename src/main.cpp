@@ -1,5 +1,6 @@
 #include "Editor.hpp"
 #include "DebugCallback.hpp"
+#include "Shaders.hpp"
 
 #include <kgfx/RenderWindow.hpp>
 #include <kgfx/TextRenderer.hpp>
@@ -225,9 +226,6 @@ int main() {
     glViewport(0, 0, window.width(), window.height());
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-<<<<<<< Updated upstream
-    editor.render(window, tr);
-=======
     // Draw Rectangles
     glUseProgram(rect_program_id);
 
@@ -240,7 +238,6 @@ int main() {
     glDrawElementsInstanced(GL_TRIANGLES, corner_indices.size() * 3, GL_UNSIGNED_INT, NULL, instances.size());
 
     // editor.render(window, tr);
->>>>>>> Stashed changes
 
     if constexpr(PROFILING) { pr.event("render to screen"); }
 

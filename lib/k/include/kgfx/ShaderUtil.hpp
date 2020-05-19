@@ -5,8 +5,8 @@
 
 struct ShaderSource {
 	const char* vertex = nullptr;
-	const char* fragment = nullptr;
 	const char* geometry = nullptr;
+	const char* fragment = nullptr;
 };
 
 GLuint
@@ -32,16 +32,16 @@ CreateProgram(ShaderSource& shader, std::initializer_list<const char*> vertex_at
 	};
 
 	GLuint vertex_shader_id         = createShader(shader.vertex, GL_VERTEX_SHADER, "vertex");
-	GLuint geometry_shader_id       = createShader(shader.geometry, GL_GEOMETRY_SHADER, "geometry");
+	// GLuint geometry_shader_id       = createShader(shader.geometry, GL_GEOMETRY_SHADER, "geometry");
 	GLuint fragment_shader_id       = createShader(shader.fragment, GL_FRAGMENT_SHADER, "fragment");
 
 	// @output program_id
 	GLuint program_id = glCreateProgram();
 	glAttachShader(program_id, vertex_shader_id);
 	glAttachShader(program_id, fragment_shader_id);
-	glAttachShader(program_id, geometry_shader_id);
+	// glAttachShader(program_id, geometry_shader_id);
 
-	// Bind attributes.
+	// Bind attributes
 	int count = 0;
 	for (const char* vertex_attribute : vertex_attributes) {
 		glBindAttribLocation(program_id, count++, vertex_attribute);

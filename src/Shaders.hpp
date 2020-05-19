@@ -60,14 +60,8 @@ R"zzz(#version 460 core
 layout (triangles) in;
 layout (triangle_strip, max_vertices = 4) out;
 
-// input uniform
-uniform mat4 view;
-
 // input from vertex shader is only gl_in
-
 // output to fragment shader
-out vec4 bary_coord;
-flat out float perimeter;
 // out vec4 gl_Position
 
 //
@@ -87,20 +81,16 @@ void main()
 
 	// perimeter = 2*length(A - B) + 2*length(B - C);
 
-  gl_Position = view * vec4(A, 1);
-  bary_coord = vec4(1, 0, 0, 0);
+  gl_Position = vec4(A, 1);
   EmitVertex();
 
-  gl_Position = view * vec4(D, 1);
-  bary_coord = vec4(0, 0, 0, 1);
+  gl_Position = vec4(D, 1);
   EmitVertex();
 
-  gl_Position = view * vec4(B, 1);
-  bary_coord = vec4(0, 1, 0, 0);
+  gl_Position = vec4(B, 1);
   EmitVertex();
 
-  gl_Position = view * vec4(C, 1);
-  bary_coord = vec4(0, 0, 1, 0);
+  gl_Position = vec4(C, 1);
   EmitVertex();
 
 	EndPrimitive();
@@ -109,25 +99,11 @@ void main()
 
 // must use every input from geometry shader
   .fragment = R"zzz(#version 460 core
-uniform bool wireframe;
-
-// input from vertex shader passed through geometry shader
-// in vec4 bary_coord;
-flat in float perimeter;
-
 out vec4 fragment_color;
 
 void main()
 {
   fragment_color = vec4(0, 0, 0, 1);
-
-  // if (wireframe) {
-  //   bool is_frame = min(bary_coord.x, min(bary_coord.y, min(bary_coord.z, bary_coord.w)))
-  //                  * perimeter < 0.05;
-  //   if (is_frame) {
-  //     fragment_color = vec4(0, float(is_frame), 0, 1);
-  //   }
-  // }
 }
 )zzz",
 };
