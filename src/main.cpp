@@ -124,7 +124,7 @@ int main() {
   } __attribute__((packed));
 
   std::vector<Instance> instances;
-  instances.emplace_back(glm::vec2{0.0, 0.0}, glm::vec2{1.0, 1.0});
+  instances.emplace_back(glm::vec2{-.9, -.9}, glm::vec2{1.8, 1.8});
 
   // set up VAO, VBO, and uniforms
 	glGenVertexArrays(1, &rect_program.VAO);
@@ -166,8 +166,6 @@ int main() {
 
   // uniform.view      = glGetUniformLocation(rect_program_id, "view");
   // uniform.wireframe = glGetUniformLocation(rect_program_id, "wireframe");
-
-  // glm::mat4 view {1};
 
   /// Render Loop ===------------------------------------------------------------------------===///
 
@@ -215,9 +213,8 @@ int main() {
     /// PreRender Compution ===----------------------------------------------------------------===///
 
     float aspect = static_cast<float>(window.width()) / window.height();
-    glm::mat4 projection_matrix(0);
-    glm::mat4 view_matrix(0);
-    glm::mat4 light_space_matrix(0);
+    // glm::mat4 projection_matrix = glm::ortho(0.f, window_width, window_height, 0.f);
+    glm::mat4 view_matrix(1);
 
     // glUseProgram(program_id);
     // glEnable(GL_CULL_FACE);
@@ -242,6 +239,8 @@ int main() {
     glUseProgram(rect_program_id);
 
     // Pass in Uniform
+
+
     // glUniformMatrix4fv(uniform.view, 1, GL_FALSE, &view[0][0]);
     // glUniform1i(       uniform.wireframe, wireframe_mode);
 
@@ -249,7 +248,7 @@ int main() {
 
     glDrawElementsInstanced(GL_TRIANGLES, corner_indices.size() * 3, GL_UNSIGNED_INT, NULL, instances.size());
 
-    // editor.render(window, tr);
+    editor.render(window, tr);
 
     if constexpr(PROFILING) { pr.event("render to screen"); }
 

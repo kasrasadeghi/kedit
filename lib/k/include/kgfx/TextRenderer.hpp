@@ -59,6 +59,7 @@ inline const char* text_fragment_shader = R"zzz(
 #version 330 core
 in vec2 TexCoords;
 out vec4 color;
+in vec4 position;
 
 uniform sampler2D text;
 uniform vec4 textColor;
@@ -74,12 +75,13 @@ inline const char* text_vertex_shader = R"zzz(
 #version 330 core
 layout (location = 0) in vec4 vertex; // <vec2 pos, vec2 tex>
 out vec2 TexCoords;
+out vec4 position;
 
 uniform mat4 projection;
 
 void main()
 {
-  gl_Position = projection * vec4(vertex.xy, 0.0, 1.0);
+  position = gl_Position = projection * vec4(vertex.xy, 0.0, 1.0);
   TexCoords = vertex.zw;
 }
 )zzz";
