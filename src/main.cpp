@@ -7,6 +7,8 @@
 #include <kgfx/Profiler.hpp>
 #include <kgfx/Str.hpp>
 
+#include <glm/gtc/matrix_transform.hpp>
+
 constexpr bool PROFILING = true;
 
 int main() {
@@ -28,11 +30,13 @@ int main() {
       editor.openBrowser();
     }
 
-    if (key == GLFW_KEY_W && action == GLFW_PRESS) {
+    if ((mods & GLFW_MOD_CONTROL) && key == GLFW_KEY_W && action == GLFW_PRESS) {
       if (wireframe_mode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
       else                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
       wireframe_mode = !wireframe_mode;
     }
+
+    editor.handleKey(key, scancode, action, mods);
 
     if (key == GLFW_KEY_ESCAPE) {
       window.close();
@@ -254,6 +258,7 @@ int main() {
     glDrawElementsInstanced(GL_TRIANGLES, corner_indices.size() * 3, GL_UNSIGNED_INT, NULL, instances.size());
 
     editor.render(window, tr);
+    status("menu selection: " + str(editor._menus.back().cursor));
 
     if constexpr(PROFILING) { pr.event("render to screen"); }
 

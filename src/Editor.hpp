@@ -44,10 +44,27 @@ inline void openBrowser(void)
     _menus.push_back(Menu{});
     Menu& curr = _menus.back();
 
-    curr.layout = pwd();
-    curr._layout_alloc = curr.layout.tabs();
+    Texp cwd = pwd();
 
-    curr.rope.make(curr._layout_alloc);
+    // TODO only quote if whitespace appears in path names
+    // TODO change the command for selecting a child path that is not a folder
+
+    // browser menu layout
+    // - working directory is the root, which is text
+    // - children are buttons
+    //   - folder children are "cd <folder name>"
+    //   - file children can be opened with the editor
+
+    curr._layout = Texp("text", {cwd.value});
+    curr._layout.push(Texp("button", {Texp("\"..\""), Texp("\"cd ..\"")}));
+
+    for (auto& child : cwd)
+      {
+        auto cmd = Texp("\"cd \'" + child.value.substr(1, child.value.length() - 2) + "\'\"");
+        curr._layout.push(Texp("button", {child, cmd}));
+      }
+
+    curr.parseLayout(curr._layout);
   }
 
 inline void render(RenderWindow& window, TextRenderer& tr)
@@ -59,6 +76,25 @@ inline void render(RenderWindow& window, TextRenderer& tr)
     for (Menu& menu : _menus) {
       menu.render(window, tr);
     }
+  }
+
+inline void handleKey(int key, int scancode, int action, int mods)
+  {
+    // TODO check menu active
+    Menu& curr = _menus.back();
+
+    if (GLFW_PRESS == action)
+      {
+        if (GLFW_KEY_UP == key && curr.cursor != 0) {
+          -- curr.cursor;
+          return;
+        }
+
+        if (GLFW_KEY_DOWN == key && curr.cursor < curr.selectable_lines.size() - 1) {
+          ++ curr.cursor;
+          return;
+        }
+      }
   }
 
 };
