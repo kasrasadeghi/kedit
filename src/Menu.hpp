@@ -39,8 +39,10 @@ struct Menu {
     {
       uint64_t line_number = 0;
 
-      for (StringView line : rope.lines)
+      for (size_t i = 0; i < rope.lines.size(); ++i)
         {
+          StringView line = rope.lines[i];
+
           double xpos = 200;
           double current_offset = (30 * line_scroller.position);
           double ypos = current_offset + (50 + (30 * line_number));
@@ -48,7 +50,14 @@ struct Menu {
           // TODO "+ 30" should be "+ text_height"
           if (ypos < (uint64_t)(window.height() + 30) && ypos > (uint64_t)(0))
             {
-              tr.renderText(line.stringCopy(), 200, ypos, 1);
+              if (i == this->selectable_lines[this->cursor])
+                {
+                  tr.renderText(line.stringCopy(), 200, ypos, 1, glm::vec4(1, 1, 1, 1));
+                }
+              else
+                {
+                  tr.renderText(line.stringCopy(), 200, ypos, 1, glm::vec4(0.7, 0.7, 0.7, 1));
+                }
             }
           ++ line_number;
         }
