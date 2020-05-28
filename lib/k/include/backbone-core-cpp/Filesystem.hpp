@@ -9,12 +9,15 @@ inline Texp pwd()
   {
     using namespace std::filesystem;
 
-    auto workdir = Texp(absolute(path(".")).lexically_normal());
+    // TODO only quote if whitespace appears in path names
+
+    std::string working_dir_path = absolute(path(".")).lexically_normal();
+    auto workdir = Texp("\"" + working_dir_path + "\"");
     for (directory_entry result : directory_iterator("."))
       {
         auto child_value = result.path().lexically_normal().string();
         child_value += (result.is_directory() ? "/" : "");
-        workdir.push(Texp(child_value));
+        workdir.push(Texp("\"" + child_value + "\""));
       }
     return workdir;
   }
