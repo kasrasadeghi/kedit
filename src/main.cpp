@@ -126,6 +126,9 @@ int main() {
   std::vector<Instance> instances;
   instances.emplace_back(glm::vec2{-.9, -.9}, glm::vec2{1.8, 1.8});
 
+  // TODO fix background positioning using projection matrix @ref1
+  // instances.emplace_back(glm::vec2{1000, 1000}, glm::vec2{100, 100});
+
   // set up VAO, VBO, and uniforms
 	glGenVertexArrays(1, &rect_program.VAO);
 	glBindVertexArray(rect_program.VAO);
@@ -159,12 +162,14 @@ int main() {
   GLuint rect_program_id = CreateProgram(rect_program.sources, {"vertex_position", "instance_rect"});
   glUseProgram(rect_program_id);
 
-  // struct uniform_ {
-  //   GLint view = 0;
-  //   GLint wireframe = 0;
-  // } uniform;
+  struct uniform_ {
+    // GLint view = 0;
+    GLint projection = 0; // TODO @ref1
+    // GLint wireframe = 0;
+  } uniform;
 
   // uniform.view      = glGetUniformLocation(rect_program_id, "view");
+  uniform.projection = glGetUniformLocation(rect_program_id, "projection"); // TODO @ref1
   // uniform.wireframe = glGetUniformLocation(rect_program_id, "wireframe");
 
   /// Render Loop ===------------------------------------------------------------------------===///
@@ -213,7 +218,8 @@ int main() {
     /// PreRender Compution ===----------------------------------------------------------------===///
 
     float aspect = static_cast<float>(window.width()) / window.height();
-    // glm::mat4 projection_matrix = glm::ortho(0.f, window_width, window_height, 0.f);
+    // glm::mat4 projection_matrix = glm::ortho(0.f, (float)(window.width()), (float)(window.height()), 0.f); // TODO @ref1
+    glm::mat4 projection_matrix{1};
     glm::mat4 view_matrix(1);
 
     // glUseProgram(program_id);
@@ -239,9 +245,8 @@ int main() {
     glUseProgram(rect_program_id);
 
     // Pass in Uniform
-
-
-    // glUniformMatrix4fv(uniform.view, 1, GL_FALSE, &view[0][0]);
+    glUniformMatrix4fv(uniform.projection, 1, GL_FALSE, &projection_matrix[0][0]); // TODO @ref1
+    // glUniformMatrix4fv(uniform.view,       1, GL_FALSE, &view[0][0]);
     // glUniform1i(       uniform.wireframe, wireframe_mode);
 
     glBindVertexArray(VAO);

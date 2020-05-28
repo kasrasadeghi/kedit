@@ -65,6 +65,8 @@ layout (triangle_strip, max_vertices = 4) out;
 out vec4 position;
 // out vec4 gl_Position
 
+uniform mat4 projection;
+
 //
 //  A  D     A--D         1--3
 //  |\    -> |\ |  order: |\ |  order is for triangle_strip,
@@ -82,10 +84,11 @@ void main()
 
 	// perimeter = 2*length(A - B) + 2*length(B - C);
 
-  position = gl_Position = vec4(B.xy, 0.5, 1); EmitVertex();
-  position = gl_Position = vec4(A.xy, 0.5, 1); EmitVertex();
-  position = gl_Position = vec4(C.xy, 0.5, 1); EmitVertex();
-  position = gl_Position = vec4(D.xy, 0.5, 1); EmitVertex();
+  // TODO @ref1
+  position = gl_Position = projection * vec4(B.xy, 0.5, 1); EmitVertex();
+  position = gl_Position = projection * vec4(A.xy, 0.5, 1); EmitVertex();
+  position = gl_Position = projection * vec4(C.xy, 0.5, 1); EmitVertex();
+  position = gl_Position = projection * vec4(D.xy, 0.5, 1); EmitVertex();
 
 	EndPrimitive();
 }
