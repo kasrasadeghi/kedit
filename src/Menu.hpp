@@ -12,10 +12,13 @@
 
 // like buffer, but with interactive options
 struct Menu {
+
+  ///=============/ Members /=========================================///
+
   Texp _layout;
 
   std::string _repr_alloc;  // layout.tabs() stored into a std::string
-  Rope rope; // refers to _layout_alloc
+  Rope rope; // refers to _repr_alloc
 
   // TODO fix segfault for scrolling on menus
   Scroller line_scroller;
@@ -24,16 +27,61 @@ struct Menu {
   std::vector<uint64_t> selectable_lines;
 
   // map from selection to command;
-  std::vector<std::string> commands;
+  std::vector<Texp> commands;
 
-  inline void _addCommand(const uint64_t line_number, const std::string command)
+  using FunctionTable = std::unordered_map<std::string, std::function<void(const Texp&)>>;
+  FunctionTable _function_table;
+
+  /** Initialization Overview
+   *
+   * _layout is set from the owner
+   *
+   * Owner calls .setHandlers() with a function table
+   * - sets _function_table, which is used to handle selection events from the menu's buttons
+   *
+   * Owner calls .parseLayout(_layout)
+   * - zeros .cursor and clears .selectable_lines and .commands
+   * - calls _createMenuRepr()
+   *   - _createMenuRepr is recursive, traverses elements of layout
+   *   - populates .selectable_lines and .commands
+   * - creates .rope
+   */
+
+  ///=============/ Methods /=========================================///
+
+  inline void setHandlers(FunctionTable function_table)
     {
-      selectable_lines.push_back(line_number);
-      commands.push_back(command);
+      _function_table = function_table;
     }
 
   inline void tick(double delta_time)
     { line_scroller.tick(delta_time); }
+
+  inline void handleKey(int key, int scancode, int action, int mods)
+    {
+      if (GLFW_PRESS == action)
+        {
+          if (GLFW_KEY_UP == key && cursor != 0)
+            {
+              -- cursor;
+              return;
+            }
+
+          if (GLFW_KEY_DOWN == key && cursor < selectable_lines.size() - 1)
+            {
+              ++ cursor;
+              return;
+            }
+
+          if (GLFW_KEY_ENTER == key)
+            {
+              auto& curr_command = commands[cursor];
+              auto& handler = _function_table.at(curr_command.value);
+              handler(curr_command[0]);
+              return;
+            }
+        }
+    }
 
   inline void render(RenderWindow& window, TextRenderer& tr)
     {
@@ -63,10 +111,13 @@ struct Menu {
         }
     }
 
+  /// NOTE: currently expects this->layout as the argument
   inline void parseLayout(const Texp& layout)
     {
       // create cursor areas
       this->cursor = 0;
+      commands.clear();
+      selectable_lines.clear();
 
       // create menu representation texp
       uint64_t curr_line = 0;
@@ -107,10 +158,16 @@ struct Menu {
         {
           ++ curr_line;
 
-          _addCommand(curr_line, layout.value);
+          _addCommand(curr_line, layout[1]);
           return result;
         }
 
       assert(false && "layout element type is not matched");
+    }
+
+  inline void _addCommand(const uint64_t line_number, const Texp& command)
+    {
+      selectable_lines.push_back(line_number);
+      commands.push_back(command);
     }
 };
