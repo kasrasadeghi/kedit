@@ -68,7 +68,7 @@ struct Editor {
 
       for (auto& child : cwd)
         {
-          auto cmd = Texp("cd", {Texp("\"" + child.value.substr(1, child.value.length() - 2) + "\"")});
+          auto cmd = Texp("cd", {child});
           curr._layout.push(Texp("button", {child, cmd}));
         }
 
