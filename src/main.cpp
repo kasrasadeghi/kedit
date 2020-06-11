@@ -26,11 +26,6 @@ int main() {
   bool wireframe_mode = false;
 
   window.setKeyCallback([&](int key, int scancode, int action, int mods) {
-    if (key == GLFW_KEY_B) {
-      editor.openBrowser();
-    }
-    // TODO closing buffer, switching active buffer
-
     if ((mods & GLFW_MOD_CONTROL) && key == GLFW_KEY_W && action == GLFW_PRESS) {
       wireframe_mode = !wireframe_mode;
       if (wireframe_mode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

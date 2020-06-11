@@ -152,6 +152,13 @@ struct Editor {
 
   inline void handleKey(int key, int scancode, int action, int mods)
     {
+      // TODO closing buffer, switching active buffer
+      if (action == GLFW_PRESS && key == GLFW_KEY_B)
+        {
+          if (_menus.empty())
+            openBrowser();
+        }
+
       // TODO check menu active
       Menu& curr = _menus.back();
       curr.handleKey(key, scancode, action, mods);
