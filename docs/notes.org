@@ -1,0 +1,21 @@
+* chdir can't be in shell                                   jun 11 2020
+=> menu
+- git commit: db660aa247d67a02a7f80170238763a621854fec
+
+To make a menu, you have to pass in a function table that will handle different
+kinds of buttons on the menu.
+
+Each button has its first child, a visual representation, which currently should
+be an atomic Texp because each button is expected to sit on a single line.
+
+The second child is a /command/.  The value of the command tells the menu which
+function from the function table to use.  It indexes the function table to get
+the function, called the /handler/, and then it calls that function.  It calls
+the function with its first and only child as the argument.  Thus the function should be of the
+type =Texp -> void= in the host language.
+
+The =shell= command type calls =man 3 system()= with the argument, expected to
+be a atomic string.  =system= calls =fork=, thus the shell command does not
+execute in the current process, but in the child process.  What we want is
+for it to call =man 2 chdir= in the current process, so we'll just create an
+=man 1 cd= specific handler that simply calls =chdir=.
