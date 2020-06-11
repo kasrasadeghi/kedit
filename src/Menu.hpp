@@ -165,6 +165,7 @@ struct Menu {
         }
 
       assert(false && "layout element type is not matched");
+      exit(1);
     }
 
   inline void _addCommand(const uint64_t line_number, const Texp& command)

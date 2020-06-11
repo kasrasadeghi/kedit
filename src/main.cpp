@@ -29,6 +29,7 @@ int main() {
     if (key == GLFW_KEY_B) {
       editor.openBrowser();
     }
+    // TODO closing buffer, switching active buffer
 
     if ((mods & GLFW_MOD_CONTROL) && key == GLFW_KEY_W && action == GLFW_PRESS) {
       if (wireframe_mode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -205,8 +206,6 @@ int main() {
     /// Development Messages ===-------------------------------------------------------------===///
 
     std::vector<std::string> status_messages;
-    status_messages.push_back("status");
-    status_messages.push_back("------");
     auto status = [&status_messages](std::string m) {
       status_messages.push_back(m);
     };
@@ -258,7 +257,10 @@ int main() {
     glDrawElementsInstanced(GL_TRIANGLES, corner_indices.size() * 3, GL_UNSIGNED_INT, NULL, instances.size());
 
     editor.render(window, tr);
-    status("menu selection: " + str(editor._menus.back().cursor));
+    if (not editor._menus.empty())
+      {
+        status("menu selection: " + str(editor._menus.back().cursor));
+      }
 
     if constexpr(PROFILING) { pr.event("render to screen"); }
 
@@ -270,33 +272,45 @@ int main() {
 
     /// Render Messages ===--------------------------------------------------===///
 
-    auto list_text = [&tr](std::vector<std::string> xs, glm::ivec2 start_pos) {
+    auto list_text = [&tr](std::vector<std::string> lines, glm::ivec2 start_pos, std::string title = "") {
       int count = 0;
-      for (std::string x : xs) {
-        tr.renderText(x, start_pos.x, start_pos.y + count++ * 30, 1);
+
+      if (title != "") {
+        tr.renderText(title, start_pos.x, start_pos.y + count++ * 30, 1);
+        std::string titlebar = "";
+        for (uint i = 0; i < title.length(); ++i) {
+          titlebar += "-";
+        }
+        tr.renderText(titlebar, start_pos.x, start_pos.y + count++ * 30, 1);
+      }
+
+      for (std::string l : lines) {
+        tr.renderText(l, start_pos.x, start_pos.y + count++ * 30, 1);
       }
     };
 
-    list_text(status_messages, {window.width() - 500, window.height() - 500});
+    if (not editor._menus.empty()) {
+      list_text(editor.command_history, {window.width() - 500, window.height() - 700}, "history");
+    }
+
+    list_text(status_messages, {window.width() - 500, window.height() - 500}, "status");
 
     if constexpr(PROFILING) {
       pr.event("render text");
       pr.endFrame();
 
-      // 2 60th's of a second is a bad frame. only keep bad frames
+      // 2 60th's of a second is a bad frame.  only keep bad frames
       if (pr._frames.back().elapsedTime() < 2/60.0) {
         pr.removeLastFrame();
       }
       std::vector<std::string> frame_messages;
-      frame_messages.push_back("frames");
-      frame_messages.push_back("------");
       if (not pr._frames.empty()) {
         for (const Event& event : pr._frames.back()._events) {
           frame_messages.emplace_back(event.name + str(": ") + str(event.elapsed_time) + "s");
         }
       }
 
-      list_text(frame_messages, {window.width() - 500, 200});
+      list_text(frame_messages, {window.width() - 500, 200}, "frames");
     }
 
     /// Poll Events and Swap ===------------------------------------------------------===///

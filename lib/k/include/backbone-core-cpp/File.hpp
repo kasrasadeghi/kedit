@@ -29,6 +29,9 @@ struct File {
       return result;
     }
 
+  // TODO open should not create
+  // TODO bug where file is opened but then mmap fails
+
   inline static File open(StringView filename)
     { return _open(filename, O_RDONLY); }
 
@@ -42,6 +45,7 @@ struct File {
     {
       char* result = (char*)::mmap(addr, file_length, prot, flags, _file_descriptor, offset);
       if (-1 == (int64_t)(result)) {
+        printerrln("file descriptor: ", _file_descriptor);
         perror("backbone-core-cpp: mmap");
       }
       return result;

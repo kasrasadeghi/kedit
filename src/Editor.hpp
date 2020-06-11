@@ -14,8 +14,11 @@
 #include <unistd.h>
 
 struct Editor {
+  // TODO merge Buffer and Menu somehow
   std::vector<Buffer> _buffers;
   std::vector<Menu>   _menus;
+
+  std::vector<std::string> command_history;
 
   inline void loadFile(StringView file_path)
     {
@@ -90,14 +93,23 @@ struct Editor {
 
       for (auto& child : cwd)
         {
-          auto cmd = Texp("cd", {child});
-          curr._layout.push(Texp("button", {child, cmd}));
+          if (child.value.ends_with("/\""))
+            {
+              auto cmd = Texp("cd", {child});
+              curr._layout.push(Texp("button", {child, cmd}));
+            }
+          else
+            {
+              auto cmd = Texp("open", {child});
+              curr._layout.push(Texp("button", {child, cmd}));
+            }
         }
 
       auto unquote = [](std::string s) -> std::string { return s.substr(1, s.length() - 2); };
 
       Menu::FunctionTable function_table {
         {"cd",     [&](const Texp& cmd) -> void {
+                     command_history.push_back("(cd " + cmd.paren() + ")");
                      std::string c = unquote(cmd.value);
                      int a = chdir(c.c_str());
                      println("'cd ", c.c_str(), "'  exit: ", a);
@@ -107,10 +119,15 @@ struct Editor {
                      std::string c = unquote(cmd.value);
                      system(c.c_str());
                      makeBrowser();
+                   }},
+        {"open",   [&](const Texp& cmd) -> void {
+                     command_history.push_back("(open " + cmd.paren() + ")");
+                     std::string c = unquote(cmd.value);
+                     // deconstruct the last menu in _menus.
+                     _menus.resize(_menus.size() - 1);
+                     loadFile(c);
                    }}
       };
-
-      // TODO should pass an vector of functions that take in Texps and do something
 
       curr.setHandlers(function_table);
       curr.parseLayout(curr._layout);
@@ -118,14 +135,18 @@ struct Editor {
 
   inline void render(RenderWindow& window, TextRenderer& tr)
     {
-      for (Buffer& buffer : _buffers)
+      // TODO text renderer needs to have a Z level argument
+      // TODO render background at different Z levels
+
+      if (not _menus.empty())
         {
-          buffer.render(window, tr);
+          _menus.back().render(window, tr);
+          return;
         }
 
-      for (Menu& menu : _menus)
+      if (not _buffers.empty())
         {
-          menu.render(window, tr);
+          _buffers.back().render(window, tr);
         }
     }
 
