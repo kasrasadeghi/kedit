@@ -251,6 +251,9 @@ int main() {
 
     glDrawElementsInstanced(GL_TRIANGLES, corner_indices.size() * 3, GL_UNSIGNED_INT, NULL, instances.size());
 
+    status("menu count: " + str(editor._menus.size()));
+    status("buffer count: " + str(editor._buffers.size()));
+
     editor.render(window, tr);
     if (not editor._menus.empty())
       {
