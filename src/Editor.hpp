@@ -30,8 +30,18 @@ struct Editor {
 
   inline void verticalScroll(double scroll_y)
     {
-      Buffer& curr = _buffers.back();
-      curr.line_scroller.target += scroll_y;
+      if (_menus.size() > 0)
+        {
+          auto& curr = _menus.back();
+          curr.line_scroller.target += scroll_y;
+          return;
+        }
+
+      if (_buffers.size() > 0)
+        {
+          auto& curr = _buffers.back();
+          curr.line_scroller.target += scroll_y;
+        }
     }
 
   inline void tick(double delta_time)
@@ -39,6 +49,11 @@ struct Editor {
       for (Buffer& buffer : _buffers)
         {
           buffer.tick(delta_time);
+        }
+
+      for (Menu& menu : _menus)
+        {
+          menu.tick(delta_time);
         }
     }
 
@@ -54,7 +69,6 @@ struct Editor {
 
       Texp cwd = pwd();
 
-      // TODO only quote if whitespace appears in path names
       // TODO change the command for selecting a child path that is not a folder
 
       // browser menu layout
@@ -62,6 +76,14 @@ struct Editor {
       // - children are buttons
       //   - folder children are "cd <folder name>"
       //   - file children can be opened with the editor
+
+      // TODO "cd .."
+      // - should select the child folder we just came from
+
+      // TODO cd - to a folder we already have visited in this browser
+      // - should select the child we had previously selected
+
+      // TODO incremental/fuzzy search
 
       curr._layout = Texp("text", {cwd.value});
       curr._layout.push(Texp("button", {Texp("\"..\""), Texp("cd", {Texp("\"..\"")})}));
@@ -81,7 +103,11 @@ struct Editor {
                      println("'cd ", c.c_str(), "'  exit: ", a);
                      makeBrowser();
                    }},
-        {"system", [&](const Texp& cmd) -> void { std::string c = unquote(cmd.value); system(c.c_str()); makeBrowser(); }}
+        {"system", [&](const Texp& cmd) -> void {
+                     std::string c = unquote(cmd.value);
+                     system(c.c_str());
+                     makeBrowser();
+                   }}
       };
 
       // TODO should pass an vector of functions that take in Texps and do something

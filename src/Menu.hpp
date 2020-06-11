@@ -126,6 +126,8 @@ struct Menu {
       // render texp to rope
       _repr_alloc = repr.tabs();
       rope.make(_repr_alloc);
+
+      line_scroller.reset();
     }
 
   inline Texp _createMenuRepr(const Texp& layout, uint64_t& curr_line)

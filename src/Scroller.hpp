@@ -9,7 +9,14 @@ struct Scroller {
   double velocity = 0;
   double position = 0;
 
-  void tick(double delta_time)
+  inline void reset()
+    {
+      target = 0;
+      velocity = 0;
+      position = 0;
+    }
+
+  inline void tick(double delta_time)
     {
       auto gone_past = [&](){
         // we've gone past if velocity direction is the opposite way we should go
