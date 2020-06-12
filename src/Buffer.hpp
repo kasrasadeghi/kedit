@@ -13,11 +13,11 @@ struct Buffer {
   Rope contents;
   Scroller line_scroller;
 
-  void tick(double delta_time)
+  inline void tick(double delta_time)
     { line_scroller.tick(delta_time); }
 
   // the default buffer renderer
-  void render(RenderWindow& window, TextRenderer& tr)
+  inline void render(RenderWindow& window, TextRenderer& tr)
     {
       uint64_t line_number = 0;
 

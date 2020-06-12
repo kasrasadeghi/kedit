@@ -9,7 +9,7 @@
 #include <string>
 
 struct FileBuffer {
-  Buffer buffer;
+  Buffer* buffer;
 
   File file;
   StringView file_contents = "";

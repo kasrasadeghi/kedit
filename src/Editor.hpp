@@ -14,21 +14,31 @@
 #include <unistd.h>
 
 struct Editor {
+  std::vector<Buffer> _buffers;
+  Buffer* _curr_buffer;
+
   // TODO merge Buffer and Menu somehow
-  std::vector<FileBuffer> _buffers;
+  std::vector<FileBuffer> _filebuffers;
   std::vector<Menu>   _menus;
 
   std::vector<std::string> command_history;
 
+  inline Buffer* allocBuffer()
+    {
+      _buffers.push_back(Buffer{});
+      return &_buffers.back();
+    }
+
   inline void loadFile(StringView file_path)
     {
-      _buffers.push_back(FileBuffer{});
-      FileBuffer& curr = _buffers.back();
+      _filebuffers.push_back(FileBuffer{});
+      FileBuffer& curr = _filebuffers.back();
 
       // TODO make sure buffer unreads and closes file
       curr.file = File::open(file_path);
       curr.file_contents = curr.file.read();
-      curr.buffer.contents.make(curr.file_contents);
+      curr.buffer = allocBuffer();
+      curr.buffer->contents.make(curr.file_contents);
     }
 
   inline void verticalScroll(double scroll_y)
@@ -36,33 +46,34 @@ struct Editor {
       if (_menus.size() > 0)
         {
           auto& curr = _menus.back();
-          curr.buffer.line_scroller.target += scroll_y;
+          curr.buffer->line_scroller.target += scroll_y;
           return;
         }
 
-      if (_buffers.size() > 0)
+      if (_filebuffers.size() > 0)
         {
-          auto& curr = _buffers.back();
-          curr.buffer.line_scroller.target += scroll_y;
+          auto& curr = _filebuffers.back();
+          curr.buffer->line_scroller.target += scroll_y;
         }
     }
 
   inline void tick(double delta_time)
     {
-      for (auto& filebuffer : _buffers)
+      for (auto& filebuffer : _filebuffers)
         {
-          filebuffer.buffer.tick(delta_time);
+          filebuffer.buffer->tick(delta_time);
         }
 
       for (auto& menu : _menus)
         {
-          menu.buffer.tick(delta_time);
+          menu.buffer->tick(delta_time);
         }
     }
 
   inline void openBrowser(void)
     {
       _menus.push_back(Menu{});
+      _menus.back().buffer = allocBuffer();
       makeBrowser();
     }
 
@@ -144,9 +155,9 @@ struct Editor {
           return;
         }
 
-      if (not _buffers.empty())
+      if (not _filebuffers.empty())
         {
-          _buffers.back().buffer.render(window, tr);
+          _filebuffers.back().buffer->render(window, tr);
         }
     }
 
@@ -160,8 +171,11 @@ struct Editor {
         }
 
       // TODO check menu active
-      Menu& curr = _menus.back();
-      curr.handleKey(key, scancode, action, mods);
+      if (not _menus.empty())
+        {
+          Menu& curr = _menus.back();
+          curr.handleKey(key, scancode, action, mods);
+        }
     }
 
 };
