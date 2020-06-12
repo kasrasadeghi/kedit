@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Rope.hpp"
-#include "Scroller.hpp"
+#include "Buffer.hpp"
 
 #include <backbone-core-cpp/File.hpp>
 #include <backbone-core-cpp/Texp.hpp>
@@ -14,15 +13,12 @@
 struct Menu {
 
   ///=============/ Members /=========================================///
+  Buffer buffer; // refers to _repr_alloc
 
   Texp _layout;
-
   std::string _repr_alloc;  // layout.tabs() stored into a std::string
 
-  Rope rope; // refers to _repr_alloc
-  Scroller line_scroller;
-
-  uint64_t cursor;
+  uint64_t cursor; // 0 .. selectable_lines.size() - 1
 
   std::vector<uint64_t> selectable_lines;
 
@@ -54,9 +50,6 @@ struct Menu {
       _function_table = function_table;
     }
 
-  inline void tick(double delta_time)
-    { line_scroller.tick(delta_time); }
-
   inline void handleKey(int key, int scancode, int action, int mods)
     {
       if (GLFW_PRESS == action)
@@ -83,16 +76,21 @@ struct Menu {
         }
     }
 
+
+  // similar, but not inherited from Buffer::render
+  // TODO merge this and Buffer's render(). ideas:
+  // - pass a lambda for a line handler
+  // - add bold to rope sections
   inline void render(RenderWindow& window, TextRenderer& tr)
     {
       uint64_t line_number = 0;
 
-      for (size_t i = 0; i < rope.lines.size(); ++i)
+      for (size_t i = 0; i < buffer.contents.lines.size(); ++i)
         {
-          StringView line = rope.lines[i];
+          StringView line = buffer.contents.lines[i];
 
           double xpos = 200;
-          double current_offset = (30 * line_scroller.position);
+          double current_offset = (30 * buffer.line_scroller.position);
           double ypos = current_offset + (50 + (30 * line_number));
 
           // TODO "+ 30" should be "+ text_height"
@@ -125,9 +123,8 @@ struct Menu {
 
       // render texp to rope
       _repr_alloc = repr.tabs();
-      rope.make(_repr_alloc);
-
-      line_scroller.reset();
+      buffer.contents.make(_repr_alloc);
+      buffer.line_scroller.reset();
     }
 
   inline Texp _createMenuRepr(const Texp& layout, uint64_t& curr_line)

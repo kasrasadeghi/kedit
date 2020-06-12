@@ -16,6 +16,7 @@ struct Buffer {
   void tick(double delta_time)
     { line_scroller.tick(delta_time); }
 
+  // the default buffer renderer
   void render(RenderWindow& window, TextRenderer& tr)
     {
       uint64_t line_number = 0;

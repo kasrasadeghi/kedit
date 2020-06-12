@@ -36,7 +36,7 @@ struct Editor {
       if (_menus.size() > 0)
         {
           auto& curr = _menus.back();
-          curr.line_scroller.target += scroll_y;
+          curr.buffer.line_scroller.target += scroll_y;
           return;
         }
 
@@ -56,7 +56,7 @@ struct Editor {
 
       for (auto& menu : _menus)
         {
-          menu.tick(delta_time);
+          menu.buffer.tick(delta_time);
         }
     }
 
