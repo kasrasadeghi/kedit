@@ -34,7 +34,7 @@ int main() {
 
     editor.handleKey(key, scancode, action, mods);
 
-    if (key == GLFW_KEY_ESCAPE) {
+    if (GLFW_PRESS == action && key == GLFW_KEY_ESCAPE) {
       window.close();
     }
   });
@@ -101,7 +101,7 @@ int main() {
 
 /*
  *  A  D        0
- *  |\   order: |\   so it's clockwise
+ *  |\   order: |\   so it's counter-clockwise
  *  | \         | \
  *  B--C        2--1
  */
