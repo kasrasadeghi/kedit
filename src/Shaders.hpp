@@ -47,9 +47,7 @@ void main()
   vec2 pos = vertex_position * vec2(dx, dy);
 
   vec2 top_left = instance_rect.xy;
-  gl_Position = vec4(pos + vec2(top_left.x, -top_left.y), -0.1, 1);
-
-  // gl_Position = vec4(vertex_position, 0, 1);
+  gl_Position = vec4(pos + top_left, 0, 1);
 }
 )zzz",
 

@@ -14,6 +14,7 @@ constexpr bool PROFILING = true;
 int main() {
   srand(time(NULL));
 
+  // TODO support for windowed mode and resizing
   // RenderWindow window {"Kedit", 1920, 1080};
   RenderWindow window {"kedit"};
   window.setMousePos(window.width()/2.f, window.height()/2.f);
@@ -104,11 +105,22 @@ int main() {
  *  |\   order: |\   so it's counter-clockwise
  *  | \         | \
  *  B--C        2--1
+ *
+ * window projection: ortho(0, width, height, 0)
+ * 0, 0
+ *       -, -
+ *               width, height
+ *
+ * opengl:
+ * -1   1             1,  1
+ *           0,  0
+ * -1, -1             1, -1
+ *
  */
   std::vector<glm::vec2> corner_vertices;
   corner_vertices.emplace_back(0,  0); // 0
-  corner_vertices.emplace_back(0, -1); // 2
-  corner_vertices.emplace_back(1, -1); // 1
+  corner_vertices.emplace_back(0,  1); // 1
+  corner_vertices.emplace_back(1,  1); // 2
 
   std::vector<glm::uvec3> corner_indices;
   corner_indices.emplace_back(0, 1, 2);
@@ -124,10 +136,9 @@ int main() {
   } __attribute__((packed));
 
   std::vector<Instance> instances;
-  instances.emplace_back(glm::vec2{-.9, -.9}, glm::vec2{1.8, 1.8});
-
+  instances.emplace_back(glm::vec2{0, 0}, glm::vec2{50, 50});
+  instances.emplace_back(glm::vec2{1000, 1000}, glm::vec2{100, 100});
   // TODO fix background positioning using projection matrix @ref1
-  // instances.emplace_back(glm::vec2{1000, 1000}, glm::vec2{100, 100});
 
   // set up VAO, VBO, and uniforms
 	glGenVertexArrays(1, &rect_program.VAO);
@@ -165,12 +176,10 @@ int main() {
   struct uniform_ {
     // GLint view = 0;
     GLint projection = 0; // TODO @ref1
-    // GLint wireframe = 0;
   } uniform;
 
   // uniform.view      = glGetUniformLocation(rect_program_id, "view");
   uniform.projection = glGetUniformLocation(rect_program_id, "projection"); // TODO @ref1
-  // uniform.wireframe = glGetUniformLocation(rect_program_id, "wireframe");
 
   /// Render Loop ===------------------------------------------------------------------------===///
 
@@ -216,8 +225,7 @@ int main() {
     /// PreRender Compution ===----------------------------------------------------------------===///
 
     float aspect = static_cast<float>(window.width()) / window.height();
-    // glm::mat4 projection_matrix = glm::ortho(0.f, (float)(window.width()), (float)(window.height()), 0.f); // TODO @ref1
-    glm::mat4 projection_matrix{1};
+    glm::mat4 projection_matrix = glm::ortho(0.f, (float)(window.width()), (float)(window.height()), 0.f); // TODO @ref1
     glm::mat4 view_matrix(1);
 
     // glUseProgram(program_id);
