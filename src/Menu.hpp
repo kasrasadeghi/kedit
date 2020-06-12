@@ -18,10 +18,10 @@ struct Menu {
   Texp _layout;
 
   std::string _repr_alloc;  // layout.tabs() stored into a std::string
-  Rope rope; // refers to _repr_alloc
 
-  // TODO fix segfault for scrolling on menus
+  Rope rope; // refers to _repr_alloc
   Scroller line_scroller;
+
   uint64_t cursor;
 
   std::vector<uint64_t> selectable_lines;

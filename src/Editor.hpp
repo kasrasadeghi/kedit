@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Buffer.hpp"
+#include "FileBuffer.hpp"
 #include "Menu.hpp"
 
 #include <kgfx/TextRenderer.hpp>
@@ -15,20 +15,20 @@
 
 struct Editor {
   // TODO merge Buffer and Menu somehow
-  std::vector<Buffer> _buffers;
+  std::vector<FileBuffer> _buffers;
   std::vector<Menu>   _menus;
 
   std::vector<std::string> command_history;
 
   inline void loadFile(StringView file_path)
     {
-      _buffers.push_back(Buffer{});
-      Buffer& curr = _buffers.back();
+      _buffers.push_back(FileBuffer{});
+      FileBuffer& curr = _buffers.back();
 
       // TODO make sure buffer unreads and closes file
       curr.file = File::open(file_path);
       curr.file_contents = curr.file.read();
-      curr.contents.make(curr.file_contents);
+      curr.buffer.contents.make(curr.file_contents);
     }
 
   inline void verticalScroll(double scroll_y)
@@ -43,18 +43,18 @@ struct Editor {
       if (_buffers.size() > 0)
         {
           auto& curr = _buffers.back();
-          curr.line_scroller.target += scroll_y;
+          curr.buffer.line_scroller.target += scroll_y;
         }
     }
 
   inline void tick(double delta_time)
     {
-      for (Buffer& buffer : _buffers)
+      for (auto& filebuffer : _buffers)
         {
-          buffer.tick(delta_time);
+          filebuffer.buffer.tick(delta_time);
         }
 
-      for (Menu& menu : _menus)
+      for (auto& menu : _menus)
         {
           menu.tick(delta_time);
         }
@@ -146,7 +146,7 @@ struct Editor {
 
       if (not _buffers.empty())
         {
-          _buffers.back().render(window, tr);
+          _buffers.back().buffer.render(window, tr);
         }
     }
 

@@ -10,8 +10,6 @@
 #include <string>
 
 struct Buffer {
-  File file;
-  StringView file_contents = "";
   Rope contents;
   Scroller line_scroller;
 
@@ -24,7 +22,6 @@ struct Buffer {
 
       for (StringView line : contents.lines)
         {
-
           double xpos = 200;
           double current_offset = (30 * line_scroller.position);
           double ypos = current_offset + (50 + (30 * line_number));
