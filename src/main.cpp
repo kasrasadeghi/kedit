@@ -138,7 +138,6 @@ int main() {
   std::vector<Instance> instances;
   instances.emplace_back(glm::vec2{0, 0}, glm::vec2{50, 50});
   instances.emplace_back(glm::vec2{1000, 1000}, glm::vec2{100, 100});
-  // TODO fix background positioning using projection matrix @ref1
 
   // set up VAO, VBO, and uniforms
 	glGenVertexArrays(1, &rect_program.VAO);
@@ -174,12 +173,12 @@ int main() {
   glUseProgram(rect_program_id);
 
   struct uniform_ {
-    // GLint view = 0;
-    GLint projection = 0; // TODO @ref1
+    // GLint view = 0; // TODO support panning around
+    GLint projection = 0;
   } uniform;
 
   // uniform.view      = glGetUniformLocation(rect_program_id, "view");
-  uniform.projection = glGetUniformLocation(rect_program_id, "projection"); // TODO @ref1
+  uniform.projection = glGetUniformLocation(rect_program_id, "projection");
 
   /// Render Loop ===------------------------------------------------------------------------===///
 
