@@ -15,7 +15,6 @@
 
 struct Editor {
   std::vector<Buffer> _buffers;
-  Buffer* _curr_buffer;
 
   // TODO merge Buffer and Menu somehow
   std::vector<FileBuffer> _filebuffers;
@@ -23,21 +22,39 @@ struct Editor {
 
   std::vector<std::string> command_history;
 
-  inline Buffer* allocBuffer()
+  inline Buffer* allocBuffer(void)
     {
       _buffers.push_back(Buffer{});
       return &_buffers.back();
     }
 
-  inline void loadFile(StringView file_path)
+  inline FileBuffer* allocFileBuffer(void)
     {
       _filebuffers.push_back(FileBuffer{});
       FileBuffer& curr = _filebuffers.back();
 
+      curr.buffer = allocBuffer();
+      curr.buffer->type = Buffer::Type::FileBufferT;
+      return &curr;
+    }
+
+  inline Menu* allocMenu(void)
+    {
+      _menus.push_back(Menu{});
+      Menu& curr = _menus.back();
+
+      curr.buffer = allocBuffer();
+      curr.buffer->type = Buffer::Type::MenuT;
+      return &curr;
+    }
+
+  inline void loadFile(StringView file_path)
+    {
+      auto& curr = *allocFileBuffer();
+
       // TODO make sure buffer unreads and closes file
       curr.file = File::open(file_path);
       curr.file_contents = curr.file.read();
-      curr.buffer = allocBuffer();
       curr.buffer->contents.make(curr.file_contents);
     }
 
@@ -72,8 +89,7 @@ struct Editor {
 
   inline void openBrowser(void)
     {
-      _menus.push_back(Menu{});
-      _menus.back().buffer = allocBuffer();
+      allocMenu();
       makeBrowser();
     }
 
