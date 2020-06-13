@@ -13,27 +13,33 @@
 // this plumbing is necessary because
 // a lambda that captures can't be used as a function ptr
 using KeyCallback = std::function<void(int, int, int, int)>;
-static KeyCallback _RenderWindow_keyCallback;
-static void _RenderWindow_keyCallbackWrapper(GLFWwindow* window, int k, int s, int a, int m) {
+inline static KeyCallback _RenderWindow_keyCallback;
+inline static void _RenderWindow_keyCallbackWrapper(GLFWwindow* window, int k, int s, int a, int m) {
   _RenderWindow_keyCallback(k, s, a, m);
 }
 
 using MouseCallback = std::function<void(int, int, int)>;
-static MouseCallback _RenderWindow_mouseCallback;
-static void _RenderWindow_mouseCallbackWrapper(GLFWwindow* window, int b, int a, int m) {
+inline static MouseCallback _RenderWindow_mouseCallback;
+inline static void _RenderWindow_mouseCallbackWrapper(GLFWwindow* window, int b, int a, int m) {
   _RenderWindow_mouseCallback(b, a, m);
 }
 
 using CursorCallback = std::function<void(double, double)>;
-static CursorCallback _RenderWindow_cursorCallback;
-static void _RenderWindow_cursorCallbackWrapper(GLFWwindow* window, double x, double y) {
+inline static CursorCallback _RenderWindow_cursorCallback;
+inline static void _RenderWindow_cursorCallbackWrapper(GLFWwindow* window, double x, double y) {
   _RenderWindow_cursorCallback(x, y);
 }
 
 using ScrollCallback = std::function<void(double, double)>;
-static ScrollCallback _RenderWindow_scrollCallback;
-static void _RenderWindow_scrollCallbackWrapper(GLFWwindow* window, double x, double y) {
+inline static ScrollCallback _RenderWindow_scrollCallback;
+inline static void _RenderWindow_scrollCallbackWrapper(GLFWwindow* window, double x, double y) {
   _RenderWindow_scrollCallback(x, y);
+}
+
+using ResizeCallback = std::function<void(int, int)>;
+inline static ResizeCallback _RenderWindow_resizeCallback;
+inline static void _RenderWindow_resizeCallbackWrapper(GLFWwindow* window, int width, int height) {
+  _RenderWindow_resizeCallback(width, height);
 }
 
 class RenderWindow {
@@ -64,7 +70,11 @@ public:
       glfwTerminate();
       exit(-1);
     }
-    glfwSetFramebufferSizeCallback(_window, frameBufferSizeCallback);
+    setResizeCallback([&](int width, int height) {
+      _width = width;
+      _height = height;
+      glViewport(0, 0, _width, _height);
+    });
     glViewport(0, 0, _width, _height);
   }
 
@@ -94,7 +104,11 @@ public:
       glfwTerminate();
       exit(-1);
     }
-    glfwSetFramebufferSizeCallback(_window, frameBufferSizeCallback);
+    setResizeCallback([&](int width, int height) {
+      _width = width;
+      _height = height;
+      glViewport(0, 0, _width, _height);
+    });
     glViewport(0, 0, _width, _height);
   }
 
@@ -137,10 +151,6 @@ public:
     return glm::vec2(xpos, ypos);
   }
 
-  static void frameBufferSizeCallback(GLFWwindow* w, int width, int height) {
-    glViewport(0, 0, width, height);
-  }
-
   void setKeyCallback(KeyCallback keyCallback) {
     _RenderWindow_keyCallback = keyCallback;
     glfwSetKeyCallback(_window, _RenderWindow_keyCallbackWrapper);
@@ -156,5 +166,9 @@ public:
   void setScrollCallback(ScrollCallback scrollCallback) {
     _RenderWindow_scrollCallback = scrollCallback;
     glfwSetScrollCallback(_window, _RenderWindow_scrollCallbackWrapper);
+  }
+  void setResizeCallback(ResizeCallback resizeCallback) {
+    _RenderWindow_resizeCallback = resizeCallback;
+    glfwSetFramebufferSizeCallback(_window, _RenderWindow_resizeCallbackWrapper);
   }
 };
