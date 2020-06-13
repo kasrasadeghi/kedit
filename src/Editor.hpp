@@ -173,7 +173,7 @@ struct Editor {
 
       if (not _filebuffers.empty())
         {
-          _filebuffers.back().buffer->render(window, tr);
+          _filebuffers.back().render(window, tr);
         }
     }
 
