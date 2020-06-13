@@ -19,36 +19,36 @@ template <typename T, typename U>
 using has_left_shift_test = decltype(decl_lvalue<T>() << std::declval<U>());
 
 template<typename T, typename U>
-constexpr bool has_left_shift_v = std::experimental::is_detected_v<has_left_shift_test, T, U>;
+inline constexpr bool has_left_shift_v = std::experimental::is_detected_v<has_left_shift_test, T, U>;
 
 
 template <typename T>
 using has_glm_to_string_test = decltype(glm::to_string(std::declval<T>()));
 
 template<typename T>
-constexpr bool has_glm_to_string_v = std::experimental::is_detected_v<has_glm_to_string_test, T>;
+inline constexpr bool has_glm_to_string_v = std::experimental::is_detected_v<has_glm_to_string_test, T>;
 
 
 template <typename T>
 using has_std_to_string_test = decltype(std::to_string(std::declval<T>()));
 
 template<typename T>
-constexpr bool has_std_to_string_v = std::experimental::is_detected_v<has_std_to_string_test, T>;
+inline constexpr bool has_std_to_string_v = std::experimental::is_detected_v<has_std_to_string_test, T>;
 
 
 template <typename T>
-std::string str(T o) {
+inline std::string str(T o) {
   if constexpr(has_std_to_string_v<T>) {
     return std::to_string(o);
-  } else 
+  } else
   if constexpr(has_glm_to_string_v<T>) {
     return glm::to_string(o);
-  } else 
+  } else
   if constexpr(has_left_shift_v<std::ostream, T>) {
     std::stringstream i;
-    i << o; 
+    i << o;
     return i.str();
-  } else 
+  } else
   {
     // static_assert(false) doesn't compile??
     std::cout << "OH NO GOD PLEASE HELP" << std::endl;
@@ -57,6 +57,6 @@ std::string str(T o) {
 }
 
 template <>
-std::string str<const char*>(const char* o) {
+inline std::string str<const char*>(const char* o) {
   return std::string(o);
 }
