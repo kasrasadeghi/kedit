@@ -38,7 +38,7 @@ struct Editor {
       curr.page._type = Type::FileBufferT;
       curr.page.buffer = allocBuffer();
 
-      _pages.push_back((Page*)&curr);
+      _pages.push_back(&curr.page);
       return &curr;
     }
 
@@ -49,7 +49,7 @@ struct Editor {
       curr.page._type = Type::MenuT;
       curr.page.buffer = allocBuffer();
 
-      _pages.push_back((Page*)&curr);
+      _pages.push_back(&curr.page);
       return &curr;
     }
 
