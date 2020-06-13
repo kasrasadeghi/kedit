@@ -63,30 +63,14 @@ struct Editor {
 
   inline void verticalScroll(double scroll_y)
     {
-      if (_menus.size() > 0)
-        {
-          auto& curr = _menus.back();
-          curr.buffer->line_scroller.target += scroll_y;
-          return;
-        }
-
-      if (_filebuffers.size() > 0)
-        {
-          auto& curr = _filebuffers.back();
-          curr.buffer->line_scroller.target += scroll_y;
-        }
+      _pages.back()->buffer->line_scroller.target += scroll_y;
     }
 
   inline void tick(double delta_time)
     {
-      for (auto& filebuffer : _filebuffers)
+      for (auto buffer : _buffers)
         {
-          filebuffer.buffer->tick(delta_time);
-        }
-
-      for (auto& menu : _menus)
-        {
-          menu.buffer->tick(delta_time);
+          buffer.tick(delta_time);
         }
     }
 
@@ -163,23 +147,10 @@ struct Editor {
       curr.parseLayout(curr._layout);
     }
 
+  // TODO text renderer needs to have a Z level argument
+  // TODO render background at different Z levels
   inline void render(RenderWindow& window, TextRenderer& tr)
-    {
-      // TODO text renderer needs to have a Z level argument
-      // TODO render background at different Z levels
-
-      _pages.back()->render(window, tr);
-
-      if (not _menus.empty())
-        {
-          return;
-        }
-
-      if (not _filebuffers.empty())
-        {
-          _filebuffers.back().render(window, tr);
-        }
-    }
+    { _pages.back()->render(window, tr); }
 
   inline void handleKey(int key, int scancode, int action, int mods)
     {
@@ -190,12 +161,7 @@ struct Editor {
             openBrowser();
         }
 
-      // TODO check menu active
-      if (not _menus.empty())
-        {
-          Menu& curr = _menus.back();
-          curr.handleKey(key, scancode, action, mods);
-        }
+      _pages.back()->handleKey(key, scancode, action, mods);
     }
 
 
