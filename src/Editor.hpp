@@ -1,5 +1,7 @@
 #pragma once
 
+#include "FileBuffer.hpp"
+#include "Menu.hpp"
 #include "Page.hpp"
 
 #include <kgfx/TextRenderer.hpp>
@@ -33,8 +35,8 @@ struct Editor {
     {
       _filebuffers.push_back(FileBuffer{});
       FileBuffer& curr = _filebuffers.back();
-      curr._type = Type::FileBufferT;
-      curr.buffer = allocBuffer();
+      curr.page._type = Type::FileBufferT;
+      curr.page.buffer = allocBuffer();
 
       _pages.push_back((Page*)&curr);
       return &curr;
@@ -44,8 +46,8 @@ struct Editor {
     {
       _menus.push_back(Menu{});
       Menu& curr = _menus.back();
-      curr._type = Type::MenuT;
-      curr.buffer = allocBuffer();
+      curr.page._type = Type::MenuT;
+      curr.page.buffer = allocBuffer();
 
       _pages.push_back((Page*)&curr);
       return &curr;
@@ -61,7 +63,7 @@ struct Editor {
       // TODO make sure buffer unreads and closes file
       curr.file = File::open(file_path);
       curr.file_contents = curr.file.read();
-      curr.buffer->contents.make(curr.file_contents);
+      curr.page.buffer->contents.make(curr.file_contents);
     }
 
   inline void verticalScroll(double scroll_y)

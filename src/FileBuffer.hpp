@@ -2,6 +2,7 @@
 
 #include "Buffer.hpp"
 #include "PageT.hpp"
+#include "Page.hpp"
 
 #include <backbone-core-cpp/File.hpp>
 #include <kgfx/RenderWindow.hpp>
@@ -10,23 +11,22 @@
 #include <string>
 
 struct FileBuffer {
-  Type _type = Type::NoneT;
-  Buffer* buffer;
+  Page page;
 
   File file;
   StringView file_contents = "";
 
   inline bool invariant()
-    { return file_contents._length > 0 && file_contents._length > buffer->contents.length(); }
+    { return file_contents._length > 0 && file_contents._length > page.buffer->contents.length(); }
 
   inline void render(RenderWindow& window, TextRenderer& tr)
     {
       uint64_t line_number = 0;
 
-      for (StringView line : buffer->contents.lines)
+      for (StringView line : page.buffer->contents.lines)
         {
           double xpos = 200;
-          double current_offset = (30 * buffer->line_scroller.position);
+          double current_offset = (30 * page.buffer->line_scroller.position);
           double ypos = current_offset + (50 + (30 * line_number));
 
           // TODO "+ 30" should be "+ text_height"

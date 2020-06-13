@@ -2,6 +2,7 @@
 
 #include "Buffer.hpp"
 #include "PageT.hpp"
+#include "Page.hpp"
 
 #include <backbone-core-cpp/File.hpp>
 #include <backbone-core-cpp/Texp.hpp>
@@ -14,8 +15,7 @@
 struct Menu {
 
   ///=============/ Members /=========================================///
-  Type _type = Type::NoneT;
-  Buffer* buffer; // refers to _repr_alloc
+  Page page;
 
   Texp _layout;
   std::string _repr_alloc;  // layout.tabs() stored into a std::string
@@ -87,12 +87,12 @@ struct Menu {
     {
       uint64_t line_number = 0;
 
-      for (size_t i = 0; i < buffer->contents.lines.size(); ++i)
+      for (size_t i = 0; i < page.buffer->contents.lines.size(); ++i)
         {
-          StringView line = buffer->contents.lines[i];
+          StringView line = page.buffer->contents.lines[i];
 
           double xpos = 200;
-          double current_offset = (30 * buffer->line_scroller.position);
+          double current_offset = (30 * page.buffer->line_scroller.position);
           double ypos = current_offset + (50 + (30 * line_number));
 
           // TODO "+ 30" should be "+ text_height"
@@ -125,8 +125,8 @@ struct Menu {
 
       // render texp to rope
       _repr_alloc = repr.tabs();
-      buffer->contents.make(_repr_alloc);
-      buffer->line_scroller.reset();
+      page.buffer->contents.make(_repr_alloc);
+      page.buffer->line_scroller.reset();
     }
 
   inline Texp _createMenuRepr(const Texp& layout, uint64_t& curr_line)
