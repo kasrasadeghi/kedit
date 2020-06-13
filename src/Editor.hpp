@@ -51,6 +51,9 @@ struct Editor {
       return &curr;
     }
 
+  inline Page* currentPage(void)
+    { return _pages.back(); }
+
   inline void loadFile(StringView file_path)
     {
       auto& curr = *allocFileBuffer();
@@ -63,7 +66,7 @@ struct Editor {
 
   inline void verticalScroll(double scroll_y)
     {
-      _pages.back()->buffer->line_scroller.target += scroll_y;
+      currentPage()->buffer->line_scroller.target += scroll_y;
     }
 
   inline void tick(double delta_time)
@@ -150,7 +153,7 @@ struct Editor {
   // TODO text renderer needs to have a Z level argument
   // TODO render background at different Z levels
   inline void render(RenderWindow& window, TextRenderer& tr)
-    { _pages.back()->render(window, tr); }
+    { currentPage()->render(window, tr); }
 
   inline void handleKey(int key, int scancode, int action, int mods)
     {
@@ -161,7 +164,7 @@ struct Editor {
             openBrowser();
         }
 
-      _pages.back()->handleKey(key, scancode, action, mods);
+      currentPage()->handleKey(key, scancode, action, mods);
     }
 
 
