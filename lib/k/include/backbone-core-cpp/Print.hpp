@@ -5,16 +5,16 @@
 
 template <class... Args>
 void print(Args&&... args)
-  { (std::cout << ... << args); }
+  { (std::cout << ... << args) << std::flush; }
 
 template<class... Args>
 void println(Args&&... args)
-  { (std::cout << ... << args) << std::endl; }
+  { (std::cout << ... << args) << std::endl << std::flush; }
 
 template<class... Args>
 void printerr(Args&&... args)
-  { (std::cerr << ... << args); }
+  { (std::cerr << ... << args) << std::flush; }
 
 template<class... Args>
 void printerrln(Args&&... args)
-  { (std::cerr << ... << args) << std::endl; }
+  { (std::cerr << ... << args) << std::endl << std::flush; }
