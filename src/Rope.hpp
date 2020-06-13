@@ -39,4 +39,14 @@ struct Rope {
           ++ char_iter;
         }
     }
+
+  inline size_t length(void)
+    {
+      size_t acc = 0;
+      for (auto l : lines)
+        {
+          acc += l._length;
+        }
+      return acc;
+    }
 };

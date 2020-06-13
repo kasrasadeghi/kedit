@@ -13,4 +13,7 @@ struct FileBuffer {
 
   File file;
   StringView file_contents = "";
+
+  inline bool invariant()
+    { return file_contents._length > 0 && file_contents._length > buffer->contents.length(); }
 };

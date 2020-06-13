@@ -12,7 +12,7 @@
 constexpr bool PROFILING = true;
 
 int main() {
-  srand(time(NULL));
+  std::cout << std::boolalpha;
 
   // TODO support for windowed mode and resizing
   // RenderWindow window {"Kedit", 1920, 1080};
