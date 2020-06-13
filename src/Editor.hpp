@@ -34,7 +34,6 @@ struct Editor {
       FileBuffer& curr = _filebuffers.back();
 
       curr.buffer = allocBuffer();
-      curr.buffer->type = Buffer::Type::FileBufferT;
       return &curr;
     }
 
@@ -44,7 +43,6 @@ struct Editor {
       Menu& curr = _menus.back();
 
       curr.buffer = allocBuffer();
-      curr.buffer->type = Buffer::Type::MenuT;
       return &curr;
     }
 

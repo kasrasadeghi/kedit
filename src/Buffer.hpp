@@ -10,9 +10,6 @@
 #include <string>
 
 struct Buffer {
-  enum class Type { NoneT, FileBufferT, MenuT };
-
-  Type type;
   Rope contents;
   Scroller line_scroller;
 
