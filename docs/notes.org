@@ -1,3 +1,27 @@
+* c++ suspicion                                             jun 12 2020
+=> c++
+I'm going to refrain from using a large part of the c++ language because I plan
+on rewriting this in backbone.
+
+Here are some parts I think are suspicious, and thus are not going to be in backbone:
+- constructors, destructors
+  - tying together allocation and initialization is bad
+  - it makes it so that you have weird problems with references and move
+    semantics
+    - e.g. when you delete an element of the array, you need to destroy it but not
+      de-allocate it.  thus you get "in-place delete".
+  - thus there's no RAII
+- inheritance
+  - inheritance bad
+  - virtual bad
+
+By avoiding these two things, we don't have to deal with the "rule of 3" (or
+5).  We do have to think a little harder about memory management, but I believe
+that being careful initially will save us the headache of looking at c++
+template pointer error output in the future (delete an element in a vector of a
+inherited type).
+
+
 * chdir can't be in shell                                   jun 11 2020
 => menu
 - git commit: db660aa247d67a02a7f80170238763a621854fec
