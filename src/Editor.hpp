@@ -1,7 +1,6 @@
 #pragma once
 
-#include "FileBuffer.hpp"
-#include "Menu.hpp"
+#include "Page.hpp"
 
 #include <kgfx/TextRenderer.hpp>
 #include <backbone-core-cpp/StrView.hpp>
@@ -20,6 +19,8 @@ struct Editor {
   std::vector<FileBuffer> _filebuffers;
   std::vector<Menu>   _menus;
 
+  std::vector<Page*> _pages;
+
   std::vector<std::string> command_history;
 
   inline Buffer* allocBuffer(void)
@@ -32,8 +33,10 @@ struct Editor {
     {
       _filebuffers.push_back(FileBuffer{});
       FileBuffer& curr = _filebuffers.back();
-
+      curr._type = Type::FileBufferT;
       curr.buffer = allocBuffer();
+
+      _pages.push_back((Page*)&curr);
       return &curr;
     }
 
@@ -41,8 +44,10 @@ struct Editor {
     {
       _menus.push_back(Menu{});
       Menu& curr = _menus.back();
-
+      curr._type = Type::MenuT;
       curr.buffer = allocBuffer();
+
+      _pages.push_back((Page*)&curr);
       return &curr;
     }
 
@@ -163,9 +168,10 @@ struct Editor {
       // TODO text renderer needs to have a Z level argument
       // TODO render background at different Z levels
 
+      _pages.back()->render(window, tr);
+
       if (not _menus.empty())
         {
-          _menus.back().render(window, tr);
           return;
         }
 

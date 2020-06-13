@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Buffer.hpp"
+#include "PageT.hpp"
 
 #include <backbone-core-cpp/File.hpp>
 #include <backbone-core-cpp/Texp.hpp>
@@ -13,6 +14,7 @@
 struct Menu {
 
   ///=============/ Members /=========================================///
+  Type _type = Type::NoneT;
   Buffer* buffer; // refers to _repr_alloc
 
   Texp _layout;

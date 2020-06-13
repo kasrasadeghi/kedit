@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Buffer.hpp"
+#include "PageT.hpp"
 
 #include <backbone-core-cpp/File.hpp>
 #include <kgfx/RenderWindow.hpp>
@@ -9,6 +10,7 @@
 #include <string>
 
 struct FileBuffer {
+  Type _type = Type::NoneT;
   Buffer* buffer;
 
   File file;
