@@ -178,4 +178,14 @@ struct Editor {
         }
     }
 
+
+  inline bool invariant(void)
+    {
+      bool acc = true;
+      for (auto fb : _filebuffers)
+        {
+          acc &= fb.invariant();
+        }
+      return acc;
+    }
 };
