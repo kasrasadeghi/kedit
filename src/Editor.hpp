@@ -71,7 +71,7 @@ struct Editor {
 
   inline void tick(double delta_time)
     {
-      for (auto buffer : _buffers)
+      for (auto& buffer : _buffers)
         {
           buffer.tick(delta_time);
         }
