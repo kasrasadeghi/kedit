@@ -3,6 +3,7 @@
 // smooth scrolling logic
 // TODO slow scrolling
 // TODO fast scrolling
+// TODO handle laptop scrolling much better
 struct Scroller {
 
   double target = 0;

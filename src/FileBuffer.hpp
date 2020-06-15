@@ -23,11 +23,13 @@ struct FileBuffer {
     {
       uint64_t line_number = 0;
 
+      double xpos = page.position.x + 50;
+      double ypos = page.position.y + 50;
+
       for (StringView line : page.buffer->contents.lines)
         {
-          double xpos = 200;
           double current_offset = (30 * page.buffer->line_scroller.position);
-          double ypos = current_offset + (50 + (30 * line_number));
+          double curr_ypos = current_offset + (ypos + (30 * line_number));
 
           // TODO "+ 30" should be "+ text_height"
           if (ypos < (uint64_t)(gc.window->height() + 30) && ypos > (uint64_t)(0))

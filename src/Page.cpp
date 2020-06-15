@@ -17,6 +17,7 @@ void Page::render(GraphicsContext& gc)
                 "Contact your developer today!");
         break;
       }
+
     gc.drawRectangle(position, size);
   }
 
