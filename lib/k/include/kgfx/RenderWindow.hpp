@@ -120,6 +120,7 @@ public:
   GLFWwindow* window() { return _window; }
   int height() const   { return _height; }
   int width() const    { return _width;  }
+  float aspectRatio() const { return (float)(_width) / (float)(_height); }
 
   bool isOpen() const { return not glfwWindowShouldClose(_window); }
   void swapBuffers()  { glfwSwapBuffers(_window); }
