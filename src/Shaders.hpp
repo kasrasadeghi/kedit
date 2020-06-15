@@ -66,11 +66,14 @@ out vec4 position;
 uniform mat4 projection;
 
 //
-//  A  D     A--D         1--3
+//  A  D     A--D         2--3
 //  |\    -> |\ |  order: |\ |  order is for triangle_strip,
-//  | \      | \|         | \|  so B A C D
-//  B--C     B--C         0--2
+//  | \      | \|         | \|  so C B A D
+//  C--B     C--B         0--1
 //
+// this triangle_strip order swaps 1 and 2 because we're using an orthographic 
+// projection that starts from a right-handed system to screen-space's left-handed system
+// - i.e. the ortho handedness swap requires 1 and 2 to be swapped
 
 void main()
 {
@@ -78,14 +81,14 @@ void main()
 	vec3 A = gl_in[0].gl_Position.xyz;
 	vec3 B = gl_in[1].gl_Position.xyz;
 	vec3 C = gl_in[2].gl_Position.xyz;
-  vec3 D = A + (C - B);
+  vec3 D = A + (B - C);
 
 	// perimeter = 2*length(A - B) + 2*length(B - C);
 
   // TODO @ref1
+  position = gl_Position = projection * vec4(C.xy, 0.5, 1); EmitVertex();
   position = gl_Position = projection * vec4(B.xy, 0.5, 1); EmitVertex();
   position = gl_Position = projection * vec4(A.xy, 0.5, 1); EmitVertex();
-  position = gl_Position = projection * vec4(C.xy, 0.5, 1); EmitVertex();
   position = gl_Position = projection * vec4(D.xy, 0.5, 1); EmitVertex();
 
 	EndPrimitive();

@@ -1,6 +1,7 @@
 #include "Editor.hpp"
 #include "DebugCallback.hpp"
 #include "Shaders.hpp"
+#include "GraphicsContext.hpp"
 
 #include <kgfx/RenderWindow.hpp>
 #include <kgfx/TextRenderer.hpp>
@@ -15,8 +16,8 @@ int main() {
   std::cout << std::boolalpha;
 
   // TODO support for windowed mode and resizing
-  // RenderWindow window {"Kedit", 1920, 1080};
-  RenderWindow window {"kedit"};
+  RenderWindow window {"Kedit", 1920, 1080};
+  // RenderWindow window {"kedit"};
   window.setMousePos(window.width()/2.f, window.height()/2.f);
 
   glfwSwapInterval(1); // framerate set: 0 for uncapped, 1 for monitor refresh rate
@@ -62,31 +63,11 @@ int main() {
     editor.verticalScroll(scroll_y);
   });
 
-  /// GL Options ===-------------------------------------------------------------------------===///
-
-
-  glEnable(GL_DEBUG_OUTPUT);
-  glDebugMessageCallback(GLDebugMessageCallback, 0);
-
-  // glEnable(GL_DEPTH_TEST);
-  // glDepthFunc(GL_LESS);
-
-  // glEnable(GL_CULL_FACE);
-  // glCullFace(GL_BACK);
-
-  glDisable(GL_CULL_FACE);
-  glFrontFace(GL_CCW);
-
-  // glEnable(GL_BLEND);
-  // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  glEnable(GL_MULTISAMPLE);
+  GraphicsContext gc { &window };
+  gc.initOptions();
 
   /// Load Screen ===------------------------------------------------------------------------===///
-
-  glViewport(0, 0, window.width(), window.height());
-  glClearColor(0.0, 0.0, 0.0, 0);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  gc.clear(0, 0, 0, 1);
 
   TextRenderer tr {(float)window.width(), (float)window.height()};
   tr.renderText("loading", window.width()/2 - 100, window.height()/2, 1, glm::vec4(1));
@@ -119,8 +100,8 @@ int main() {
  */
   std::vector<glm::vec2> corner_vertices;
   corner_vertices.emplace_back(0,  0); // 0
-  corner_vertices.emplace_back(0,  1); // 1
   corner_vertices.emplace_back(1,  1); // 2
+  corner_vertices.emplace_back(0,  1); // 1
 
   std::vector<glm::uvec3> corner_indices;
   corner_indices.emplace_back(0, 1, 2);
@@ -137,7 +118,7 @@ int main() {
 
   std::vector<Instance> instances;
   instances.emplace_back(glm::vec2{0, 0}, glm::vec2{50, 50});
-  instances.emplace_back(glm::vec2{1000, 1000}, glm::vec2{100, 100});
+  instances.emplace_back(glm::vec2{500, 500}, glm::vec2{100, 100});
 
   // set up VAO, VBO, and uniforms
 	glGenVertexArrays(1, &rect_program.VAO);
@@ -204,31 +185,12 @@ int main() {
     if constexpr(PROFILING) { pr.event("handle updates"); }
 
     editor.tick(pr.delta_time);
-
-    /// PreRender Compution ===----------------------------------------------------------------===///
-
-    float aspect = static_cast<float>(window.width()) / window.height();
-    glm::mat4 projection_matrix = glm::ortho(0.f, (float)(window.width()), (float)(window.height()), 0.f); // TODO @ref1
-    glm::mat4 view_matrix(1);
-
-    // glUseProgram(program_id);
-    // glEnable(GL_CULL_FACE);
-		// glCullFace(GL_BACK);
-    glClearColor(0.5, 0.5, 0.5, 1); // Sky color
-    glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS);
-
+    
     /// Render to Screen ===-----------------------------------------------------===///
-
-    // GL options
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDisable(GL_CULL_FACE);
-
-    // Clear
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glViewport(0, 0, window.width(), window.height());
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // Clear and Set up Options
+    gc.renderOptions();
+    gc.alignViewport();
+    gc.clear(0.5, 0.5, 0.5, 1);
 
     // Draw Rectangles
     glUseProgram(rect_program_id);
@@ -238,6 +200,10 @@ int main() {
     // glUniformMatrix4fv(uniform.view,       1, GL_FALSE, &view[0][0]);
     // glUniform1i(       uniform.wireframe, wireframe_mode);
 
+    float aspect = static_cast<float>(window.width()) / window.height();
+    glm::mat4 projection_matrix = glm::ortho(0.f, (float)(window.width()), (float)(window.height()), 0.f); // TODO @ref1
+    glm::mat4 view_matrix(1);
+    
     glBindVertexArray(VAO);
 
     glDrawElementsInstanced(GL_TRIANGLES, corner_indices.size() * 3, GL_UNSIGNED_INT, NULL, instances.size());
