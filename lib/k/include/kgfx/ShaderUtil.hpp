@@ -9,7 +9,7 @@ struct ShaderSource {
 	const char* fragment = nullptr;
 };
 
-GLuint
+inline GLuint
 CreateProgram(ShaderSource& shader, std::initializer_list<const char*> vertex_attributes) {
 
 	auto createShader = [](const char* source, GLenum shaderType, std::string name = "") -> GLuint {
