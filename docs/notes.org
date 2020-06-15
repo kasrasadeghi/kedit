@@ -1,3 +1,78 @@
+* layered buffers, text and rectangles                      jun 15 2020
+Drawing text is complicated.  Text is usually drawn with a textured
+rectangle and some of the pixels are partially colored, and others are
+completely opaque or transparent.
+
+To draw a rectangle after the text but have the rectangle appear under
+the text, there must be a depth buffer that allows for a depth test to
+occur.  With that, OpenGL can use the Z variable to check the
+depth.  The real problem lies with the partially colored fragments.
+
+If the text is white and it is being drawn on a red background, the
+partially colored pixels are pink.  If then a black background is
+drawn below the white text, it will still have a pink periphery
+instead of having a grey periphery.  There are many solutions to this
+problem.  There are also many tradeoffs to consider.
+
+The tradeoffs include:
+- minimizing the number of draw calls during a frame
+- allowing the pages to be re-ordered
+- allowing for text highlighting
+- allowing for moving pages around
+
+The solutions I can think of are listed below.
+
+1. *Blank Texture*
+   We could draw the text to a texture with a transparent background.
+   We could then use the texture to redraw the text that has been
+   black-backgrounded.
+
+2. *Negative Space*
+   We could clear the screen with the correct background color and
+   only actually draw the negative space.
+
+3. *Background Color Texture*
+   We could draw the text to a texture with the correct background
+   color and use that to render the text.  This requires knowing the
+   background color of the text before drawing the background.  This
+   would allow batching the backgrounds.
+
+4. *Multiple Draw Calls*
+   I could just draw all of the rectangles and texts in the correct
+   order, and redraw all of them when it is reordered.
+
+5. *Background First*
+   I could draw the text after all the backgrounds are drawn.
+
+6. *Discard* 
+   I could discard the pixels from the text's fragment shader.  This
+   does not avoid the problem of the partially colored pixels that are
+   drawn on the wrong background, but it is simple enough to do.
+
+7. *Dirty Draw*
+   Only redraw when necessary.  For scrolling, draw to image.  The
+   rest of these solutions are built around the assumption of
+   redrawing every frame, this one is not.
+
+8. *Background Color Argument*
+   We could modify the text renderer's shader to also take in a
+   background color.  We can use that to linearly interpolate with
+   instead of using a "blank" color.  This might also simplify
+   highlighting, so as long as the highlight does not go partially
+   through a character of the text.  If a character only has its left
+   half highlighted, then we'll need a highlight texture and that's
+   basically the same as 3's *Background Color Texture*.
+
+For now I've chosen option 6, because it requires the smallest change
+from the current code.  I'll revisit this in the future.  I suspect
+the final solution will take bits and pieces from many of these
+sections.
+
+When I decide to return to this, I'll probably do a combination of 5
+and 8.  The advanced solution would probably consider something like 7
+and 1 through 4.
+
+
 * c++ suspicion                                             jun 12 2020
 => c++
 I'm going to refrain from using a large part of the c++ language because I plan

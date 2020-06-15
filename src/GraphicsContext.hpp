@@ -28,12 +28,6 @@ struct GraphicsContext {
 
   inline void clear(glm::vec4 color)
     {
-      glClearColor(color.x, color.y, color.z, color.w);
-      glClear(GL_COLOR_BUFFER_BIT);
-    }
-
-  inline void depthClear(glm::vec4 color)
-    {
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
       glClearColor(color.x, color.y, color.z, color.w);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -47,11 +41,13 @@ struct GraphicsContext {
 
       glEnable(GL_MULTISAMPLE);
 
-      // NOTE: use depthClear if you use this
-      // glEnable(GL_DEPTH_TEST);
-      // glDepthFunc(GL_LESS);
+      glEnable(GL_DEPTH_TEST);
+      glDepthFunc(GL_LESS);
       
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
+
+  inline void renderRectangles(void)
+    { rectprog.render(window->width(), window->height()); }
 };

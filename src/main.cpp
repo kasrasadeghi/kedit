@@ -104,26 +104,13 @@ int main() {
     gc.alignViewport();
     gc.clear(0.5, 0.5, 0.5, 1);
 
-    // Draw Rectangles
-    glUseProgram(gc.rectprog.rect_program_id);
-
-    float aspect = static_cast<float>(window.width()) / window.height();
-    glm::mat4 projection_matrix = glm::ortho(0.f, (float)(window.width()), (float)(window.height()), 0.f); // TODO @ref1
-    glm::mat4 view_matrix(1);
-
-    // Pass in Uniform
-    glUniformMatrix4fv(gc.rectprog.uniform.projection, 1, GL_FALSE, &projection_matrix[0][0]); // TODO @ref1
-    // glUniformMatrix4fv(uniform.view,       1, GL_FALSE, &view[0][0]);
-    // glUniform1i(       uniform.wireframe, wireframe_mode);
-    
-    glBindVertexArray(rect_program.VAO);
-
-    glDrawElementsInstanced(GL_TRIANGLES, gc.rectprog.corner_indices.size() * 3, GL_UNSIGNED_INT, NULL, gc.rectprog.instances.size());
-
     status("menu count: " + str(editor._menus.size()));
     status("buffer count: " + str(editor._buffers.size()));
 
     editor.render(window, tr);
+
+    gc.renderRectangles();
+
     if (not editor._menus.empty())
       {
         status("menu selection: " + str(editor._menus.back().cursor));
