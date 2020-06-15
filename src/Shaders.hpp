@@ -16,7 +16,7 @@ GLuint VAO; // array object
 
 struct buffer_ {
   GLuint vertex; // VBO vertex buffer object
-  GLuint elements; // EBO vertex elements object
+  GLuint element; // EBO vertex elements object
   GLuint instance; // IBO instance buffer object
 } buffer;
 

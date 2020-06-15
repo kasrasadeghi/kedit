@@ -50,5 +50,11 @@ struct GraphicsContext {
     }
 
   inline void renderRectangles(void)
-    { rectprog.render(window->width(), window->height()); }
+    {
+      rectprog.render(window->width(), window->height());
+      rectprog.instances.clear();
+    }
+
+  inline void drawRectangle(glm::vec2 topleft, glm::vec2 size)
+    { rectprog.instances.emplace_back(topleft, size); }
 };

@@ -13,6 +13,9 @@ struct Page {
   Type _type;
   Buffer* buffer;
 
+  glm::vec2 position = {100, 100};
+  glm::vec2 size = {1000, 1000};
+
   void render(GraphicsContext& gc);
   void handleKey(int key, int scancode, int action, int mods);
 };

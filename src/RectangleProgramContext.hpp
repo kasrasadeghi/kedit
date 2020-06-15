@@ -2,6 +2,8 @@
 
 #include "Shaders.hpp"
 
+#include <backbone-core-cpp/Print.hpp>
+
 #include <glm/gtc/matrix_transform.hpp>
 
 struct RectProgramContext {
@@ -66,8 +68,8 @@ struct RectProgramContext {
 
       corner_indices.emplace_back(0, 1, 2); // CCW order
 
-      instances.emplace_back(glm::vec2{0, 0}, glm::vec2{400, 400});
-      instances.emplace_back(glm::vec2{500, 500}, glm::vec2{100, 100});
+      // instances.emplace_back(glm::vec2{0, 0}, glm::vec2{400, 400});
+      // instances.emplace_back(glm::vec2{500, 500}, glm::vec2{100, 100});
 
       // set up VAO, VBO, and uniforms
       glGenVertexArrays(1, &rect_program.VAO);
@@ -76,7 +78,7 @@ struct RectProgramContext {
 
       const auto VAO = rect_program.VAO;
       const auto VBO = rect_program.buffer.vertex;
-      const auto EBO = rect_program.buffer.elements;
+      const auto EBO = rect_program.buffer.element;
       const auto IBO = rect_program.buffer.instance;
 
       constexpr auto vertex_position = rect_program.attrib.vertex_position;
@@ -119,6 +121,9 @@ struct RectProgramContext {
       // glUniform1i(       uniform.wireframe, wireframe_mode);
 
       glBindVertexArray(rect_program.VAO);
+
+      glBindBuffer(GL_ARRAY_BUFFER, rect_program.buffer.instance);
+      glBufferData(GL_ARRAY_BUFFER, sizeof(Instance) * instances.size(), instances.data(), GL_STATIC_DRAW);
 
       glDrawElementsInstanced(GL_TRIANGLES, corner_indices.size() * 3, GL_UNSIGNED_INT, NULL, instances.size());
     }
