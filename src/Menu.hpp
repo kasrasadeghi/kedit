@@ -99,7 +99,7 @@ struct Menu {
           double curr_ypos = current_offset + (ypos + (30 * line_number));
 
           // TODO "+ 30" should be "+ text_height"
-          if (ypos < (uint64_t)(gc.window->height() + 30) && ypos > (uint64_t)(0))
+          if (curr_ypos < (uint64_t)(gc.window->height() + 30) && curr_ypos > (uint64_t)(0))
             {
               if (i == this->selectable_lines[this->cursor])
                 {

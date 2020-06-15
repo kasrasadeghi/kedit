@@ -32,9 +32,9 @@ struct FileBuffer {
           double curr_ypos = current_offset + (ypos + (30 * line_number));
 
           // TODO "+ 30" should be "+ text_height"
-          if (ypos < (uint64_t)(gc.window->height() + 30) && ypos > (uint64_t)(0))
+          if (curr_ypos < (uint64_t)(gc.window->height() + 30) && curr_ypos > (uint64_t)(0))
             {
-              gc.text(line.stringCopy(), 200, ypos, 1);
+              gc.text(line.stringCopy(), xpos, curr_ypos, 1);
             }
           ++ line_number;
         }
