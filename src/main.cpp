@@ -69,8 +69,8 @@ int main() {
   /// Load Screen ===------------------------------------------------------------------------===///
   gc.clear(0, 0, 0, 1);
 
-  TextRenderer tr {(float)window.width(), (float)window.height()};
-  tr.renderText("loading", window.width()/2 - 100, window.height()/2, 1, glm::vec4(1));
+  TextRenderer tr;
+  tr.renderText(window.width(), window.height(), "loading", window.width()/2 - 100, window.height()/2, 1, glm::vec4(1));
   window.swapBuffers();
 
   // Set up OpenGL stuff
@@ -195,14 +195,15 @@ int main() {
     // Draw Rectangles
     glUseProgram(rect_program_id);
 
-    // Pass in Uniform
-    glUniformMatrix4fv(uniform.projection, 1, GL_FALSE, &projection_matrix[0][0]); // TODO @ref1
-    // glUniformMatrix4fv(uniform.view,       1, GL_FALSE, &view[0][0]);
-    // glUniform1i(       uniform.wireframe, wireframe_mode);
 
     float aspect = static_cast<float>(window.width()) / window.height();
     glm::mat4 projection_matrix = glm::ortho(0.f, (float)(window.width()), (float)(window.height()), 0.f); // TODO @ref1
     glm::mat4 view_matrix(1);
+
+    // Pass in Uniform
+    glUniformMatrix4fv(uniform.projection, 1, GL_FALSE, &projection_matrix[0][0]); // TODO @ref1
+    // glUniformMatrix4fv(uniform.view,       1, GL_FALSE, &view[0][0]);
+    // glUniform1i(       uniform.wireframe, wireframe_mode);
     
     glBindVertexArray(VAO);
 
@@ -222,25 +223,25 @@ int main() {
     /// FPS Counter ===------------------------------------------------------===///
 
     auto tilde_width = tr.textWidth("~");
-    tr.renderText("FPS: " + str(pr.framerate), window.width() - 300 + tilde_width, 50, 1);
-    tr.renderText("~FPS: " + str(pr.moving_avg_framerate), window.width() - 300, 80, 1);
+    tr.renderText(window.width(), window.height(), "FPS: " + str(pr.framerate), window.width() - 300 + tilde_width, 50, 1);
+    tr.renderText(window.width(), window.height(), "~FPS: " + str(pr.moving_avg_framerate), window.width() - 300, 80, 1);
 
     /// Render Messages ===--------------------------------------------------===///
 
-    auto list_text = [&tr](std::vector<std::string> lines, glm::ivec2 start_pos, std::string title = "") {
+    auto list_text = [&](std::vector<std::string> lines, glm::ivec2 start_pos, std::string title = "") {
       int count = 0;
 
       if (title != "") {
-        tr.renderText(title, start_pos.x, start_pos.y + count++ * 30, 1);
+        tr.renderText(window.width(), window.height(), title, start_pos.x, start_pos.y + count++ * 30, 1);
         std::string titlebar = "";
         for (uint i = 0; i < title.length(); ++i) {
           titlebar += "-";
         }
-        tr.renderText(titlebar, start_pos.x, start_pos.y + count++ * 30, 1);
+        tr.renderText(window.width(), window.height(), titlebar, start_pos.x, start_pos.y + count++ * 30, 1);
       }
 
       for (std::string l : lines) {
-        tr.renderText(l, start_pos.x, start_pos.y + count++ * 30, 1);
+        tr.renderText(window.width(), window.height(), l, start_pos.x, start_pos.y + count++ * 30, 1);
       }
     };
 

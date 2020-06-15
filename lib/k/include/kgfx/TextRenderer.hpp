@@ -95,7 +95,7 @@ class TextRenderer {
   GLuint _shader_color_loc = 0;
 
 public:
-  inline TextRenderer(float window_width, float window_height) {
+  inline TextRenderer() {
     if (_shaderID == 0) {
       _shaderID = makeShader();
     }
@@ -109,8 +109,6 @@ public:
     glUseProgram(_shaderID);
     _shader_proj_loc = glGetUniformLocation(_shaderID, "projection");
     _shader_color_loc = glGetUniformLocation(_shaderID, "textColor");
-    glm::mat4 proj = glm::ortho(0.f, window_width, window_height, 0.f);
-    glUniformMatrix4fv(_shader_proj_loc, 1, GL_FALSE, &proj[0][0]);
 
     // FreeType
     FT_Library ft;
@@ -194,10 +192,13 @@ public:
     return ID;
   }
 
-  inline GLfloat renderText(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec4 color = glm::vec4(1)) {
+  inline GLfloat renderText(int window_width, int window_height, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec4 color = glm::vec4(1)) {
     // Activate corresponding render state
     glEnable(GL_BLEND);
     glUseProgram(_shaderID);
+
+    glm::mat4 proj = glm::ortho(0.f, (float)window_width, (float)window_height, 0.f);
+    glUniformMatrix4fv(_shader_proj_loc, 1, GL_FALSE, &proj[0][0]);
     glUniform4f(_shader_color_loc, color.x, color.y, color.z, color.w);
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(_VAO);

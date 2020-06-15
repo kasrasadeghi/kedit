@@ -100,11 +100,11 @@ struct Menu {
             {
               if (i == this->selectable_lines[this->cursor])
                 {
-                  tr.renderText(line.stringCopy(), 200, ypos, 1, glm::vec4(1, 1, 1, 1));
+                  tr.renderText(window.width(), window.height(), line.stringCopy(), 200, ypos, 1, glm::vec4(1, 1, 1, 1));
                 }
               else
                 {
-                  tr.renderText(line.stringCopy(), 200, ypos, 1, glm::vec4(0.7, 0.7, 0.7, 1));
+                  tr.renderText(window.width(), window.height(), line.stringCopy(), 200, ypos, 1, glm::vec4(0.7, 0.7, 0.7, 1));
                 }
             }
           ++ line_number;
