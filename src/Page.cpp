@@ -2,15 +2,15 @@
 #include "FileBuffer.hpp"
 #include "Menu.hpp"
 
-void Page::render(RenderWindow& window, TextRenderer& tr)
+void Page::render(GraphicsContext& gc)
   {
     switch(_type)
       {
       case Type::FileBufferT:
-        ((FileBuffer*)(this))->render(window, tr);
+        ((FileBuffer*)(this))->render(gc);
         break;
       case Type::MenuT:
-        ((Menu*)(this))->render(window, tr);
+        ((Menu*)(this))->render(gc);
         break;
       case Type::NoneT:
         println("ERROR: Oh no, you have a NoneT Buffer. "

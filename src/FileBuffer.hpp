@@ -19,7 +19,7 @@ struct FileBuffer {
   inline bool invariant()
     { return file_contents._length > 0 && file_contents._length > page.buffer->contents.length(); }
 
-  inline void render(RenderWindow& window, TextRenderer& tr)
+  inline void render(GraphicsContext& gc)
     {
       uint64_t line_number = 0;
 
@@ -30,9 +30,9 @@ struct FileBuffer {
           double ypos = current_offset + (50 + (30 * line_number));
 
           // TODO "+ 30" should be "+ text_height"
-          if (ypos < (uint64_t)(window.height() + 30) && ypos > (uint64_t)(0))
+          if (ypos < (uint64_t)(gc.window->height() + 30) && ypos > (uint64_t)(0))
             {
-              tr.renderText(window.width(), window.height(), line.stringCopy(), 200, ypos, 1);
+              gc.text(line.stringCopy(), 200, ypos, 1);
             }
           ++ line_number;
         }

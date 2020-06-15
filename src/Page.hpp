@@ -2,6 +2,7 @@
 
 #include "PageT.hpp"
 #include "Buffer.hpp"
+#include "GraphicsContext.hpp"
 
 #include <kgfx/RenderWindow.hpp>
 #include <kgfx/TextRenderer.hpp>
@@ -12,6 +13,6 @@ struct Page {
   Type _type;
   Buffer* buffer;
 
-  void render(RenderWindow& window, TextRenderer& tr);
+  void render(GraphicsContext& gc);
   void handleKey(int key, int scancode, int action, int mods);
 };

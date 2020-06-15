@@ -3,6 +3,7 @@
 #include "FileBuffer.hpp"
 #include "Menu.hpp"
 #include "Page.hpp"
+#include "GraphicsContext.hpp"
 
 #include <kgfx/TextRenderer.hpp>
 #include <backbone-core-cpp/StrView.hpp>
@@ -154,8 +155,8 @@ struct Editor {
 
   // TODO text renderer needs to have a Z level argument
   // TODO render background at different Z levels
-  inline void render(RenderWindow& window, TextRenderer& tr)
-    { currentPage()->render(window, tr); }
+  inline void render(GraphicsContext& gc)
+    { currentPage()->render(gc); }
 
   inline void handleKey(int key, int scancode, int action, int mods)
     {

@@ -1,5 +1,4 @@
 #include "Editor.hpp"
-#include "DebugCallback.hpp"
 #include "RectangleProgramContext.hpp"
 #include "GraphicsContext.hpp"
 
@@ -68,9 +67,7 @@ int main() {
 
   /// Load Screen ===------------------------------------------------------------------------===///
   gc.clear(0, 0, 0, 1);
-
-  TextRenderer tr;
-  tr.renderText(window.width(), window.height(), "loading", window.width()/2 - 100, window.height()/2, 1, glm::vec4(1));
+  gc.text("loading", window.width()/2 - 100, window.height()/2, 1, glm::vec4(1));
   window.swapBuffers();
 
   gc.rectprog.init();
@@ -107,7 +104,7 @@ int main() {
     status("menu count: " + str(editor._menus.size()));
     status("buffer count: " + str(editor._buffers.size()));
 
-    editor.render(window, tr);
+    editor.render(gc);
 
     gc.renderRectangles();
 
@@ -120,7 +117,7 @@ int main() {
 
     /// FPS Counter ===------------------------------------------------------===///
 
-    auto tilde_width = tr.textWidth("~");
+    auto tilde_width = gc.tr.textWidth("~");
     gc.text("FPS: " + str(pr.framerate), window.width() - 300 + tilde_width, 50, 1);
     gc.text("~FPS: " + str(pr.moving_avg_framerate), window.width() - 300, 80, 1);
 

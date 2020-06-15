@@ -83,7 +83,7 @@ struct Menu {
   // TODO merge this and Buffer's render(). ideas:
   // - pass a lambda for a line handler
   // - add bold to rope sections
-  inline void render(RenderWindow& window, TextRenderer& tr)
+  inline void render(GraphicsContext& gc)
     {
       uint64_t line_number = 0;
 
@@ -96,15 +96,15 @@ struct Menu {
           double ypos = current_offset + (50 + (30 * line_number));
 
           // TODO "+ 30" should be "+ text_height"
-          if (ypos < (uint64_t)(window.height() + 30) && ypos > (uint64_t)(0))
+          if (ypos < (uint64_t)(gc.window->height() + 30) && ypos > (uint64_t)(0))
             {
               if (i == this->selectable_lines[this->cursor])
                 {
-                  tr.renderText(window.width(), window.height(), line.stringCopy(), 200, ypos, 1, glm::vec4(1, 1, 1, 1));
+                  gc.text(line.stringCopy(), 200, ypos, 1, glm::vec4(1, 1, 1, 1));
                 }
               else
                 {
-                  tr.renderText(window.width(), window.height(), line.stringCopy(), 200, ypos, 1, glm::vec4(0.7, 0.7, 0.7, 1));
+                  gc.text(line.stringCopy(), 200, ypos, 1, glm::vec4(0.7, 0.7, 0.7, 1));
                 }
             }
           ++ line_number;

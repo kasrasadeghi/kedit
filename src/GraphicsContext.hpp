@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DebugCallback.hpp"
 #include "RectangleProgramContext.hpp"
 
 struct GraphicsContext {
