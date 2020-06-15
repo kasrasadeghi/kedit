@@ -1,10 +1,15 @@
 #pragma once
 
-#include "Shaders.hpp"
+#include "RectangleProgramContext.hpp"
 
 struct GraphicsContext {
   /// General ===-----------------------------------------------------------------------------===///
   RenderWindow* window;
+  TextRenderer tr;
+  RectProgramContext rectprog;
+
+  inline void text(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec4 color = glm::vec4(1))
+    { tr.renderText(window->width(), window->height(), text, x, y, scale, color); };
 
   GraphicsContext(RenderWindow* w): window(w)
     { glViewport(0, 0, window->width(), window->height()); }
