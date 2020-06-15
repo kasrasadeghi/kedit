@@ -182,29 +182,13 @@ int main() {
 
   /// Render Loop ===------------------------------------------------------------------------===///
 
-  double fps_counter_time = glfwGetTime();
-  int framecounter = 0;
-  double moving_avg_framerate = 60.f;
-  double framerate = 60.f;
-  double delta_time = 0.f;
-
-  Profiler pr;
+  Profiler pr { 60.0 };
 
   while (window.isOpen()) {
 
-    if constexpr(PROFILING) { pr.startFrame(); }
-
     /// Update Frame Data ===----------------------------------------------------------------===///
 
-    framecounter ++;
-
-    constexpr int geometric_falloff_rate = 16; // try for power of 2
-    delta_time = (glfwGetTime() - fps_counter_time);
-    fps_counter_time = glfwGetTime();
-    framerate = 1 / delta_time;
-    moving_avg_framerate = ((moving_avg_framerate * (geometric_falloff_rate - 1)) + framerate) / geometric_falloff_rate;
-
-    if constexpr(PROFILING) { pr.event("update frame data"); }
+    pr.startFrame();
 
     /// Development Messages ===-------------------------------------------------------------===///
 
@@ -219,7 +203,7 @@ int main() {
 
     if constexpr(PROFILING) { pr.event("handle updates"); }
 
-    editor.tick(delta_time);
+    editor.tick(pr.delta_time);
 
     /// PreRender Compution ===----------------------------------------------------------------===///
 
@@ -272,8 +256,8 @@ int main() {
     /// FPS Counter ===------------------------------------------------------===///
 
     auto tilde_width = tr.textWidth("~");
-    tr.renderText("FPS: " + str(framerate), window.width() - 300 + tilde_width, 50, 1);
-    tr.renderText("~FPS: " + str(moving_avg_framerate), window.width() - 300, 80, 1);
+    tr.renderText("FPS: " + str(pr.framerate), window.width() - 300 + tilde_width, 50, 1);
+    tr.renderText("~FPS: " + str(pr.moving_avg_framerate), window.width() - 300, 80, 1);
 
     /// Render Messages ===--------------------------------------------------===///
 
@@ -300,17 +284,14 @@ int main() {
 
     list_text(status_messages, {window.width() - 500, window.height() - 500}, "status");
 
-    if constexpr(PROFILING) {
-      pr.event("render text");
-      pr.endFrame();
+    if constexpr(PROFILING) { pr.event("render text"); }
 
-      // 2 60th's of a second is a bad frame.  only keep bad frames
-      if (pr._frames.back().elapsedTime() < 2/60.0) {
-        pr.removeLastFrame();
-      }
+    pr.endFrame();
+
+    if constexpr(PROFILING) {
       std::vector<std::string> frame_messages;
-      if (not pr._frames.empty()) {
-        for (const Event& event : pr._frames.back()._events) {
+      if (not pr.fc._frames.empty()) {
+        for (const Event& event : pr.fc._frames.back()._events) {
           frame_messages.emplace_back(event.name + str(": ") + str(event.elapsed_time) + "s");
         }
       }
