@@ -1,3 +1,12 @@
+* nonterminating menus considered harmful                   jun 18 2020
+The lifetimes of daemon menus would be hard to keep track of, so I'm going to
+prefer using only terminating menus.  Every menu lives while it's on screen,
+transitions to a different menus using some actions, and terminates to a buffer
+using other actions.
+
+Some kinds of menus might need to be daemon, or might otherwise be preferred to
+be daemon by the user.  For now I'm not going to worry about those.
+
 * kinds of menus                                            jun 17 2020
 - daemon menus
 - terminating menus/transition menus
@@ -60,7 +69,7 @@ The solutions I can think of are listed below.
 5. *Background First*
    I could draw the text after all the backgrounds are drawn.
 
-6. *Discard* 
+6. *Discard*
    I could discard the pixels from the text's fragment shader.  This
    does not avoid the problem of the partially colored pixels that are
    drawn on the wrong background, but it is simple enough to do.

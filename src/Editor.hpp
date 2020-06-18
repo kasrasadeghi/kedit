@@ -56,7 +56,27 @@ struct Editor {
 
   inline void freeMenu(Menu* menu)
     {
-      println("diff ", menu - _menus.data());
+      // buffer* is in page, in menu
+      auto* buffptr = menu->page.buffer;
+      // TODO optimize. can just memcpy instead of erase-remove idiom
+      _buffers.erase(std::remove_if(_buffers.begin(), _buffers.end(), [&](const Buffer& buf) { return buffptr == &buf; }), _buffers.end());
+
+      // garbage collect from _pages
+      if (_pages.back() != (Page*)menu)
+        {
+          printerrln("LEAK: cannot garbage collect current menu from _pages");
+          return;
+        }
+
+      _pages.pop_back();
+
+      // garbage collect from _menus
+      size_t menu_index = menu - _menus.data();
+      if (menu_index != _menus.size() - 1)
+        {
+          printerrln("LEAK: cannot garbage collect current menu from _menus");
+        }
+      _menus.pop_back();
     }
 
   inline Page* currentPage(void)
