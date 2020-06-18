@@ -54,6 +54,11 @@ struct Editor {
       return &curr;
     }
 
+  inline void freeMenu(Menu* menu)
+    {
+      println("diff ", menu - _menus.data());
+    }
+
   inline Page* currentPage(void)
     { return _pages.back(); }
 
@@ -143,8 +148,7 @@ struct Editor {
         {"open",   [&](const Texp& cmd) -> void {
                      command_history.push_back("(open " + cmd.paren() + ")");
                      std::string c = unquote(cmd.value);
-                     // deconstruct the last menu in _menus.
-                     _menus.resize(_menus.size() - 1);
+                     freeMenu(&_menus.back()); // TODO should probably be freeMenu((Menu*)&_pages.back());
                      loadFile(c);
                    }}
       };

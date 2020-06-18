@@ -1,3 +1,19 @@
+* kinds of menus                                            jun 17 2020
+- daemon menus
+- terminating menus/transition menus
+
+
+* the myth of non-integral laptop scrolling                 jun 15 2020
+I always thought that laptops scrolled with a floating point amount of
+precision as you scrolled down, and that may be the case on Windows
+with Windows Precision Drivers, but that definitely isn't the case on
+Linux.
+
+GLFW only detects +/- 1 scroll_y.  Testing even on chrome, it seems to
+only detect integer-based up and down scrolls.  That definitely isn't
+the case on mobile.
+
+
 * layered buffers, text and rectangles                      jun 15 2020
 Drawing text is complicated.  Text is usually drawn with a textured
 rectangle and some of the pixels are partially colored, and others are
