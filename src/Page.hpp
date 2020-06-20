@@ -10,7 +10,7 @@
 // all Pages have a Type from PageT as their first element
 // - manual inheritance
 struct Page {
-  Type _type;
+  Type _type = Type::NoneT;
   Buffer* buffer;
 
   glm::vec2 position = {100, 100};
