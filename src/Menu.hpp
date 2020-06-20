@@ -17,6 +17,8 @@ struct Menu {
   ///=============/ Members /=========================================///
   Page page;
 
+  std::string name;
+
   Texp _layout;
   std::string _repr_alloc;  // layout.tabs() stored into a std::string
 

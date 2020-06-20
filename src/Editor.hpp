@@ -26,15 +26,105 @@ struct Editor {
 
   std::vector<std::string> command_history;
 
+  // Note: only use this function to allocate buffers put in Pages.
+  //
+  // Commentary:
+  //      _filebuffers and _menus refer to _buffers, so when _buffers resizes,
+  // they need to move pointers.  FileBuffers and Menus both refer to Buffers in
+  // their Pages, which are kept track of in _pages, so we can refer to both
+  // _filebuffers and _menus by using _pages.  Thus, when moving _buffers.data(),
+  // for each page in _pages, fix page->buffer by apply the delta from the old
+  // backing store to the new backing store.  delta = (new - old).
+  //      _pages has a similar problem that is also solved by pointer moving.
+  //
+  // CONSIDER: alternatives to pointer moving
+  // - Observable pointers
+  // - indexes into each list
+  // - use allocPage instead of allocBuffer
+  // - don't have allocBuffer at all
+  // - go completely SoA/data-oriented
   inline Buffer* allocBuffer(void)
     {
-      _buffers.push_back(Buffer{});
+      if (_buffers.size() == _buffers.capacity())
+        {
+          auto* before = _buffers.data();
+          _buffers.push_back(Buffer{});
+          auto* after = _buffers.data();
+          if (before != after)
+            {
+              println("LOG: _buffers resize with move");
+              for (auto* page : _pages)
+                {
+                  auto old_index = (page->buffer - before);
+                  page->buffer = after + old_index;
+                }
+            }
+          else
+            {
+              println("LOG: _buffers resize without move");
+            }
+        }
+      else
+        {
+          auto* before = _buffers.data();
+          _buffers.push_back(Buffer{});
+          auto* after = _buffers.data();
+          if (before != after)
+            {
+              println("SUSPICIOUS: _buffers move when not at capacity");
+            }
+        }
       return &_buffers.back();
     }
 
+  // Commentary:
+  //    Both allocFileBuffer and allocMenu require pointer moving when
+  // their respective backing buffer moves.  When moving _filebuffers,
+  // find which pages are FileBufferT's and fix them.
   inline FileBuffer* allocFileBuffer(void)
     {
-      _filebuffers.push_back(FileBuffer{});
+      if (_filebuffers.size() == _filebuffers.capacity())
+        {
+          std::vector<unsigned char> pages_filter;
+          for (auto* page : _pages)
+            {
+              pages_filter.push_back(page->_type == Type::FileBufferT);
+            }
+
+          auto* before = _filebuffers.data();
+          _filebuffers.push_back(FileBuffer{});
+          auto* after = _filebuffers.data();
+          if (before != after)
+            {
+              println("LOG: _filebuffers resize with move");
+
+              // zip(pages_filter, _pages)
+              for (size_t i = 0; i < pages_filter.size(); ++ i)
+                {
+                  if (pages_filter[i])
+                    {
+                      auto old_index = (((FileBuffer*)_pages[i]) - before);
+                      _pages[i] = (Page*)(after + old_index);
+                    }
+                }
+            }
+          else
+            {
+              println("LOG: _filebuffers resize without move");
+            }
+        }
+      else
+        {
+          // TODO remove SUSPICIOUS warning
+          auto* before = _filebuffers.data();
+          _filebuffers.push_back(FileBuffer{});
+          auto* after = _filebuffers.data();
+          if (before != after)
+            {
+              println("SUSPICIOUS: _filebuffers move when not at capacity");
+            }
+        }
+
       FileBuffer& curr = _filebuffers.back();
       curr.page._type = Type::FileBufferT;
       curr.page.buffer = allocBuffer();
@@ -45,7 +135,48 @@ struct Editor {
 
   inline Menu* allocMenu(void)
     {
-      _menus.push_back(Menu{});
+      if (_menus.size() == _menus.capacity())
+        {
+          std::vector<unsigned char> pages_filter;
+          for (auto* page : _pages)
+            {
+              pages_filter.push_back(page->_type == Type::MenuT);
+            }
+
+          auto* before = _menus.data();
+          _menus.push_back(Menu{});
+          auto* after = _menus.data();
+          if (before != after)
+            {
+              println("LOG: _menus resize with move");
+
+              // zip(pages_filter, _pages)
+              for (size_t i = 0; i < pages_filter.size(); ++ i)
+                {
+                  if (pages_filter[i])
+                    {
+                      auto old_index = (((Menu*)_pages[i]) - before);
+                      _pages[i] = (Page*)(after + old_index);
+                    }
+                }
+            }
+          else
+            {
+              println("LOG: _menus resize without move");
+            }
+        }
+      else
+        {
+          // TODO remove SUSPICIOUS warning
+          auto* before = _menus.data();
+          _menus.push_back(Menu{});
+          auto* after = _menus.data();
+          if (before != after)
+            {
+              println("SUSPICIOUS: _menus move when not at capacity");
+            }
+        }
+
       Menu& curr = _menus.back();
       curr.page._type = Type::MenuT;
       curr.page.buffer = allocBuffer();
@@ -56,6 +187,9 @@ struct Editor {
 
   inline void freeMenu(Menu* menu)
     {
+      // TODO need to fix pointers in here too
+      return;
+
       // buffer* is in page, in menu
       auto* buffptr = menu->page.buffer;
       // TODO optimize. can just memcpy instead of erase-remove idiom
@@ -67,7 +201,6 @@ struct Editor {
           printerrln("LEAK: cannot garbage collect current menu from _pages");
           return;
         }
-
       _pages.pop_back();
 
       // garbage collect from _menus
@@ -75,12 +208,28 @@ struct Editor {
       if (menu_index != _menus.size() - 1)
         {
           printerrln("LEAK: cannot garbage collect current menu from _menus");
+          return;
         }
       _menus.pop_back();
     }
 
+  inline void freeCurrentMenu(void)
+    { freeMenu(currentMenu()); }
+
   inline Page* currentPage(void)
     { return _pages.back(); }
+
+  inline Menu* currentMenu(void)
+    {
+      if (currentPage()->_type != Type::MenuT) printerrln("ERROR: accessing current menu while current page is not menu");
+      return (Menu*)currentPage();
+    }
+
+  inline FileBuffer* currentFileBuffer(void)
+    {
+      if (currentPage()->_type != Type::FileBufferT) printerrln("ERROR: accessing current filebuffer while current page is not filebuffer");
+      return (FileBuffer*)currentPage();
+    }
 
   inline void loadFile(StringView file_path)
     {
@@ -105,8 +254,32 @@ struct Editor {
         }
     }
 
+  // check if we're opening a menu from another menu
+  // - returns true if the current menu is the destination
+  inline bool menuToMenuTransitionCheck(const std::string& destination)
+    {
+      if (_pages.empty()) return false;
+
+      if (Type::MenuT == currentPage()->_type)
+        {
+          auto* menu = currentMenu();
+          if (menu->name == destination)
+            {
+              return true;
+            }
+          else
+            {
+              // we're on some other menu,
+              // dispose of it and continue making the menu
+              freeMenu(menu);
+            }
+        }
+      return false;
+    }
+
   inline void openBrowser(void)
     {
+      if (menuToMenuTransitionCheck("File Browser")) return;
       allocMenu();
       makeBrowser();
     }
@@ -115,6 +288,7 @@ struct Editor {
     {
       Menu& curr = _menus.back();
 
+      curr.name = "File Browser";
       Texp cwd = pwd();
 
       // TODO change the command for selecting a child path that is not a folder
@@ -168,7 +342,7 @@ struct Editor {
         {"open",   [&](const Texp& cmd) -> void {
                      command_history.push_back("(open " + cmd.paren() + ")");
                      std::string c = unquote(cmd.value);
-                     freeMenu(&_menus.back()); // TODO should probably be freeMenu((Menu*)&_pages.back());
+                     freeCurrentMenu();
                      loadFile(c);
                    }}
       };
@@ -184,12 +358,13 @@ struct Editor {
 
   inline void handleKey(int key, int scancode, int action, int mods)
     {
-      // TODO closing buffer, switching active buffer
-      if (action == GLFW_PRESS && key == GLFW_KEY_B)
+      if (GLFW_PRESS == action)
         {
-          if (_menus.empty())
+          if (GLFW_KEY_B == key)
             openBrowser();
         }
+
+      // TODO closing buffer, switching active buffer
 
       currentPage()->handleKey(key, scancode, action, mods);
     }
@@ -203,5 +378,19 @@ struct Editor {
           acc &= fb.invariant();
         }
       return acc;
+    }
+
+  inline void pageDump(void)
+    {
+      println("[");
+      for (size_t i = 0; i < _pages.size(); ++ i)
+        {
+          print("  ", i, " ");
+          auto* page = _pages[i];
+          print("  (type, ", page->_type, ")");
+          print("  (addr, 0x", std::hex, (uintptr_t)page, std::oct, ")");
+          println();
+        }
+      println("]");
     }
 };
