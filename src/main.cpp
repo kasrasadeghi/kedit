@@ -95,14 +95,16 @@ int main() {
     if constexpr(PROFILING) { pr.event("handle updates"); }
 
     editor.tick(pr.delta_time);
-    
+
     /// Render to Screen ===-----------------------------------------------------===///
     gc.renderOptions();
     gc.alignViewport();
     gc.clear(0.5, 0.5, 0.5, 1);
 
     status("menu count: " + str(editor._menus.size()));
+    status("filebuffer count: " + str(editor._filebuffers.size()));
     status("buffer count: " + str(editor._buffers.size()));
+    status("current page type: " + str(editor.currentPage()->_type));
 
     editor.render(gc);
 
