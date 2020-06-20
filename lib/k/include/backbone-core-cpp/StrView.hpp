@@ -11,8 +11,9 @@ struct StringView {
 
   StringView(char* cstr, uint64_t len) : _data(cstr), _length(len) {}
 
+  // Note: length = N - 1 to ignore the null terminator
   template <int N>
-  StringView(const char (&cstring)[N]) : _data((char*)(cstring)), _length(N) {}
+  StringView(const char (&cstring)[N]) : _data((char*)(cstring)), _length(N - 1) {}
 
   std::string stringCopy()
     { return std::string(_data, _length); }
