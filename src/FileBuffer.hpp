@@ -17,7 +17,11 @@ struct FileBuffer {
   StringView file_contents = "";
 
   inline bool invariant()
-    { return file_contents._length > 0 && file_contents._length > page.buffer->contents.length(); }
+    {
+      return page._type == Type::FileBufferT
+        && file_contents._length > 0
+        && file_contents._length > page.buffer->contents.length();
+    }
 
   inline void render(GraphicsContext& gc)
     {
