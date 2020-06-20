@@ -19,5 +19,8 @@ inline Texp pwd()
         child_value += (result.is_directory() ? "/" : "");
         workdir.push(Texp("\"" + child_value + "\""));
       }
+
+    std::sort(workdir._children.begin(), workdir._children.end(), [](const Texp& l, const Texp& r) { return l.value.compare(r.value) <= 0; });
+
     return workdir;
   }

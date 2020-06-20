@@ -1,3 +1,14 @@
+* std::sort arg vs string.compare                           jun 18 2020
+=std::sort= can take a comparison function as an argument.  This comparison
+argument must return something that's castable to =bool=.  =string::compare=
+returns an integer: -1 if less than, 0 if equal, 1 if greater than.  If this
+gets cast to a bool, the sort does not behave as expected.  To create the
+correct argument for std::sort, one must compare the two strings and then check
+if the result of that is less than (or equal to) zero.
+
+(a, b -> a.compare(b) <= 0)
+
+
 * nonterminating menus considered harmful                   jun 18 2020
 The lifetimes of daemon menus would be hard to keep track of, so I'm going to
 prefer using only terminating menus.  Every menu lives while it's on screen,
@@ -6,6 +17,7 @@ using other actions.
 
 Some kinds of menus might need to be daemon, or might otherwise be preferred to
 be daemon by the user.  For now I'm not going to worry about those.
+
 
 * kinds of menus                                            jun 17 2020
 - daemon menus
