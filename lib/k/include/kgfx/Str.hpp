@@ -9,47 +9,40 @@
 // thanks to https://github.com/pycpp/sfinae
 // thanks to @dot in (discord channel (c++ in #cpp)) on the (#include server)
 
-// decltype(decl_lvalue<T>) gives an l-value version of T
-// operators need an l-value on the left side
-template <typename T>
-std::add_lvalue_reference_t<T> decl_lvalue() noexcept;
-
-
-template <typename T, typename U>
-using has_left_shift_test = decltype(decl_lvalue<T>() << std::declval<U>());
-
-template<typename T, typename U>
-inline constexpr bool has_left_shift_v = std::experimental::is_detected_v<has_left_shift_test, T, U>;
-
 
 template <typename T>
-using has_glm_to_string_test = decltype(glm::to_string(std::declval<T>()));
-
-template<typename T>
-inline constexpr bool has_glm_to_string_v = std::experimental::is_detected_v<has_glm_to_string_test, T>;
-
+concept HasLeftShift = requires(T t)
+  {
+    { std::cout << t } -> std::same_as<std::ostream&>;
+  };
 
 template <typename T>
-using has_std_to_string_test = decltype(std::to_string(std::declval<T>()));
+concept HasGlmToString = requires(T t)
+  {
+    { glm::to_string(t) } -> std::same_as<std::string>;
+  };
 
-template<typename T>
-inline constexpr bool has_std_to_string_v = std::experimental::is_detected_v<has_std_to_string_test, T>;
+template <typename T>
+concept HasStdToString = requires(T t)
+  {
+    { std::to_string(t) } -> std::same_as<std::string>;
+  };
 
 
 template <typename T>
 inline std::string str(T o) {
-  if constexpr(has_std_to_string_v<T>) {
+  if constexpr(HasStdToString<T>) {
     return std::to_string(o);
-  } else
-  if constexpr(has_glm_to_string_v<T>) {
-    return glm::to_string(o);
-  } else
-  if constexpr(has_left_shift_v<std::ostream, T>) {
+  }
+  // else if constexpr(HasGlmToString<T>) {
+  //   return glm::to_string(o);
+  // }
+  else if constexpr(HasLeftShift<T>) {
     std::stringstream i;
     i << o;
     return i.str();
-  } else
-  {
+  }
+  else {
     // static_assert(false) doesn't compile??
     std::cout << "OH NO GOD PLEASE HELP" << std::endl;
     exit(1);
