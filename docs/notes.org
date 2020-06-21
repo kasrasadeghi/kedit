@@ -175,10 +175,25 @@ using other actions.
 Some kinds of menus might need to be daemon, or might otherwise be preferred to
 be daemon by the user.  For now I'm not going to worry about those.
 
+Post-note, (jun 21 2020):
+We should generally try to make software that has simple lifetimes when we can.
+It is not valuable to pre-optimize when it makes software needlessly more
+complicated.  We can optimize later, when we have a working solution that we can
+profile.  From thinking about menus, I've learned to value simpler lifetimes
+more.  Currently, the garbage collection logic for pages, buffers, and the
+different types of pages accounts for 244 lines of code (not considering
+comments), more than 20% of the code of the project (not considering library
+code).
+
 
 * kinds of menus                                                     jun 17 2020
 - daemon menus
 - terminating menus/transition menus
+
+Post-note, (jun 21 2020):
+To elaborate, daemon menus are menus that exist continually, that have no
+terminating buttons on them.  Terminating menus have buttons that either
+transition to other menus, close them, or open a file buffer.
 
 
 * the myth of non-integral laptop scrolling                          jun 15 2020
