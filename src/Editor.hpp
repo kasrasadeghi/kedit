@@ -255,7 +255,6 @@ struct Editor {
                    _menus.end());
       auto* menu_after = _menus.data();
 
-      // TODO pointer move pages
       if (menu_before != menu_after)
         {
           println("LOG: _menus shrink with move");
@@ -322,7 +321,6 @@ struct Editor {
                    _filebuffers.end());
       auto* filebuffer_after = _filebuffers.data();
 
-      // TODO pointer move pages
       if (filebuffer_before != filebuffer_after)
         {
           println("LOG: _filebuffers shrink with move");
