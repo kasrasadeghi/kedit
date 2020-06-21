@@ -43,6 +43,12 @@ struct Editor {
   // - use allocPage instead of allocBuffer
   // - don't have allocBuffer at all
   // - go completely SoA/data-oriented
+  //
+  // CONSIDER: strongly consider using vectors of pointers instead, as we don't
+  //           really want to move around big objects.  Naively, this, along with
+  //           removing _buffers and inlining the Buffer in Page (making it not a
+  //           pointer), should make memory management much much easier than
+  //           pointer-moving.
   inline Buffer* allocBuffer(void)
     {
       if (_buffers.size() == _buffers.capacity())
@@ -52,7 +58,7 @@ struct Editor {
           auto* after = _buffers.data();
           if (before != after)
             {
-              println("LOG: _buffers resize with move");
+              println("LOG: _buffers grow with move");
               for (auto* page : _pages)
                 {
                   auto old_index = (page->buffer - before);
@@ -61,7 +67,7 @@ struct Editor {
             }
           else
             {
-              println("LOG: _buffers resize without move");
+              println("LOG: _buffers grow without move");
             }
         }
       else
@@ -96,7 +102,7 @@ struct Editor {
           auto* after = _filebuffers.data();
           if (before != after)
             {
-              println("LOG: _filebuffers resize with move");
+              println("LOG: _filebuffers grow with move");
 
               // zip(pages_filter, _pages)
               for (size_t i = 0; i < pages_filter.size(); ++ i)
@@ -110,7 +116,7 @@ struct Editor {
             }
           else
             {
-              println("LOG: _filebuffers resize without move");
+              println("LOG: _filebuffers grow without move");
             }
         }
       else
@@ -148,7 +154,7 @@ struct Editor {
           auto* after = _menus.data();
           if (before != after)
             {
-              println("LOG: _menus resize with move");
+              println("LOG: _menus grow with move");
 
               // zip(pages_filter, _pages)
               for (size_t i = 0; i < pages_filter.size(); ++ i)
@@ -162,7 +168,7 @@ struct Editor {
             }
           else
             {
-              println("LOG: _menus resize without move");
+              println("LOG: _menus grow without move");
             }
         }
       else
