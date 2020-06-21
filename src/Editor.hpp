@@ -537,8 +537,7 @@ struct Editor {
             {
               // TODO file name might need to change if current directory is changed
               auto* filebuffer = (FileBuffer*)page;
-              auto filebuffer_index_str = str(filebuffer - _filebuffers.data());
-              auto cmd = Texp("swap", {filebuffer_index_str});
+              auto cmd = Texp("swap", {str(page_i)});
 
               std::string file_name = quote(filebuffer->file._name);
               curr._layout.push(Texp("button", {file_name, cmd}));
