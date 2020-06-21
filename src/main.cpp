@@ -101,10 +101,11 @@ int main() {
     gc.alignViewport();
     gc.clear(0.5, 0.5, 0.5, 1);
 
-    status("menu count: " + str(editor._menus.size()));
-    status("filebuffer count: " + str(editor._filebuffers.size()));
-    status("buffer count: " + str(editor._buffers.size()));
-    status("current page type: " + str(editor.currentPage()->_type));
+    status(str(editor.currentPage()->_type) + " :current page type ");
+    status(str(editor._pages.size())        + " :page count "       );
+    status(str(editor._buffers.size())      + " :buffer count "     );
+    status(str(editor._menus.size())        + " :menu count "       );
+    status(str(editor._filebuffers.size())  + " :filebuffer count " );
 
     editor.render(gc);
 
