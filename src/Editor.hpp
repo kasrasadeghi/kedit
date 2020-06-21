@@ -18,7 +18,6 @@
 struct Editor {
   std::vector<Buffer> _buffers;
 
-  // TODO merge Buffer and Menu somehow
   std::vector<FileBuffer> _filebuffers;
   std::vector<Menu>   _menus;
 
@@ -590,12 +589,11 @@ struct Editor {
           if (GLFW_KEY_S == key)
             openSwap();
 
+          // CONSIDER: opening swap menu after closing current file
           if (GLFW_KEY_W == key)
             if (_pages.size() > 1)
               freeCurrent();
         }
-
-      // TODO closing buffer, switching active buffer
 
       currentPage()->handleKey(key, scancode, action, mods);
     }
