@@ -1,4 +1,4 @@
-* next plans                                                         jun 21 2020
+* next plans                                                       - jun 21 2020
 Currently, we can browse the filesystem, open files, swap between open files,
 and close files.  In terms of tech, we have menus and filebuffers, garbage
 collection for swapping between.  Menus have a function table and buttons that
@@ -46,7 +46,7 @@ different kinds of files, like images, webpages, or pdfs.  Allowing a modular
 system for different kinds of pages would be very useful.
 
 
-* shrink with move?                                                  jun 21 2020
+* shrink with move?                                                - jun 21 2020
 When shrinking an allocation, =man 3 realloc= has the opportunity to move the
 allocation in order to reduce (internal?) fragmentation.  While handling
 pointer-move for shrinking allocations, I have seen that it often does not.  I
@@ -55,7 +55,7 @@ as not wanting to do extra work, not wanting to make pointers to a shrinking
 allocation become stale, or something more complicated.
 
 
-* hold-less chording                                                 jun 21 2020
+* hold-less chording                                               - jun 21 2020
 Emacs has "chords", sequences of keystrokes that perform an action.  These are
 a kind of keyboard shortcut.  The problem with how emacs defines certain
 keystrokes is that they depend on you holding things.
@@ -76,7 +76,7 @@ then "c", then "a".  This even makes sense with the context of normal text
 editing, as pressing "Control + c" requires Control to be pressed first anyways.
 
 
-* pointer-move                                                       jun 21 2020
+* pointer-move                                                     - jun 21 2020
 < background >
 A pointer is often used to refer to an allocation in memory.  A pointer becomes
 stale when the contents of that allocation are moved.  Usually, these contents
@@ -124,7 +124,7 @@ then adding the /Index/ to the new allocation's base with /New/ + /Index/.
 Combined to one step this is /NewAddr/ = /New/ + (/Addr/ - /Old/).
 
 
-* null terminator from c-array to std::string                        jun 21 2020
+* null terminator from c-array to std::string                      - jun 21 2020
 A string can be made from a =C=-style =char= array.  This string can be directly
 taken as an argument in C++ with the following peculiar template function:
 
@@ -155,7 +155,7 @@ string literals, be sure to take into consider the null character included in
 the length of the literal.
 
 
-* std::sort arg vs string.compare                                    jun 18 2020
+* std::sort arg vs string.compare                                  - jun 18 2020
 =std::sort= can take a comparison function as an argument.  This comparison
 argument must return something that's castable to =bool=.  =string::compare=
 returns an integer: -1 if less than, 0 if equal, 1 if greater than.  If this
@@ -166,7 +166,7 @@ if the result of that is less than (or equal to) zero.
 (a, b -> a.compare(b) <= 0)
 
 
-* nonterminating menus considered harmful                            jun 18 2020
+* nonterminating menus considered harmful                          - jun 18 2020
 The lifetimes of daemon menus would be hard to keep track of, so I'm going to
 prefer using only terminating menus.  Every menu lives while it's on screen,
 transitions to a different menus using some actions, and terminates to a buffer
@@ -186,7 +186,7 @@ comments), more than 20% of the code of the project (not considering library
 code).
 
 
-* kinds of menus                                                     jun 17 2020
+* kinds of menus                                                   - jun 17 2020
 - daemon menus
 - terminating menus/transition menus
 
@@ -196,7 +196,7 @@ terminating buttons on them.  Terminating menus have buttons that either
 transition to other menus, close them, or open a file buffer.
 
 
-* the myth of non-integral laptop scrolling                          jun 15 2020
+* the myth of non-integral laptop scrolling                        - jun 15 2020
 I always thought that laptops scrolled with a floating point amount of precision
 as you scrolled down, and that may be the case on Windows with Windows Precision
 Drivers, but that definitely isn't the case on Linux.
@@ -206,7 +206,7 @@ detect integer-based up and down scrolls.  That definitely isn't the case on
 mobile.
 
 
-* layered buffers, text and rectangles                               jun 15 2020
+* layered buffers, text and rectangles                             - jun 15 2020
 Drawing text is complicated.  Text is usually drawn with a textured rectangle
 and some of the pixels are partially colored, and others are completely opaque
 or transparent.
@@ -277,7 +277,7 @@ When I decide to return to this, I'll probably do a combination of 5 and 8.  The
 advanced solution would probably consider something like 7 and 1 through 4.
 
 
-* c++ suspicion                                                      jun 12 2020
+* c++ suspicion                                                    - jun 12 2020
 => c++
 I'm going to refrain from using a large part of the c++ language because I plan
 on rewriting this in backbone.
@@ -308,7 +308,7 @@ Abstraction often comes from us facing code that is "too" low-level.  This
 project serves as an experiment for using C++ without these tools.
 
 
-* chdir can't be in shell                                            jun 11 2020
+* chdir can't be in shell                                          - jun 11 2020
 => menu
 - git commit: db660aa247d67a02a7f80170238763a621854fec
 
