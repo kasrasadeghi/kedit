@@ -1,4 +1,161 @@
-* std::sort arg vs string.compare                           jun 18 2020
+* next plans                                                         jun 21 2020
+Currently, we can browse the filesystem, open files, swap between open files,
+and close files.  In terms of tech, we have menus and filebuffers, garbage
+collection for swapping between.  Menus have a function table and buttons that
+can access the function table, along with read-only text.
+
+I'd like to add *keyboard-shortcuts* to menus.  We could do this by placing
+certain functionality in the function table and binding it to certain key
+combinations.  The would later be extended to hold-less chording (see above).
+
+Obviously, as a text editor, it'd be nice for Kedit to be able to *edit text*,
+which requires some subtasks.  We have to be restructure how we open files in
+order to support reloading files, we have to see if someone opens a file twice
+and decide between some options, e.g. whether that should:
+- give them a new buffer and a new page
+- give them a copy of the same buffer but a different page
+- swap them to the current page that has that file open
+     At the very least, we have to add paths to the containing directories of
+files to each FileBuffer.  We should also probably change the vestigial name of
+the "FileBuffer".  We might also want to add a dialogue box for when you save a
+file that has changed from when you opened it so that you do not write over
+other changes.  *Dialogue boxes* have a different flow to them than normal menus,
+so we'll have to figure out how they'd work.  We also might want to add *text
+areas* to menus so that we can do things like "Save as...".
+
+Generally, I'd also like to *improve the file browser*.  It's annoying to
+navigate right now because you have to press up and down repetitively.  There is
+the classic option of adding *key repeats*, which might be useful generally, but
+there is also the option that allows you to search through the current Menu's
+button labels.  Both are large tasks.
+
+There is also the task of *opening multiple pages*, which is an important goal
+for the editor itself.  This would optionally require moving the pages around
+with the mouse, resizing the pages, tiling the pages, cutting the text from the
+pages off once they go out of the bounds of the page.
+
+In terms of the editor itself, I'd like to be able to *toggle fullscreen mode*.
+We also need to revisit the text rendering solution for layering the text better.
+
+Future work contains Cornerstone integration and highlighting, along with
+running through stages of the compiler and adding debugging features.  It would
+also be cool to add a memory-management debugger for Backbone in it.  It could
+track stale pointers by analyzing the heap and the stack.  We could also have
+gdb integration and console integration.  We could also allow for opening
+different kinds of files, like images, webpages, or pdfs.  Allowing a modular
+system for different kinds of pages would be very useful.
+
+
+* shrink with move?                                                  jun 21 2020
+When shrinking an allocation, =man 3 realloc= has the opportunity to move the
+allocation in order to reduce (internal?) fragmentation.  While handling
+pointer-move for shrinking allocations, I have seen that it often does not.  I
+need to investigate why it does not move the allocations.  It could be as simple
+as not wanting to do extra work, not wanting to make pointers to a shrinking
+allocation become stale, or something more complicated.
+
+
+* hold-less chording                                                 jun 21 2020
+Emacs has "chords", sequences of keystrokes that perform an action.  These are
+a kind of keyboard shortcut.  The problem with how emacs defines certain
+keystrokes is that they depend on you holding things.
+
+In emacs, "C-c C-a" is read as "Ctrl + c" and then "Ctrl + a".  Emacs interprets
+"C-c a" to be different from "C-c C-a".  So if you press "C-c" and then you let
+go of Control to press "a", it's different from if you didn't let go of Control.
+
+This is really problematic.  It's easy for me to fumble these keystrokes and
+it's painful to hold Control for so long.  I don't even like holding Control for
+the initial "C-c".  What if, instead, Control entered you into a kind of
+"command mode", like vim?  Then you could press different buttons that act like
+mnemonics for actions, and then finally exit using a terminating command.
+
+To borrow a little more from vim, lets use "^" to mean control, as "C" might
+mean capital C, as with normal text editing.  Then "^ c a" would mean "Control",
+then "c", then "a".  This even makes sense with the context of normal text
+editing, as pressing "Control + c" requires Control to be pressed first anyways.
+
+
+* pointer-move                                                       jun 21 2020
+< background >
+A pointer is often used to refer to an allocation in memory.  A pointer becomes
+stale when the contents of that allocation are moved.  Usually, these contents
+are moved to a different allocation when the allocation is resized.  We refer to
+these pointers as "stale pointers".
+
+=std::vector= in the C++ standard library is an implementation of a resizable
+array.  When one adds elements to the vector (e.g. using =push_back= or
+=insert=) or when one removes elements from the vector (e.g. using =erase=), the
+vector may resize.  =std::vector= grows by doubling the size of its allocation,
+and any spots in the vector that do not have a corresponding object are left
+uninitialized.
+
+When creating pointers to the elements of a =std::vector=, where that vector may
+grow, one has to be cautious of creating stale pointers.  To fix stale pointers
+from a vector whose backing store (i.e. the backing allocation that contains the
+objects) has moved, one can use the offset of the previous location of the
+backing store to the new location.
+
+If the backing store of the vector used to be at address /Old/, and then the
+allocation was resized and the backing store moved to be at address /New/, all
+of the objects within move along the same delta (confusingly also often called a
+vector).  This delta is /New/ - /Old/.  Applying the delta to every pointer that
+refers to elements of the moved vector fixes them.
+
+#+BEGIN_SRC
+  let vec be a vector of type T
+  A = vec[X]                                         if A is the X'th element of vec
+  &A = vec.alloc + (X * sizeof(T))                   the address of A is equal to the sum of
+                                                        (the address of the base of the vector's allocation)
+                                                        (X times the size of an element of the vector)
+  new &A = new vec.alloc + (X + sizeof(T))           the new address of A is the same, but using the new allocation's base
+  (new &A) - (&A) = (new vec.alloc) - (vec.alloc)    the X * sizeof(T) part crosses itself out
+  let delta = (new &A) - (&A)
+
+  Bp = &B                                            let Bp be a pointer to the object B in the same vector before the allocation moves
+  new Bp = Bp + delta
+         = Bp + (new vec.alloc) - (vec.alloc)
+#+END_SRC
+
+Note: the delta should be applied as if /New/ and /Old/ are pointers to /bytes/
+so that we avoid alignment issues.  The alternative is to find the index of the
+object at address /Addr/ within the allocation with /Index/ = /Addr/ - /Old/,
+then adding the /Index/ to the new allocation's base with /New/ + /Index/.
+Combined to one step this is /NewAddr/ = /New/ + (/Addr/ - /Old/).
+
+
+* null terminator from c-array to std::string                        jun 21 2020
+A string can be made from a =C=-style =char= array.  This string can be directly
+taken as an argument in C++ with the following peculiar template function:
+
+#+BEGIN_SRC c++
+  template <int N>
+  return_type example_function(const char (&c_string)[N])
+    { ... }
+#+END_SRC
+
+The N is the length of the array pointed to by the argument named /c_string/.
+This N contains the null terminator.  If you were to manually make a
+=std::string= from this argument, you would naively use the constructor that
+takes in a character pointer and a number of characters to copy over.  If you
+did that, the =std::string= would now contain the null character.  Appending a
+=std::string= at the end of the one that contains the null character would leave
+a null character in the middle of the new string.
+
+What's odd, is =std::string= has a way of containing a null character for when
+one may call the =c_str= method.  This returns a null terminated string.  So it
+is surprising that making a =std::string= contain the null terminator by
+manually using the above template function causes future appends to contain a
+null character.
+
+The solution is to place a minus one ("- 1") somewhere on the length to not
+include the null character.  If creating a custom string data type that is to be
+compatible with =std::string= or C-style null-terminated strings and C-style
+string literals, be sure to take into consider the null character included in
+the length of the literal.
+
+
+* std::sort arg vs string.compare                                    jun 18 2020
 =std::sort= can take a comparison function as an argument.  This comparison
 argument must return something that's castable to =bool=.  =string::compare=
 returns an integer: -1 if less than, 0 if equal, 1 if greater than.  If this
@@ -9,7 +166,7 @@ if the result of that is less than (or equal to) zero.
 (a, b -> a.compare(b) <= 0)
 
 
-* nonterminating menus considered harmful                   jun 18 2020
+* nonterminating menus considered harmful                            jun 18 2020
 The lifetimes of daemon menus would be hard to keep track of, so I'm going to
 prefer using only terminating menus.  Every menu lives while it's on screen,
 transitions to a different menus using some actions, and terminates to a buffer
@@ -19,37 +176,36 @@ Some kinds of menus might need to be daemon, or might otherwise be preferred to
 be daemon by the user.  For now I'm not going to worry about those.
 
 
-* kinds of menus                                            jun 17 2020
+* kinds of menus                                                     jun 17 2020
 - daemon menus
 - terminating menus/transition menus
 
 
-* the myth of non-integral laptop scrolling                 jun 15 2020
-I always thought that laptops scrolled with a floating point amount of
-precision as you scrolled down, and that may be the case on Windows
-with Windows Precision Drivers, but that definitely isn't the case on
-Linux.
+* the myth of non-integral laptop scrolling                          jun 15 2020
+I always thought that laptops scrolled with a floating point amount of precision
+as you scrolled down, and that may be the case on Windows with Windows Precision
+Drivers, but that definitely isn't the case on Linux.
 
-GLFW only detects +/- 1 scroll_y.  Testing even on chrome, it seems to
-only detect integer-based up and down scrolls.  That definitely isn't
-the case on mobile.
+GLFW only detects +/- 1 scroll_y.  Testing even on chrome, it seems to only
+detect integer-based up and down scrolls.  That definitely isn't the case on
+mobile.
 
 
-* layered buffers, text and rectangles                      jun 15 2020
-Drawing text is complicated.  Text is usually drawn with a textured
-rectangle and some of the pixels are partially colored, and others are
-completely opaque or transparent.
+* layered buffers, text and rectangles                               jun 15 2020
+Drawing text is complicated.  Text is usually drawn with a textured rectangle
+and some of the pixels are partially colored, and others are completely opaque
+or transparent.
 
-To draw a rectangle after the text but have the rectangle appear under
-the text, there must be a depth buffer that allows for a depth test to
-occur.  With that, OpenGL can use the Z variable to check the
-depth.  The real problem lies with the partially colored fragments.
+To draw a rectangle after the text but have the rectangle appear under the text,
+there must be a depth buffer that allows for a depth test to occur.  With that,
+OpenGL can use the Z variable to check the depth.  The real problem lies with
+the partially colored fragments.
 
-If the text is white and it is being drawn on a red background, the
-partially colored pixels are pink.  If then a black background is
-drawn below the white text, it will still have a pink periphery
-instead of having a grey periphery.  There are many solutions to this
-problem.  There are also many tradeoffs to consider.
+If the text is white and it is being drawn on a red background, the partially
+colored pixels are pink.  If then a black background is drawn below the white
+text, it will still have a pink periphery instead of having a grey periphery.
+There are many solutions to this problem.  There are also many tradeoffs to
+consider.
 
 The tradeoffs include:
 - minimizing the number of draw calls during a frame
@@ -60,62 +216,59 @@ The tradeoffs include:
 The solutions I can think of are listed below.
 
 1. *Blank Texture*
-   We could draw the text to a texture with a transparent background.
-   We could then use the texture to redraw the text that has been
-   black-backgrounded.
+   We could draw the text to a texture with a transparent background.  We could
+   then use the texture to redraw the text that has been black-backgrounded.
 
 2. *Negative Space*
-   We could clear the screen with the correct background color and
-   only actually draw the negative space.
+   We could clear the screen with the correct background color and only actually
+   draw the negative space.
 
 3. *Background Color Texture*
-   We could draw the text to a texture with the correct background
-   color and use that to render the text.  This requires knowing the
-   background color of the text before drawing the background.  This
-   would allow batching the backgrounds.
+   We could draw the text to a texture with the correct background color and use
+   that to render the text.  This requires knowing the background color of the
+   text before drawing the background.  This would allow batching the
+   backgrounds.
 
 4. *Multiple Draw Calls*
-   I could just draw all of the rectangles and texts in the correct
-   order, and redraw all of them when it is reordered.
+   I could just draw all of the rectangles and texts in the correct order, and
+   redraw all of them when it is reordered.
 
 5. *Background First*
    I could draw the text after all the backgrounds are drawn.
 
 6. *Discard*
-   I could discard the pixels from the text's fragment shader.  This
-   does not avoid the problem of the partially colored pixels that are
-   drawn on the wrong background, but it is simple enough to do.
+   I could discard the pixels from the text's fragment shader.  This does not
+   avoid the problem of the partially colored pixels that are drawn on the wrong
+   background, but it is simple enough to do.
 
 7. *Dirty Draw*
-   Only redraw when necessary.  For scrolling, draw to image.  The
-   rest of these solutions are built around the assumption of
-   redrawing every frame, this one is not.
+   Only redraw when necessary.  For scrolling, draw to image.  The rest of these
+   solutions are built around the assumption of redrawing every frame, this one
+   is not.
 
 8. *Background Color Argument*
-   We could modify the text renderer's shader to also take in a
-   background color.  We can use that to linearly interpolate with
-   instead of using a "blank" color.  This might also simplify
-   highlighting, so as long as the highlight does not go partially
-   through a character of the text.  If a character only has its left
-   half highlighted, then we'll need a highlight texture and that's
-   basically the same as 3's *Background Color Texture*.
+   We could modify the text renderer's shader to also take in a background
+   color.  We can use that to linearly interpolate with instead of using a
+   "blank" color.  This might also simplify highlighting, so as long as the
+   highlight does not go partially through a character of the text.  If a
+   character only has its left half highlighted, then we'll need a highlight
+   texture and that's basically the same as 3's *Background Color Texture*.
 
-For now I've chosen option 6, because it requires the smallest change
-from the current code.  I'll revisit this in the future.  I suspect
-the final solution will take bits and pieces from many of these
-sections.
+For now I've chosen option 6, because it requires the smallest change from the
+current code.  I'll revisit this in the future.  I suspect the final solution
+will take bits and pieces from many of these sections.
 
-When I decide to return to this, I'll probably do a combination of 5
-and 8.  The advanced solution would probably consider something like 7
-and 1 through 4.
+When I decide to return to this, I'll probably do a combination of 5 and 8.  The
+advanced solution would probably consider something like 7 and 1 through 4.
 
 
-* c++ suspicion                                             jun 12 2020
+* c++ suspicion                                                      jun 12 2020
 => c++
 I'm going to refrain from using a large part of the c++ language because I plan
 on rewriting this in backbone.
 
-Here are some parts I think are suspicious, and thus are not going to be in backbone:
+Here are some parts I think are suspicious, and thus are not going to be in
+backbone:
 - constructors, destructors
   - tying together allocation and initialization is bad
   - it makes it so that you have weird problems with references and move
@@ -127,14 +280,20 @@ Here are some parts I think are suspicious, and thus are not going to be in back
   - inheritance bad
   - virtual bad
 
-By avoiding these two things, we don't have to deal with the "rule of 3" (or
-5).  We do have to think a little harder about memory management, but I believe
-that being careful initially will save us the headache of looking at c++
-template pointer error output in the future (delete an element in a vector of a
-inherited type).
+By avoiding these two things, we don't have to deal with the "rule of 3" (or 5).
+We do have to think a little harder about memory management, but I believe that
+being careful initially will save us the headache of looking at c++ template
+pointer error output in the future (delete an element in a vector of a inherited
+type).
+
+Post-note, (jun 21 2020):
+It's not necessarily true that these things are always bad in every case, but
+that I want to see what it is like to design software without these things.
+Abstraction often comes from us facing code that is "too" low-level.  This
+project serves as an experiment for using C++ without these tools.
 
 
-* chdir can't be in shell                                   jun 11 2020
+* chdir can't be in shell                                            jun 11 2020
 => menu
 - git commit: db660aa247d67a02a7f80170238763a621854fec
 
@@ -147,11 +306,11 @@ be an atomic Texp because each button is expected to sit on a single line.
 The second child is a /command/.  The value of the command tells the menu which
 function from the function table to use.  It indexes the function table to get
 the function, called the /handler/, and then it calls that function.  It calls
-the function with its first and only child as the argument.  Thus the function should be of the
-type =Texp -> void= in the host language.
+the function with its first and only child as the argument.  Thus the function
+should be of the type =Texp -> void= in the host language.
 
 The =shell= command type calls =man 3 system()= with the argument, expected to
 be a atomic string.  =system= calls =fork=, thus the shell command does not
-execute in the current process, but in the child process.  What we want is
-for it to call =man 2 chdir= in the current process, so we'll just create an
-=man 1 cd= specific handler that simply calls =chdir=.
+execute in the current process, but in the child process.  What we want is for
+it to call =man 2 chdir= in the current process, so we'll just create an =man 1
+cd= specific handler that simply calls =chdir=.
