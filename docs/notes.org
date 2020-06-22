@@ -1,3 +1,23 @@
+* data-oriented programming                                        - jun 22 2020
+Data-oriented programming is a paradigm where you think about the structure of
+your data and you build your application around the data inside of it.  I don't
+know too much past that about how it works in generality, but I know that
+usually applications that claim to be data-oriented manage their data using
+internal database-like memory allocators and using structure-of-array (SoA)
+instead of array-of-structure (AoS) in order to improve cache performance and
+vectorization for hot loops.  For the rest of this, I'll just focus on SoA
+programming.  Note: Entity-Component-Systems (ECS) programming is related to
+SoA, and a lot of games are designed with an ECS implementation.
+
+While there is a part of me that wants to SoA everything, as it's a pretty
+interesting programming model, I think some things just aren't SoA friendly.  I
+think that one should start gradually adding SoAs where they see hot loops, and
+otherwise they make things a bit complicated.  SoA is not well supported in
+current programming languages, so you have to do things manually.
+
+CONSIDER: investigating SoAs for pointer-move and automatic SoA analysis.
+
+
 * next plans                                                       - jun 21 2020
 Currently, we can browse the filesystem, open files, swap between open files,
 and close files.  In terms of tech, we have menus and filebuffers, garbage
