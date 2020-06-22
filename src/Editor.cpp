@@ -50,6 +50,13 @@ static bool pointer_move_after_grow(std::vector<T>& vec, std::vector<R>& referer
     return has_moved;
   }
 
+template <typename T>
+static void erase_if(std::vector<T>& V, std::function<bool(const T&)> predicate)
+  {
+    V.erase(std::remove_if(V.begin(), V.end(), predicate),
+            V.end());
+  }
+
 template <typename T, typename R>
 static bool pointer_move(std::vector<T>& vec, std::vector<R>& referer,
                          std::function<void(void)> operation,
@@ -156,9 +163,7 @@ Menu* Editor::allocMenu(void)
 void Editor::freeMenu(Menu* menu)
   {
     // garbage collect from _pages
-    _pages.erase(std::remove_if(_pages.begin(), _pages.end(),
-                                [&](Page* curr_page) { return curr_page == (Page*)menu; }),
-                 _pages.end());
+    erase_if(_pages, [&](Page* curr_page) { return curr_page == (Page*)menu; });
     // NOTE: nobody refers to pages, so there's no pointer-moving to do
 
     // buffer* is in page, in menu
