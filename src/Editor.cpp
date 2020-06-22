@@ -1,7 +1,6 @@
 #include "Editor.hpp"
 
 
-//
 // returns whether pointer-move occured
 template <typename T, typename R>
 static bool pointer_move_after_grow(std::vector<T>& vec, std::vector<R>& referer,
@@ -50,6 +49,9 @@ static bool pointer_move_after_grow(std::vector<T>& vec, std::vector<R>& referer
     return has_moved;
   }
 
+
+// the erase-remove idiom
+// - link: https://en.wikipedia.org/wiki/Erase%E2%80%93remove_idiom
 template <typename T>
 static void erase_if(std::vector<T>& V, std::function<bool(const T&)> predicate)
   {
@@ -57,13 +59,42 @@ static void erase_if(std::vector<T>& V, std::function<bool(const T&)> predicate)
             V.end());
   }
 
+
+// NOTE: needle should be a pointer to an element of haystack
 template <typename T, typename R>
-static bool pointer_move(std::vector<T>& vec, std::vector<R>& referer,
-                         std::function<void(void)> operation,
-                         std::function<T*&(R&)> access)
+static bool pointer_move_after_erase(T* needle, std::vector<T>& haystack,
+                                     std::vector<R>& referer,
+                                     std::function<T*&(R&)> access,
+                                     const std::string& name)
   {
-    println("UNSUPPORTED: general pointer move");
-    return false;
+    bool has_moved = false;
+
+    auto* before = haystack.data();
+
+    erase_if(haystack,
+             [&](const T& item) { return &item == needle; });
+
+    auto* after = haystack.data();
+
+    if (before != after)
+      {
+        println("LOG: ", name, " shrink with move");
+        for (R& obj_ref : referer)
+          {
+            T*& old_addr = access(obj_ref);
+            if (before < old_addr && old_addr < before + haystack.size())
+              {
+                auto old_index = (old_addr - before);
+                old_addr = after + old_index;
+                has_moved = true;
+              }
+          }
+      }
+    else
+      {
+        println("LOG: ", name, " shrink without move");
+      }
+    return has_moved;
   }
 
 // Note: only use this function to allocate buffers put in Pages accounted for
@@ -168,126 +199,57 @@ void Editor::freeMenu(Menu* menu)
 
     // buffer* is in page, in menu
     auto* buffptr = menu->page.buffer;
-    auto* buffer_before = _buffers.data();
-    // TODO optimize. can just memcpy instead of erase-remove idiom
-    _buffers.erase(std::remove_if(_buffers.begin(), _buffers.end(),
-                                  [&](const Buffer& buf) { return &buf == buffptr; }),
-                   _buffers.end());
-    auto* buffer_after = _buffers.data();
 
-    // pointer-move _pages to handle _buffer move
-    if (buffer_before != buffer_after)
-      {
-        println("LOG: _buffers shrink with move");
-        for (auto* page : _pages)
-          {
-            auto old_index = (page->buffer - buffer_before);
-            page->buffer = buffer_after + old_index;
-          }
-      }
-    else
-      {
-        println("LOG: _buffers shrink without move");
-      }
+    std::function<Buffer*&(Page*&)> page_to_buffer_ref =
+      [](Page*& page_ptr) -> Buffer*& { return page_ptr->buffer; };
+
+    pointer_move_after_erase(
+      buffptr, _buffers,
+      _pages, page_to_buffer_ref,
+      "_buffers"
+    );
 
     // garbage collect from _menus
     // - pointer-move _pages if _menus moves
-    std::vector<unsigned char> pages_filter;
-    for (auto* page : _pages)
-      {
-        pages_filter.push_back(page->_type == Type::MenuT);
-      }
+    std::function<Menu*&(Page*&)> page_to_menu_ref =
+      [](Page*& page_ptr) -> Menu*& { return (Menu*&)page_ptr; };
 
-    auto* menu_before = _menus.data();
-    _menus.erase(std::remove_if(_menus.begin(), _menus.end(),
-                                [&](const Menu& curr_menu) { return &curr_menu == menu; }),
-                 _menus.end());
-    auto* menu_after = _menus.data();
-
-    if (menu_before != menu_after)
-      {
-        println("LOG: _menus shrink with move");
-
-        // zip(pages_filter, _pages)
-        for (size_t i = 0; i < pages_filter.size(); ++ i)
-          {
-            if (pages_filter[i])
-              {
-                auto old_index = (((Menu*)_pages[i]) - menu_before);
-                _pages[i] = (Page*)(menu_after + old_index);
-              }
-          }
-      }
-    else
-      {
-        println("LOG: _menus grow without move");
-      }
+    pointer_move_after_erase(
+      menu, _menus,
+      _pages, page_to_menu_ref,
+      "_buffers"
+    );
   }
 
 void Editor::freeFileBuffer(FileBuffer* filebuffer)
   {
     // garbage collect from _pages
-    _pages.erase(std::remove_if(_pages.begin(), _pages.end(),
-                                [&](Page* curr_page) { return curr_page == (Page*)filebuffer; }),
-                 _pages.end());
+    erase_if(_pages, [&](Page* curr_page) { return curr_page == (Page*)filebuffer; });
     // NOTE: nobody refers to pages, so there's no pointer-moving to do
 
     // buffer* is in page, in filebuffer
     auto* buffptr = filebuffer->page.buffer;
-    auto* buffer_before = _buffers.data();
-    // TODO optimize. can just memcpy instead of erase-remove idiom
-    _buffers.erase(std::remove_if(_buffers.begin(), _buffers.end(),
-                                  [&](const Buffer& buf) { return &buf == buffptr; }),
-                   _buffers.end());
-    auto* buffer_after = _buffers.data();
 
-    // pointer-move _pages to handle _buffer move
-    if (buffer_before != buffer_after)
-      {
-        println("LOG: _buffers shrink with move");
-        for (auto* page : _pages)
-          {
-            auto old_index = (page->buffer - buffer_before);
-            page->buffer = buffer_after + old_index;
-          }
-      }
-    else
-      {
-        println("LOG: _buffers shrink without move");
-      }
+    std::function<Buffer*&(Page*&)> page_to_buffer_ref =
+      [](Page*& page_ptr) -> Buffer*& { return page_ptr->buffer; };
+
+    pointer_move_after_erase(
+      buffptr, _buffers,
+      _pages, page_to_buffer_ref,
+      "_buffers"
+    );
+
 
     // garbage collect from _filebuffers
     // - pointer-move _pages if _filebuffers moves
-    std::vector<unsigned char> pages_filter;
-    for (auto* page : _pages)
-      {
-        pages_filter.push_back(page->_type == Type::FileBufferT);
-      }
+    std::function<FileBuffer*&(Page*&)> page_to_filebuffer_ref =
+      [](Page*& page_ptr) -> FileBuffer*& { return (FileBuffer*&)page_ptr; };
 
-    auto* filebuffer_before = _filebuffers.data();
-    _filebuffers.erase(std::remove_if(_filebuffers.begin(), _filebuffers.end(),
-                                      [&](const FileBuffer& curr_filebuffer) { return &curr_filebuffer == filebuffer; }),
-                 _filebuffers.end());
-    auto* filebuffer_after = _filebuffers.data();
-
-    if (filebuffer_before != filebuffer_after)
-      {
-        println("LOG: _filebuffers shrink with move");
-
-        // zip(pages_filter, _pages)
-        for (size_t i = 0; i < pages_filter.size(); ++ i)
-          {
-            if (pages_filter[i])
-              {
-                auto old_index = (((FileBuffer*)_pages[i]) - filebuffer_before);
-                _pages[i] = (Page*)(filebuffer_after + old_index);
-              }
-          }
-      }
-    else
-      {
-        println("LOG: _filebuffers grow without move");
-      }
+    pointer_move_after_erase(
+      filebuffer, _filebuffers,
+      _pages, page_to_filebuffer_ref,
+      "_buffers"
+    );
   }
 
 // TODO could have optimization for current menu, _pages.pop_back instead of erase-remove
