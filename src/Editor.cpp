@@ -100,47 +100,13 @@ Buffer* Editor::allocBuffer(void)
 // find which pages are FileBufferT's and fix them.
 FileBuffer* Editor::allocFileBuffer(void)
   {
-    if (_filebuffers.size() == _filebuffers.capacity())
-      {
-        std::vector<unsigned char> pages_filter;
-        for (auto* page : _pages)
-          {
-            pages_filter.push_back(page->_type == Type::FileBufferT);
-          }
+    std::function<FileBuffer*&(Page*&)> access =
+      [](Page*& page_ptr) -> FileBuffer*& { return (FileBuffer*&)page_ptr; };
 
-        auto* before = _filebuffers.data();
-        _filebuffers.push_back(FileBuffer{});
-        auto* after = _filebuffers.data();
-        if (before != after)
-          {
-            println("LOG: _filebuffers grow with move");
-
-            // zip(pages_filter, _pages)
-            for (size_t i = 0; i < pages_filter.size(); ++ i)
-              {
-                if (pages_filter[i])
-                  {
-                    auto old_index = (((FileBuffer*)_pages[i]) - before);
-                    _pages[i] = (Page*)(after + old_index);
-                  }
-              }
-          }
-        else
-          {
-            println("LOG: _filebuffers grow without move");
-          }
-      }
-    else
-      {
-        // TODO remove SUSPICIOUS warning
-        auto* before = _filebuffers.data();
-        _filebuffers.push_back(FileBuffer{});
-        auto* after = _filebuffers.data();
-        if (before != after)
-          {
-            println("SUSPICIOUS: _filebuffers move when not at capacity");
-          }
-      }
+    pointer_move_after_grow(
+      _filebuffers, _pages,
+      access, "_filebuffers"
+    );
 
     FileBuffer& curr = _filebuffers.back();
     curr.page._type = Type::FileBufferT;
@@ -152,47 +118,14 @@ FileBuffer* Editor::allocFileBuffer(void)
 
 Menu* Editor::allocMenu(void)
   {
-    if (_menus.size() == _menus.capacity())
-      {
-        std::vector<unsigned char> pages_filter;
-        for (auto* page : _pages)
-          {
-            pages_filter.push_back(page->_type == Type::MenuT);
-          }
+    std::function<Menu*&(Page*&)> access =
+      [](Page*& page_ptr) -> Menu*& { return (Menu*&)page_ptr; };
 
-        auto* before = _menus.data();
-        _menus.push_back(Menu{});
-        auto* after = _menus.data();
-        if (before != after)
-          {
-            println("LOG: _menus grow with move");
+    pointer_move_after_grow(
+      _menus, _pages,
+      access, "_menus"
+    );
 
-            // zip(pages_filter, _pages)
-            for (size_t i = 0; i < pages_filter.size(); ++ i)
-              {
-                if (pages_filter[i])
-                  {
-                    auto old_index = (((Menu*)_pages[i]) - before);
-                    _pages[i] = (Page*)(after + old_index);
-                  }
-              }
-          }
-        else
-          {
-            println("LOG: _menus grow without move");
-          }
-      }
-    else
-      {
-        // TODO remove SUSPICIOUS warning
-        auto* before = _menus.data();
-        _menus.push_back(Menu{});
-        auto* after = _menus.data();
-        if (before != after)
-          {
-            println("SUSPICIOUS: _menus move when not at capacity");
-          }
-      }
 
     Menu& curr = _menus.back();
     curr.page._type = Type::MenuT;
