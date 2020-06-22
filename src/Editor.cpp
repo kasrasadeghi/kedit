@@ -18,13 +18,16 @@ static bool pointer_move_after_grow(std::vector<T>& vec, std::vector<R>& referer
 
         if (before != after)
           {
-            has_moved = true;
             println("LOG: ", name, " grow with move");
             for (R& obj_ref : referer)
               {
                 T*& old_addr = access(obj_ref);
-                auto old_index = (old_addr - before);
-                old_addr = after + old_index;
+                if (before < old_addr && old_addr < before + vec.size())
+                  {
+                    auto old_index = (old_addr - before);
+                    old_addr = after + old_index;
+                    has_moved = true;
+                  }
               }
           }
         else
