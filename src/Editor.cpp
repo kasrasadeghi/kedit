@@ -1,5 +1,61 @@
 #include "Editor.hpp"
 
+
+//
+// returns whether pointer-move occured
+template <typename T, typename R>
+static bool pointer_move_grow(std::vector<T>& vec, std::vector<R>& referer,
+                              std::function<T*&(R&)> access,
+                              const std::string& name)
+  {
+    bool has_moved = false;
+
+    if (vec.size() == vec.capacity())
+      {
+        auto* before = vec.data();
+        vec.push_back(T{});
+        auto* after = vec.data();
+
+        if (before != after)
+          {
+            has_moved = true;
+            println("LOG: ", name, " grow with move");
+            for (R& obj_ref : referer)
+              {
+                T*& old_addr = access(obj_ref);
+                auto old_index = (old_addr - before);
+                old_addr = after + old_index;
+              }
+          }
+        else
+          {
+            println("LOG: ", name, " grow without move");
+          }
+      }
+    else
+      {
+        auto* before = vec.data();
+        vec.push_back(T{});
+        auto* after = vec.data();
+        if (before != after)
+          {
+            has_moved = true;
+            println("UNSUPPORTED: ", name, " move after grow when not at capacity");
+          }
+      }
+
+    return has_moved;
+  }
+
+template <typename T, typename R>
+static bool pointer_move(std::vector<T>& vec, std::vector<R>& referer,
+                         std::function<void(void)> operation,
+                         std::function<T*&(R&)> access)
+  {
+    println("UNSUPPORTED: general pointer move");
+    return false;
+  }
+
 // Note: only use this function to allocate buffers put in Pages accounted for
 // in _pages.
 //
@@ -26,35 +82,13 @@
 //           pointer-moving.
 Buffer* Editor::allocBuffer(void)
   {
-    if (_buffers.size() == _buffers.capacity())
-      {
-        auto* before = _buffers.data();
-        _buffers.push_back(Buffer{});
-        auto* after = _buffers.data();
-        if (before != after)
-          {
-            println("LOG: _buffers grow with move");
-            for (auto* page : _pages)
-              {
-                auto old_index = (page->buffer - before);
-                page->buffer = after + old_index;
-              }
-          }
-        else
-          {
-            println("LOG: _buffers grow without move");
-          }
-      }
-    else
-      {
-        auto* before = _buffers.data();
-        _buffers.push_back(Buffer{});
-        auto* after = _buffers.data();
-        if (before != after)
-          {
-            println("SUSPICIOUS: _buffers move when not at capacity");
-          }
-      }
+    std::function<Buffer*&(Page*&)> access =
+      [](Page*& page_ptr) -> Buffer*& { return page_ptr->buffer; };
+
+    pointer_move_grow(
+      _buffers, _pages,
+      access,
+      str("_buffers"));
     return &_buffers.back();
   }
 
