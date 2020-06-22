@@ -4,9 +4,9 @@
 //
 // returns whether pointer-move occured
 template <typename T, typename R>
-static bool pointer_move_grow(std::vector<T>& vec, std::vector<R>& referer,
-                              std::function<T*&(R&)> access,
-                              const std::string& name)
+static bool pointer_move_after_grow(std::vector<T>& vec, std::vector<R>& referer,
+                                    std::function<T*&(R&)> access,
+                                    const std::string& name)
   {
     bool has_moved = false;
 
@@ -85,10 +85,9 @@ Buffer* Editor::allocBuffer(void)
     std::function<Buffer*&(Page*&)> access =
       [](Page*& page_ptr) -> Buffer*& { return page_ptr->buffer; };
 
-    pointer_move_grow(
+    pointer_move_after_grow(
       _buffers, _pages,
-      access,
-      str("_buffers"));
+      access, "_buffers");
     return &_buffers.back();
   }
 
