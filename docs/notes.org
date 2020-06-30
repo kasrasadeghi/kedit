@@ -97,7 +97,7 @@ editing, as pressing "Control + c" requires Control to be pressed first anyways.
 
 
 * pointer-move                                                     - jun 21 2020
-< background >
+< Background >
 A pointer is often used to refer to an allocation in memory.  A pointer becomes
 stale when the contents of that allocation are moved.  Usually, these contents
 are moved to a different allocation when the allocation is resized.  We refer to
@@ -116,6 +116,7 @@ from a vector whose backing store (i.e. the backing allocation that contains the
 objects) has moved, one can use the offset of the previous location of the
 backing store to the new location.
 
+< Algorithm >
 If the backing store of the vector used to be at address /Old/, and then the
 allocation was resized and the backing store moved to be at address /New/, all
 of the objects within move along the same delta (confusingly also often called a
