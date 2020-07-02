@@ -193,7 +193,7 @@ public:
     return ID;
   }
 
-  inline GLfloat renderText(int window_width, int window_height, std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec4 color = glm::vec4(1)) {
+  inline GLfloat renderText(int window_width, int window_height, const char* const text, uint64_t text_length, GLfloat x, GLfloat y, GLfloat scale, glm::vec4 color = glm::vec4(1)) {
     // Activate corresponding render state
     glEnable(GL_BLEND);
     glUseProgram(_shaderID);
@@ -205,8 +205,7 @@ public:
     glBindVertexArray(_VAO);
 
     // Iterate through all characters
-    std::string::const_iterator c;
-    for (c = text.begin(); c != text.end(); c++) {
+    for (const char* c = text; c != (text + text_length); c++) {
       Character ch = _characters[*c];
 
       GLfloat xpos = x + ch.Bearing.x * scale;

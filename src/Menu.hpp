@@ -105,11 +105,11 @@ struct Menu {
             {
               if (i == this->selectable_lines[this->cursor])
                 {
-                  gc.text(line.stringCopy(), xpos, curr_ypos, 1, glm::vec4(1, 1, 1, 1));
+                  gc.text(line, xpos, curr_ypos, 1, glm::vec4(1, 1, 1, 1));
                 }
               else
                 {
-                  gc.text(line.stringCopy(), xpos, curr_ypos, 1, glm::vec4(0.7, 0.7, 0.7, 1));
+                  gc.text(line, xpos, curr_ypos, 1, glm::vec4(0.7, 0.7, 0.7, 1));
                 }
             }
           ++ line_number;

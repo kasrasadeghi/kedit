@@ -3,14 +3,23 @@
 #include "DebugCallback.hpp"
 #include "RectangleProgramContext.hpp"
 
+#include "backbone-core-cpp/StrView.hpp"
+
 struct GraphicsContext {
   /// General ===-----------------------------------------------------------------------------===///
   RenderWindow* window;
   TextRenderer tr;
   RectProgramContext rectprog;
 
-  inline void text(std::string text, GLfloat x, GLfloat y, GLfloat scale, glm::vec4 color = glm::vec4(1))
-    { tr.renderText(window->width(), window->height(), text, x, y, scale, color); };
+  template<int N>
+  inline void text(const char (&text)[N], GLfloat x, GLfloat y, GLfloat scale, glm::vec4 color = glm::vec4(1))
+    { tr.renderText(window->width(), window->height(), text, N - 1, x, y, scale, color); };
+
+  inline void text(StringView text, GLfloat x, GLfloat y, GLfloat scale, glm::vec4 color = glm::vec4(1))
+    { tr.renderText(window->width(), window->height(), text.data(), text.length(), x, y, scale, color); };
+
+  inline void text(const std::string& text, GLfloat x, GLfloat y, GLfloat scale, glm::vec4 color = glm::vec4(1))
+    { tr.renderText(window->width(), window->height(), text.data(), text.length(), x, y, scale, color); };
 
   GraphicsContext(RenderWindow* w): window(w)
     { glViewport(0, 0, window->width(), window->height()); }
@@ -33,7 +42,7 @@ struct GraphicsContext {
       glClearColor(color.x, color.y, color.z, color.w);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
-  
+
   inline void renderOptions(void)
     {
       glEnable(GL_CULL_FACE);
@@ -44,7 +53,7 @@ struct GraphicsContext {
 
       glEnable(GL_DEPTH_TEST);
       glDepthFunc(GL_LESS);
-      
+
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }

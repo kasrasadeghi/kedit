@@ -23,6 +23,9 @@ struct StringView {
 
   const char* end() const
     { return _data + _length; }
+
+  uint64_t length() const
+    { return _length; }
 };
 
 
