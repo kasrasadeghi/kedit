@@ -58,11 +58,7 @@ struct Editor {
   inline void loadFile(StringView file_path)
     {
       auto& curr = *allocFileBuffer();
-
-      // TODO make sure buffer unreads and closes file
-      curr.file = File::open(file_path);
-      curr.file_contents = curr.file.read();
-      curr.page.buffer->contents.make(curr.file_contents);
+      curr.loadFromPath(file_path);
     }
 
   inline void verticalScroll(double scroll_y)

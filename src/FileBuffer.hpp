@@ -16,6 +16,14 @@ struct FileBuffer {
   File file;
   StringView file_contents = "";
 
+  inline void loadFromPath(StringView file_path)
+    {
+      // TODO make sure buffer unreads and closes file
+      file = File::open(file_path);
+      file_contents = file.read();
+      page.buffer->contents.make(file_contents);
+    }
+
   inline bool invariant()
     {
       return page._type == Type::FileBufferT
