@@ -27,7 +27,7 @@ void Page::handleKey(int key, int scancode, int action, int mods)
     switch(_type)
       {
       case Type::FileBufferT:
-        // ((FileBuffer*)(this))->handleKey(key, scancode, action, mods);
+        ((FileBuffer*)(this))->handleKey(key, scancode, action, mods);
         break;
       case Type::MenuT:
         ((Menu*)(this))->handleKey(key, scancode, action, mods);
