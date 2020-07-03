@@ -73,5 +73,7 @@ struct File {
   inline static void close(File&& file)
     {
       ::close(file._file_descriptor);
+      file._name = "";
+      file._file_descriptor = -1;
     }
 };
