@@ -254,6 +254,9 @@ struct Editor {
 
   inline void handleKey(int key, int scancode, int action, int mods)
     {
+      // TODO new file
+      // TODO new buffer without file ?
+
       if (GLFW_PRESS == action)
         {
           if (GLFW_KEY_B == key)

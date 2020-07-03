@@ -26,6 +26,7 @@ int main() {
 
   bool wireframe_mode = false;
 
+  // TODO consider making viewable menu of callback history
   window.setKeyCallback([&](int key, int scancode, int action, int mods) {
     if ((mods & GLFW_MOD_CONTROL) && key == GLFW_KEY_W && action == GLFW_PRESS) {
       wireframe_mode = !wireframe_mode;
