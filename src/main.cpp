@@ -41,6 +41,10 @@ int main() {
     }
   });
 
+  window.setCharCallback([&](unsigned int codepoint) {
+    println((char)(codepoint));
+  });
+
   struct MouseState_ {
     bool pressed = false;
     int current_button = 0;

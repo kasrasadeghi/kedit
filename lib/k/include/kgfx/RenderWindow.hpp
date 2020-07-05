@@ -18,6 +18,12 @@ inline static void _RenderWindow_keyCallbackWrapper(GLFWwindow* window, int k, i
   _RenderWindow_keyCallback(k, s, a, m);
 }
 
+using CharCallback = std::function<void(unsigned int)>;
+inline static CharCallback _RenderWindow_charCallback;
+inline static void _RenderWindow_charCallbackWrapper(GLFWwindow* window, unsigned int codepoint) {
+  _RenderWindow_charCallback(codepoint);
+}
+
 using MouseCallback = std::function<void(int, int, int)>;
 inline static MouseCallback _RenderWindow_mouseCallback;
 inline static void _RenderWindow_mouseCallbackWrapper(GLFWwindow* window, int b, int a, int m) {
@@ -155,6 +161,10 @@ public:
   void setKeyCallback(KeyCallback keyCallback) {
     _RenderWindow_keyCallback = keyCallback;
     glfwSetKeyCallback(_window, _RenderWindow_keyCallbackWrapper);
+  }
+  void setCharCallback(CharCallback charCallback) {
+    _RenderWindow_charCallback = charCallback;
+    glfwSetCharCallback(_window, _RenderWindow_charCallbackWrapper);
   }
   void setMouseCallback(MouseCallback mouseCallback) {
     _RenderWindow_mouseCallback = mouseCallback;
