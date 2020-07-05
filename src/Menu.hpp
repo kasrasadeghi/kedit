@@ -103,7 +103,7 @@ struct Menu {
           // TODO "+ 30" should be "+ text_height"
           if (curr_ypos < (uint64_t)(gc.window->height() + 30) && curr_ypos > (uint64_t)(0))
             {
-              if (i == this->selectable_lines[this->cursor])
+              if (not selectable_lines.empty() && i == this->selectable_lines[this->cursor])
                 {
                   gc.text(line, xpos, curr_ypos, 1, glm::vec4(1, 1, 1, 1));
                 }
