@@ -265,7 +265,8 @@ struct Editor {
 
           double tly = fb->page.position.y;
           tly += 50;
-          tly += 30 * (fb->cursor.line - 1);  // add line offset
+          tly += 30 * (fb->cursor.line);  // add line offset
+          tly += -30; // start at top of line
           tly += 30 * fb->page.buffer->line_scroller.position; // add scroll offset
 
           // TODO change for variable text width fonts
