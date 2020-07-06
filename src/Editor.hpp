@@ -266,7 +266,9 @@ struct Editor {
           double tly = fb->page.position.y;
           tly += 50;
           tly += 30 * (fb->cursor.line);  // add line offset
-          tly += -30; // start at top of line
+          tly += -30; // start at top of line // TODO make this not a full width,
+                                              // but however much it takes to get from the base of the
+                                              // glyph to the bottom of the low flags of the glyph on the line above
           tly += 30 * fb->page.buffer->line_scroller.position; // add scroll offset
 
           // TODO change for variable text width fonts
