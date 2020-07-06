@@ -25,6 +25,8 @@ struct Editor {
 
   std::vector<std::string> command_history;
 
+  bool _control_mode = true;
+
   /// Memory Management ===-------------------------------------------------------------------===///
 
   Buffer* allocBuffer(void);
@@ -252,6 +254,27 @@ struct Editor {
   inline void render(GraphicsContext& gc)
     { currentPage()->render(gc); }
 
+  inline void addRectangles(GraphicsContext& gc)
+    {
+      // gc.drawRectangle(currentPage()->position, currentPage()->size);
+      if (Type::FileBufferT == currentPage()->_type)
+        {
+          auto* fb = currentFileBuffer();
+          double tlx = fb->page.position.x;  // start at the top of the page
+          tlx += 50;  // add page offset
+
+          double tly = fb->page.position.y;
+          tly += 50;
+          tly += 30 * (fb->cursor.line - 1);  // add line offset
+          tly += 30 * fb->page.buffer->line_scroller.position; // add scroll offset
+
+          // TODO change for variable text width fonts
+          double text_width = gc.tr.textWidth("a");
+
+          gc.drawRectangle({tlx, tly}, {text_width, 30});
+        }
+    }
+
   inline void handleKey(int key, int scancode, int action, int mods)
     {
       // TODO create new file
@@ -259,21 +282,36 @@ struct Editor {
 
       if (GLFW_PRESS == action)
         {
-          if (GLFW_KEY_B == key)
-            openBrowser();
+          if (GLFW_KEY_LEFT_CONTROL)
+            {
+              _control_mode = not _control_mode;
+            }
 
-          if (GLFW_KEY_S == key)
-            openSwap();
+          if (_control_mode)
+            {
+              if (GLFW_KEY_B == key)
+                openBrowser();
 
-          // CONSIDER: opening swap menu after closing current file
-          if (GLFW_KEY_W == key)
-            if (_pages.size() > 1)
-              freeCurrent();
+              if (GLFW_KEY_S == key)
+                openSwap();
+
+              // CONSIDER: opening swap menu after closing current file
+              if (GLFW_KEY_W == key)
+                if (_pages.size() > 1)
+                  freeCurrent();
+            }
         }
 
       currentPage()->handleKey(key, scancode, action, mods);
     }
 
+  inline void handleChar(unsigned char codepoint)
+    {
+      if (Type::FileBufferT == currentPage()->_type)
+        {
+          currentFileBuffer()->handleChar(codepoint);
+        }
+    }
 
   inline bool invariant(void)
     {

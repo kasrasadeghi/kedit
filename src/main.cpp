@@ -28,7 +28,8 @@ int main() {
 
   // TODO consider making viewable menu of callback history
   window.setKeyCallback([&](int key, int scancode, int action, int mods) {
-    if ((mods & GLFW_MOD_CONTROL) && key == GLFW_KEY_W && action == GLFW_PRESS) {
+    // TODO add to debug mode or something
+    if (editor._control_mode && key == GLFW_KEY_G && action == GLFW_PRESS) {
       wireframe_mode = !wireframe_mode;
       if (wireframe_mode) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
       else                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -42,7 +43,7 @@ int main() {
   });
 
   window.setCharCallback([&](unsigned int codepoint) {
-    println((char)(codepoint));
+    editor.handleChar(codepoint);
   });
 
   struct MouseState_ {
@@ -112,9 +113,11 @@ int main() {
     status(str(editor._menus.size())        + " :menu count "       );
     status(str(editor._filebuffers.size())  + " :filebuffer count " );
 
-    editor.render(gc);
+    editor.addRectangles(gc);
 
     gc.renderRectangles();
+    editor.render(gc);
+
 
     if (not editor._menus.empty())
       {

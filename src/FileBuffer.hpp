@@ -26,6 +26,16 @@ struct FileBuffer {
       File::close(std::move(file));
     }
 
+  inline void preparePageForRender(void)
+    {
+      // copy from backing store into rendering view to prepare to unmap file
+      page.buffer->contents.lines.clear();
+      for (std::string& line : lines)
+        {
+          page.buffer->contents.lines.push_back(line);
+        }
+    }
+
   inline void loadFromPath(StringView file_path)
     {
       // TODO make sure buffer unreads and closes file
@@ -41,12 +51,9 @@ struct FileBuffer {
           lines.push_back(line.stringCopy());
         }
 
-      // copy from backing store into rendering view to prepare to unmap file
-      page.buffer->contents.lines.clear();
-      for (std::string& line : lines)
-        {
-          page.buffer->contents.lines.push_back(line);
-        }
+      // TODO probably be more efficient than this
+      // - there is a parse, then a copy, then a reconstruction of the array that points to the about-to-be-closed file
+      preparePageForRender();
 
       // unmap file and prepare for editting
       File::unread(std::move(file_contents));
@@ -69,6 +76,7 @@ struct FileBuffer {
     {
       uint64_t line_number = 0;
 
+      // TODO have constexpr PAGE_OFFSET
       double xpos = page.position.x + 50;
       double ypos = page.position.y + 50;
 
@@ -107,7 +115,21 @@ struct FileBuffer {
               ++ cursor.line;
               return;
             }
+
+          if (GLFW_KEY_ENTER == key)
+            {
+              lines.insert(lines.begin() + cursor.line, "");
+              preparePageForRender();
+              ++ cursor.line;
+            }
         }
+    }
+
+  inline void handleChar(unsigned int codepoint)
+    {
+      // TODO check cursor in bounds/ check that lines is big enough to contain cursor
+      lines[cursor.line] += codepoint;
+      preparePageForRender();
     }
 
 };
