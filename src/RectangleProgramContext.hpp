@@ -11,15 +11,15 @@ struct RectProgramContext {
   std::vector<glm::uvec3> corner_indices;
 
   struct Instance {
-    Instance(glm::vec2 p, glm::vec2 dim):
-      tlx(p.x), tly(p.y), dx(dim.x), dy(dim.y) {}
+    inline Instance(glm::vec2 position, glm::vec2 dimension, glm::vec4 color_):
+      tlx(position.x), tly(position.y), dx(dimension.x), dy(dimension.y), color(color_) {}
     float tlx;
     float tly;
 
     float dx;
     float dy;
 
-    glm::vec4 color = glm::vec4(0.1, 0.5, 0.1, 1);
+    glm::vec4 color;
 
     friend std::ostream& operator<< (std::ostream& o, const Instance& rect)
       { return o << rect.tlx << ", " << rect.tly << ", " <<  rect.dx << ", " << rect.dy; }

@@ -274,7 +274,7 @@ struct Editor {
           // TODO change for variable text width fonts
           double text_width = gc.tr.textWidth("a");
 
-          gc.drawRectangle({tlx, tly}, {text_width, 30});
+          gc.drawRectangle({tlx, tly}, {text_width, 30}, {0.7, 0.8, 0.7, 1});
         }
     }
 
