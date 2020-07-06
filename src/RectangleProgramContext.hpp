@@ -19,9 +19,11 @@ struct RectProgramContext {
     float dx;
     float dy;
 
+    glm::vec4 color = glm::vec4(0.1, 0.5, 0.1, 1);
+
     friend std::ostream& operator<< (std::ostream& o, const Instance& rect)
       { return o << rect.tlx << ", " << rect.tly << ", " <<  rect.dx << ", " << rect.dy; }
-  } __attribute__((packed));
+  };
 
   std::vector<Instance> instances;
 
@@ -82,7 +84,8 @@ struct RectProgramContext {
       const auto IBO = rect_program.buffer.instance;
 
       constexpr auto vertex_position = rect_program.attrib.vertex_position;
-      constexpr auto instance_rect = rect_program.attrib.instance_offset;
+      constexpr auto instance_rect   = rect_program.attrib.instance_offset;
+      constexpr auto instance_color  = rect_program.attrib.instance_color;
 
       // Setup element array buffer.
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
@@ -100,8 +103,12 @@ struct RectProgramContext {
         glVertexAttribPointer(    instance_rect, 4, GL_FLOAT, GL_FALSE, sizeof(Instance), (void*)(0));
         glVertexAttribDivisor(    instance_rect, 1);  // sets this attribute to be instanced
 
+        glEnableVertexAttribArray(instance_color);
+        glVertexAttribPointer(    instance_color, 4, GL_FLOAT, GL_FALSE, sizeof(Instance), (void*)(sizeof(glm::vec4)));
+        glVertexAttribDivisor(    instance_color, 1);  // sets this attribute to be instanced
+
       // compile shader program
-      rect_program_id = CreateProgram(rect_program.sources, {"vertex_position", "instance_rect"});
+      rect_program_id = CreateProgram(rect_program.sources, {"vertex_position", "instance_rect", "instance_color"});
       glUseProgram(rect_program_id);
 
       // uniform.view      = glGetUniformLocation(rect_program_id, "view");

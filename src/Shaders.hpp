@@ -10,6 +10,7 @@ inline struct rect_program_ {
 struct attrib_ {
   constexpr static GLuint vertex_position = 0;
   constexpr static GLuint instance_offset = 1;
+  constexpr static GLuint instance_color  = 2;
 } attrib;
 
 GLuint VAO; // array object
@@ -31,8 +32,10 @@ layout (location = 0) in vec2 vertex_position;
 
 // input attribute from instances
 layout (location = 1) in vec4 instance_rect;
+layout (location = 2) in vec4 instance_color;
 
 // output to geometry shader
+out vec4 vec_color;
 // out vec4 gl_Position;
 
 /* note: expanded for clarity, equivalent to:
@@ -48,6 +51,8 @@ void main()
 
   vec2 top_left = instance_rect.xy;
   gl_Position = vec4(pos + top_left, 0, 1);
+
+  vec_color = instance_color;
 }
 )zzz",
 
@@ -58,7 +63,12 @@ R"zzz(#version 460 core
 layout (triangles) in;
 layout (triangle_strip, max_vertices = 4) out;
 
-// input from vertex shader is only gl_in
+// input from vertex shader
+in vec4 vec_color[];
+
+// pass along to fragment shader
+flat out vec4 frag_color;
+
 // output to fragment shader
 out vec4 position;
 // out vec4 gl_Position
@@ -77,6 +87,8 @@ uniform mat4 projection;
 
 void main()
 {
+  frag_color = vec_color[0];
+
 	vec3 A = gl_in[0].gl_Position.xyz;
 	vec3 B = gl_in[1].gl_Position.xyz;
 	vec3 C = gl_in[2].gl_Position.xyz;
@@ -98,10 +110,11 @@ void main()
   .fragment = R"zzz(#version 460 core
 out vec4 fragment_color;
 in vec4 position;
+in vec4 frag_color;
 
 void main()
 {
-  fragment_color = vec4(0.1, 0.1, 0.1, 1);
+  fragment_color = frag_color;
 }
 )zzz",
 };
