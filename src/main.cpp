@@ -37,7 +37,7 @@ int main() {
 
     editor.handleKey(key, scancode, action, mods);
 
-    if (GLFW_PRESS == action && key == GLFW_KEY_ESCAPE) {
+    if (GLFW_PRESS == action && GLFW_KEY_ESCAPE == key) {
       window.close();
     }
   });
