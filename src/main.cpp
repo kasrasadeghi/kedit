@@ -22,7 +22,8 @@ int main() {
   glfwSwapInterval(1); // framerate set: 0 for uncapped, 1 for monitor refresh rate
 
   Editor editor;
-  editor.openBrowser();
+  // editor.openBrowser();
+  editor.loadFile("README.md");
 
   bool wireframe_mode = false;
 
@@ -114,10 +115,11 @@ int main() {
     status(str(editor._filebuffers.size())  + " :filebuffer count " );
 
     editor.addRectangles(gc);
-
     gc.renderRectangles();
+
     editor.render(gc);
 
+    // TODO translucency on top of text goes after editor render
 
     if (not editor._menus.empty())
       {
