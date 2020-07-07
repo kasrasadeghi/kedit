@@ -256,11 +256,16 @@ struct Editor {
 
   inline void addRectangles(GraphicsContext& gc)
     {
-      // gc.drawRectangle(currentPage()->position, currentPage()->size);
+      addBackground(gc);
       if (Type::FileBufferT == currentPage()->_type)
         {
           addCursor(gc);
         }
+    }
+
+  inline void addBackground(GraphicsContext& gc)
+    {
+      gc.drawRectangle(currentPage()->position, currentPage()->size, {0.1, 0.1, 0.1, 1}, 0.6);
     }
 
   inline void addCursor(GraphicsContext& gc)
