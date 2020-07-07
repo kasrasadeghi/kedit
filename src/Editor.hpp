@@ -259,23 +259,30 @@ struct Editor {
       // gc.drawRectangle(currentPage()->position, currentPage()->size);
       if (Type::FileBufferT == currentPage()->_type)
         {
-          auto* fb = currentFileBuffer();
-          double tlx = fb->page.position.x;  // start at the top of the page
-          tlx += 50;  // add page offset
-
-          double tly = fb->page.position.y;
-          tly += 50;
-          tly += 30 * (fb->cursor.line);  // add line offset
-          tly += -30; // start at top of line // TODO make this not a full width,
-                                              // but however much it takes to get from the base of the
-                                              // glyph to the bottom of the low flags of the glyph on the line above
-          tly += 30 * fb->page.buffer->line_scroller.position; // add scroll offset
-
-          // TODO change for variable text width fonts
-          double text_width = gc.tr.textWidth("a");
-
-          gc.drawRectangle({tlx, tly}, {text_width, 30}, {0.7, 0.8, 0.7, 1});
+          addCursor(gc);
         }
+    }
+
+  inline void addCursor(GraphicsContext& gc)
+    {
+      auto* fb = currentFileBuffer();
+      double tlx = fb->page.position.x;  // start at the top of the page
+      tlx += 50;  // add page offset
+
+      double tly = fb->page.position.y;
+      tly += 50;
+      tly += 30 * (fb->cursor.line);  // add line offset
+      tly += -30; // start at top of line // TODO make this not a full width,
+                                          // but however much it takes to get from the base of the
+                                          // glyph to the bottom of the low flags of the glyph on the line above
+      tly += 30 * fb->page.buffer->line_scroller.position; // add scroll offset
+
+      // TODO change for variable text width fonts
+      double text_width = gc.tr.textWidth("a");
+
+      gc.drawRectangle({tlx, tly}, {text_width, 30}, {0.7, 0.8, 0.7, 1}, 0.5);
+
+      // TODO investigate positive z layer being below text? maybe ortho proj doesn't flip?
     }
 
   inline void handleKey(int key, int scancode, int action, int mods)

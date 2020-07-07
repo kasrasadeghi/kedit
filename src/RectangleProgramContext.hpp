@@ -11,8 +11,8 @@ struct RectProgramContext {
   std::vector<glm::uvec3> corner_indices;
 
   struct Instance {
-    inline Instance(glm::vec2 position, glm::vec2 dimension, glm::vec4 color_):
-      tlx(position.x), tly(position.y), dx(dimension.x), dy(dimension.y), color(color_) {}
+    inline Instance(glm::vec2 position, glm::vec2 dimension, glm::vec4 color_, float z_level):
+      tlx(position.x), tly(position.y), dx(dimension.x), dy(dimension.y), color(color_), z(z_level) {}
     float tlx;
     float tly;
 
@@ -20,6 +20,8 @@ struct RectProgramContext {
     float dy;
 
     glm::vec4 color;
+
+    float z;
 
     friend std::ostream& operator<< (std::ostream& o, const Instance& rect)
       { return o << rect.tlx << ", " << rect.tly << ", " <<  rect.dx << ", " << rect.dy; }
@@ -86,6 +88,7 @@ struct RectProgramContext {
       constexpr auto vertex_position = rect_program.attrib.vertex_position;
       constexpr auto instance_rect   = rect_program.attrib.instance_offset;
       constexpr auto instance_color  = rect_program.attrib.instance_color;
+      constexpr auto instance_z      = rect_program.attrib.instance_z;
 
       // Setup element array buffer.
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
@@ -100,12 +103,17 @@ struct RectProgramContext {
       glBindBuffer(GL_ARRAY_BUFFER, IBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(Instance) * instances.size(), instances.data(), GL_STATIC_DRAW);
         glEnableVertexAttribArray(instance_rect);
-        glVertexAttribPointer(    instance_rect, 4, GL_FLOAT, GL_FALSE, sizeof(Instance), (void*)(0));
+        glVertexAttribPointer(    instance_rect, 4, GL_FLOAT, GL_FALSE, sizeof(Instance), (void*)(offsetof(Instance, tlx)));
         glVertexAttribDivisor(    instance_rect, 1);  // sets this attribute to be instanced
 
         glEnableVertexAttribArray(instance_color);
-        glVertexAttribPointer(    instance_color, 4, GL_FLOAT, GL_FALSE, sizeof(Instance), (void*)(sizeof(glm::vec4)));
+        glVertexAttribPointer(    instance_color, 4, GL_FLOAT, GL_FALSE, sizeof(Instance), (void*)(offsetof(Instance, color)));
         glVertexAttribDivisor(    instance_color, 1);  // sets this attribute to be instanced
+
+        glEnableVertexAttribArray(instance_z);
+        glVertexAttribPointer(    instance_z, 1, GL_FLOAT, GL_FALSE, sizeof(Instance), (void*)(offsetof(Instance, z)));
+        glVertexAttribDivisor(    instance_z, 1);  // sets this attribute to be instanced
+
 
       // compile shader program
       rect_program_id = CreateProgram(rect_program.sources, {"vertex_position", "instance_rect", "instance_color"});
