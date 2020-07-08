@@ -297,7 +297,7 @@ struct Editor {
 
       if (GLFW_PRESS == action)
         {
-          if (GLFW_KEY_LEFT_CONTROL)
+          if (GLFW_KEY_LEFT_CONTROL == key)
             {
               _control_mode = not _control_mode;
             }
@@ -322,7 +322,7 @@ struct Editor {
 
   inline void handleChar(unsigned char codepoint)
     {
-      if (Type::FileBufferT == currentPage()->_type)
+      if (not _control_mode && Type::FileBufferT == currentPage()->_type)
         {
           currentFileBuffer()->handleChar(codepoint);
         }

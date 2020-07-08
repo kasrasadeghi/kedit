@@ -113,6 +113,7 @@ int main() {
     status(str(editor._buffers.size())      + " :buffer count "     );
     status(str(editor._menus.size())        + " :menu count "       );
     status(str(editor._filebuffers.size())  + " :filebuffer count " );
+    status(str(editor._control_mode)        + " :control mode "     );
 
     editor.addRectangles(gc);
     gc.renderRectangles();
