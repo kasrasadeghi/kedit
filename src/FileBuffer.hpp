@@ -104,15 +104,67 @@ struct FileBuffer {
 
       if (GLFW_PRESS == action)
         {
+          if (not cursor.invariant(lines)) return;
+
           if (GLFW_KEY_UP == key && cursor.line != 0)
             {
               -- cursor.line;
+
+              // correct cursor if off the end
+              if (lines.at(cursor.line).length() < cursor.column)
+                {
+                  cursor.column = lines.at(cursor.line).length();
+                }
               return;
             }
 
           if (GLFW_KEY_DOWN == key && cursor.line < lines.size() - 1)
             {
               ++ cursor.line;
+
+              // TODO implement phantom cursor
+              // correct cursor if off the end
+              if (lines.at(cursor.line).length() < cursor.column)
+                {
+                  cursor.column = lines.at(cursor.line).length();
+                }
+              return;
+            }
+
+          if (GLFW_KEY_LEFT == key)
+            {
+              if (cursor.column != 0)
+                {
+                  -- cursor.column;
+                  return;
+                }
+
+              // zero column, roll to previous line
+              if (cursor.column == 0)
+                {
+                  if (cursor.line != 0)
+                    {
+                      -- cursor.line;
+                      cursor.column = lines.at(cursor.line).length();
+                    }
+                  return;
+                }
+            }
+
+          if (GLFW_KEY_RIGHT == key)
+            {
+              if (cursor.column < lines.at(cursor.line).size())
+                {
+                  ++ cursor.column;
+                  return;
+                }
+
+              // roll over to next line
+              if (cursor.column == lines.at(cursor.line).size() && cursor.line < lines.size() - 1)
+                {
+                  cursor.column = 0;
+                  ++ cursor.line;
+                }
               return;
             }
 
@@ -121,6 +173,7 @@ struct FileBuffer {
               lines.insert(lines.begin() + cursor.line, "");
               preparePageForRender();
               ++ cursor.line;
+              return;
             }
         }
     }

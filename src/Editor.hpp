@@ -270,20 +270,21 @@ struct Editor {
 
   inline void addCursor(GraphicsContext& gc)
     {
+      // TODO change for variable text width fonts
+      double text_width = gc.tr.textWidth("a");
+
       auto* fb = currentFileBuffer();
       double tlx = fb->page.position.x;  // start at the top of the page
       tlx += 50;  // add page offset
+      tlx += text_width * fb->cursor.column;
 
       double tly = fb->page.position.y;
       tly += 50;
-      tly += 30 * (fb->cursor.line);  // add line offset
+      tly += 30 * fb->cursor.line;  // add line offset
       tly += -30; // start at top of line // TODO make this not a full width,
                                           // but however much it takes to get from the base of the
                                           // glyph to the bottom of the low flags of the glyph on the line above
       tly += 30 * fb->page.buffer->line_scroller.position; // add scroll offset
-
-      // TODO change for variable text width fonts
-      double text_width = gc.tr.textWidth("a");
 
       gc.drawRectangle({tlx, tly}, {text_width, 30}, {0.7, 0.8, 0.7, 1}, 0.5);
 
