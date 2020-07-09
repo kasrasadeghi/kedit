@@ -186,6 +186,37 @@ struct FileBuffer {
 
   inline void handleKeyEdit(int key, int scancode, int action, int mods)
     {
+      // guards
+      if (not cursor.invariant(lines)) return;
+
+      // EDITTING
+
+      if (GLFW_PRESS != action and GLFW_REPEAT != action) return;
+
+      if (GLFW_KEY_BACKSPACE == key)
+        {
+          if (0 == cursor.column)
+            {
+              if (0 == cursor.line) return;
+
+              std::string temp = lines.at(cursor.line);
+              lines.erase(lines.begin() + cursor.line);
+              -- cursor.line;
+              lines.at(cursor.line) += temp;
+              cursor.column = lines.at(cursor.line).length() - temp.length();
+            }
+
+          else
+            {
+              auto& line = lines.at(cursor.line);
+              -- cursor.column;
+              line.erase(line.begin() + cursor.column);
+            }
+
+          preparePageForRender();
+          return;
+        }
+
       if (GLFW_PRESS != action) return;
 
       if (GLFW_KEY_ENTER == key)
