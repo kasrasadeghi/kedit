@@ -286,7 +286,7 @@ struct Editor {
                                           // glyph to the bottom of the low flags of the glyph on the line above
       tly += 30 * fb->page.buffer->line_scroller.position; // add scroll offset
 
-      gc.drawRectangle({tlx, tly}, {text_width, 30}, {0.7, 0.8, 0.7, 1}, 0.5);
+      gc.drawRectangle({tlx, tly}, {text_width, 30}, _control_mode ? glm::vec4{0.8, 0.7, 0.7, 1} : glm::vec4{0.7, 0.8, 0.7, 1}, 0.5);
 
       // TODO investigate positive z layer being below text? maybe ortho proj doesn't flip?
     }
