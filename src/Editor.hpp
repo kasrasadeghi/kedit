@@ -319,6 +319,11 @@ struct Editor {
         }
 
       currentPage()->handleKey(key, scancode, action, mods);
+
+      if (not _control_mode && Type::FileBufferT == currentPage()->_type)
+        {
+          currentFileBuffer()->handleKeyEdit(key, scancode, action, mods);
+        }
     }
 
   inline void handleChar(unsigned char codepoint)

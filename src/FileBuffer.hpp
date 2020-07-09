@@ -106,6 +106,8 @@ struct FileBuffer {
         {
           if (not cursor.invariant(lines)) return;
 
+          // DIRECTIONS
+
           if (GLFW_KEY_UP == key && cursor.line != 0)
             {
               -- cursor.line;
@@ -168,13 +170,53 @@ struct FileBuffer {
               return;
             }
 
-          if (GLFW_KEY_ENTER == key)
+          // SPECIAL MOVEMENT
+
+          if (GLFW_KEY_HOME == key)
+            {
+              cursor.column = 0;
+            }
+
+          if (GLFW_KEY_END == key)
+            {
+              cursor.column = lines.at(cursor.line).length();
+            }
+        }
+    }
+
+  inline void handleKeyEdit(int key, int scancode, int action, int mods)
+    {
+      if (GLFW_PRESS != action) return;
+
+      if (GLFW_KEY_ENTER == key)
+        {
+          if (0 == cursor.column)
             {
               lines.insert(lines.begin() + cursor.line, "");
-              preparePageForRender();
               ++ cursor.line;
-              return;
             }
+
+          else if (lines.at(cursor.line).length() == cursor.column)
+            {
+              lines.insert(lines.begin() + cursor.line + 1, "");
+              ++ cursor.line;
+              cursor.column = 0;
+            }
+
+          else
+            {
+              std::string& line = lines.at(cursor.line);
+              std::string head = line.substr(0, cursor.column);
+              std::string tail = line.substr(cursor.column);
+
+              line = head;
+              lines.insert(lines.begin() + cursor.line + 1, tail);
+              ++ cursor.line;
+              cursor.column = 0;
+            }
+
+          preparePageForRender();
+          return;
         }
     }
 
