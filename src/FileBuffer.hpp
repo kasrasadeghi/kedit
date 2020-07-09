@@ -223,7 +223,13 @@ struct FileBuffer {
   inline void handleChar(unsigned int codepoint)
     {
       // TODO check cursor in bounds/ check that lines is big enough to contain cursor
-      lines[cursor.line] += codepoint;
+      if (not cursor.invariant(lines)) return;
+
+      auto& line = lines.at(cursor.line);
+      line.insert(line.begin() + cursor.column, codepoint);
+
+      ++ cursor.column;
+
       preparePageForRender();
     }
 
