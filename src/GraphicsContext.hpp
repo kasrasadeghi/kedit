@@ -64,6 +64,6 @@ struct GraphicsContext {
       rectprog.instances.clear();
     }
 
-  inline void drawRectangle(glm::vec2 topleft, glm::vec2 size)
-    { rectprog.instances.emplace_back(topleft, size); }
+  inline void drawRectangle(glm::vec2 topleft, glm::vec2 size, glm::vec4 color, float z)
+    { rectprog.instances.emplace_back(topleft, size, color, z); }
 };

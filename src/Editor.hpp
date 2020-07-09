@@ -25,6 +25,8 @@ struct Editor {
 
   std::vector<std::string> command_history;
 
+  bool _control_mode = true;
+
   /// Memory Management ===-------------------------------------------------------------------===///
 
   Buffer* allocBuffer(void);
@@ -252,28 +254,85 @@ struct Editor {
   inline void render(GraphicsContext& gc)
     { currentPage()->render(gc); }
 
+  inline void addRectangles(GraphicsContext& gc)
+    {
+      addBackground(gc);
+      if (Type::FileBufferT == currentPage()->_type)
+        {
+          addCursor(gc);
+        }
+    }
+
+  inline void addBackground(GraphicsContext& gc)
+    {
+      gc.drawRectangle(currentPage()->position, currentPage()->size, {0.1, 0.1, 0.1, 1}, 0.6);
+    }
+
+  inline void addCursor(GraphicsContext& gc)
+    {
+      // TODO change for variable text width fonts
+      double text_width = gc.tr.textWidth("a");
+
+      auto* fb = currentFileBuffer();
+      double tlx = fb->page.position.x;  // start at the top of the page
+      tlx += 50;  // add page offset
+      tlx += text_width * fb->cursor.column;
+
+      double tly = fb->page.position.y;
+      tly += 50;
+      tly += 30 * fb->cursor.line;  // add line offset
+      tly += -30; // start at top of line // TODO make this not a full width,
+                                          // but however much it takes to get from the base of the
+                                          // glyph to the bottom of the low flags of the glyph on the line above
+      tly += 30 * fb->page.buffer->line_scroller.position; // add scroll offset
+
+      gc.drawRectangle({tlx, tly}, {text_width, 30}, _control_mode ? glm::vec4{0.8, 0.7, 0.7, 1} : glm::vec4{0.7, 0.8, 0.7, 1}, 0.5);
+
+      // TODO investigate positive z layer being below text? maybe ortho proj doesn't flip?
+    }
+
   inline void handleKey(int key, int scancode, int action, int mods)
     {
-      // TODO new file
-      // TODO new buffer without file ?
+      // TODO create new file
+      // TODO create new buffer without file ?
 
       if (GLFW_PRESS == action)
         {
-          if (GLFW_KEY_B == key)
-            openBrowser();
+          if (GLFW_KEY_LEFT_CONTROL == key)
+            {
+              _control_mode = not _control_mode;
+            }
 
-          if (GLFW_KEY_S == key)
-            openSwap();
+          if (_control_mode)
+            {
+              if (GLFW_KEY_B == key)
+                openBrowser();
 
-          // CONSIDER: opening swap menu after closing current file
-          if (GLFW_KEY_W == key)
-            if (_pages.size() > 1)
-              freeCurrent();
+              if (GLFW_KEY_S == key)
+                openSwap();
+
+              // CONSIDER: opening swap menu after closing current file
+              if (GLFW_KEY_W == key)
+                if (_pages.size() > 1)
+                  freeCurrent();
+            }
         }
 
       currentPage()->handleKey(key, scancode, action, mods);
+
+      if (not _control_mode && Type::FileBufferT == currentPage()->_type)
+        {
+          currentFileBuffer()->handleKeyEdit(key, scancode, action, mods);
+        }
     }
 
+  inline void handleChar(unsigned char codepoint)
+    {
+      if (not _control_mode && Type::FileBufferT == currentPage()->_type)
+        {
+          currentFileBuffer()->handleChar(codepoint);
+        }
+    }
 
   inline bool invariant(void)
     {

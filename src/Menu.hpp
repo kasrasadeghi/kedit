@@ -56,7 +56,7 @@ struct Menu {
 
   inline void handleKey(int key, int scancode, int action, int mods)
     {
-      if (GLFW_PRESS == action)
+      if (GLFW_PRESS == action || GLFW_REPEAT == action)
         {
           if (GLFW_KEY_UP == key && cursor != 0)
             {

@@ -82,10 +82,12 @@ uniform mat4 projection;
 
 void main()
 {
-  position = gl_Position = projection * vec4(vertex.xy, 0.0, 1.0);
+  position = gl_Position = projection * vec4(vertex.xy, 0.0 /* <- z-level */, 1.0);
   TexCoords = vertex.zw;
 }
 )zzz";
+
+// NOTE: text renders at z-level = 0.0
 
 class TextRenderer {
   std::map<GLchar, Character> _characters;
