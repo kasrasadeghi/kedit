@@ -217,6 +217,27 @@ struct FileBuffer {
           return;
         }
 
+      if (GLFW_KEY_DELETE == key)
+        {
+          if (lines.at(cursor.line).length() == cursor.column)
+            {
+              // cannot delete anything at the end of the last line, line_index = size - 1
+              if (lines.size() - 1 == cursor.line) return;
+
+              lines.at(cursor.line) += lines.at(cursor.line + 1);
+              lines.erase(lines.begin() + cursor.line + 1);
+            }
+
+          else
+            {
+              auto& line = lines.at(cursor.line);
+              line.erase(line.begin() + cursor.column);
+            }
+
+          preparePageForRender();
+          return;
+        }
+
       if (GLFW_PRESS != action) return;
 
       if (GLFW_KEY_ENTER == key)
