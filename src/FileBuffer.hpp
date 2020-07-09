@@ -102,7 +102,7 @@ struct FileBuffer {
     {
       // TODO consider synchronization issues with movement keys and text input from CharCallback
 
-      if (GLFW_PRESS == action)
+      if (GLFW_PRESS == action || GLFW_REPEAT == action)
         {
           if (not cursor.invariant(lines)) return;
 
