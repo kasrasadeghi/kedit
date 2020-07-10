@@ -199,11 +199,11 @@ struct FileBuffer {
             {
               if (0 == cursor.line) return;
 
-              std::string temp = lines.at(cursor.line);
-              lines.erase(lines.begin() + cursor.line);
               -- cursor.line;
-              lines.at(cursor.line) += temp;
-              cursor.column = lines.at(cursor.line).length() - temp.length();
+              cursor.column = lines.at(cursor.line).length();
+
+              lines.at(cursor.line) += lines.at(cursor.line + 1);
+              lines.erase(lines.begin() + cursor.line + 1);
             }
 
           else
