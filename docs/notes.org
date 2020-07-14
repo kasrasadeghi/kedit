@@ -1,3 +1,40 @@
+* generalized undo                                                 - jul 13 2020
+Undoing in text editors is usually done on a buffer-local level.  Undoing the
+following actions is buffer-local:
+- inserting text
+- deleting text
+- moving the cursor
+- scrolling the buffer
+
+Cursor movement and buffer scrolling are usually distinguished as "visual"
+changes, thus undoing would not affect them.
+
+To expand the notion of undo past a text buffer would be far more complicated.
+We'd have to be able to undo:
+- compiling the project
+- committing to version control
+- saving/writing to a file
+- swapping open files
+- closing a file
+- opening a file
+- read & revert to the current version of the file
+- selecting arbitrary menu entries
+
+- File operations (write, read, close, open) are filesystem level undos.
+  Possible and made easier with a journalling filesystem or something similar to
+  a trash bin.
+- Swapping an open file is simple to undo at a unit level, just swap back.  With
+  larger histories of undo the complexity for that may grow.
+- Undoing the compilation of a project seems kind of strange.  Might be just as
+  useful to cache previous binaries or previous compiled objects, but caching
+  previous source files should be sufficient.
+- Undoing menu entry selection would require special support for each kind of
+  menu and may not be generally possible.
+
+For now, the most useful kind of undos are the buffer-editting ones of inserting
+and deleting text.  It may be useful to have those be filebuffer specific.
+
+
 * data-oriented programming                                        - jun 22 2020
 Data-oriented programming is a paradigm where you think about the structure of
 your data and you build your application around the data inside of it.  I don't
