@@ -100,7 +100,6 @@ struct FileBuffer {
 
   inline void handleKey(int key, int scancode, int action, int mods)
     {
-      // TODO consider synchronization issues with movement keys and text input from CharCallback
 
       if (GLFW_PRESS == action || GLFW_REPEAT == action)
         {
