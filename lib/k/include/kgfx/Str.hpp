@@ -53,3 +53,8 @@ template <>
 inline std::string str<const char*>(const char* o) {
   return std::string(o);
 }
+
+template <>
+inline std::string str<char>(char c) {
+  return std::string() + c;
+}
