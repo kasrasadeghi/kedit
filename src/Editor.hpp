@@ -26,6 +26,7 @@ struct Editor {
   std::vector<std::string> command_history;
 
   bool _control_mode = true;
+  bool _control_mode_release_exit = false;
 
   /// Memory Management ===-------------------------------------------------------------------===///
 
@@ -318,11 +319,31 @@ struct Editor {
             }
         }
 
+      if (GLFW_RELEASE == action)
+        {
+          if (GLFW_KEY_LEFT_CONTROL == key && _control_mode_release_exit)
+            {
+              _control_mode = false;
+              _control_mode_release_exit = false;
+            }
+        }
+
       currentPage()->handleKey(key, scancode, action, mods);
 
-      if (not _control_mode && Type::FileBufferT == currentPage()->_type)
+      if (Type::FileBufferT == currentPage()->_type)
         {
-          currentFileBuffer()->handleKeyEdit(key, scancode, action, mods);
+          if (_control_mode)
+            {
+              // if you press a key while ctrl is held,
+              //   releasing ctrl exits control mode
+              if (GLFW_PRESS == action && (GLFW_MOD_CONTROL & mods))
+                {
+                  _control_mode_release_exit = true;
+                }
+              currentFileBuffer()->handleKeyControl(key, scancode, action, mods);
+            }
+          else
+            currentFileBuffer()->handleKeyEdit(key, scancode, action, mods);
         }
     }
 
