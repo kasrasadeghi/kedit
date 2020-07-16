@@ -3,9 +3,11 @@
 // TODO ensure compatibility with backbone cursor
 // TODO move to backbone-core-cpp
 
+#include <ostream>
+
 struct Cursor {
-  uint64_t column = 0;
   uint64_t line = 0; // cursor can go one past the last character to append to the line
+  uint64_t column = 0;
 
   inline bool invariant(const std::vector<std::string>& lines)
     {
@@ -30,5 +32,10 @@ struct Cursor {
         }
 
       return true;
+    }
+
+  inline friend std::ostream& operator<<(std::ostream& o, const Cursor& cursor)
+    {
+      return o << "cursor(" << cursor.line << "," << cursor.column << ")";
     }
 };
