@@ -205,15 +205,24 @@ void Editor::freeMenu(Menu* menu)
     if (buffer_before != buffer_after)
       {
         println("LOG: _buffers shrink with move");
-        for (auto* page : _pages)
-          {
-            auto old_index = (page->buffer - buffer_before);
-            page->buffer = buffer_after + old_index;
-          }
       }
     else
       {
         println("LOG: _buffers shrink without move");
+      }
+
+    for (auto* page : _pages)
+      {
+        auto old_index = (page->buffer - buffer_before);
+
+        // the old_index is one less if we removed an element before it
+        auto removed_index = buffptr - buffer_before;
+        if (old_index > removed_index)
+          {
+            -- old_index;
+          }
+
+        page->buffer = buffer_after + old_index;
       }
 
     // garbage collect from _menus
@@ -233,20 +242,28 @@ void Editor::freeMenu(Menu* menu)
     if (menu_before != menu_after)
       {
         println("LOG: _menus shrink with move");
-
-        // zip(pages_filter, _pages)
-        for (size_t i = 0; i < pages_filter.size(); ++ i)
-          {
-            if (pages_filter[i])
-              {
-                auto old_index = (((Menu*)_pages[i]) - menu_before);
-                _pages[i] = (Page*)(menu_after + old_index);
-              }
-          }
       }
     else
       {
-        println("LOG: _menus grow without move");
+        println("LOG: _menus shrink without move");
+      }
+
+    // zip(pages_filter, _pages)
+    for (size_t i = 0; i < pages_filter.size(); ++ i)
+      {
+        if (pages_filter[i])
+          {
+            auto old_index = (((Menu*)_pages[i]) - menu_before);
+
+            // the old_index is one less if we removed an element before it
+            auto removed_index = menu - menu_before;
+            if (old_index > removed_index)
+              {
+                -- old_index;
+              }
+
+            _pages[i] = (Page*)(menu_after + old_index);
+          }
       }
   }
 
@@ -271,15 +288,24 @@ void Editor::freeFileBuffer(FileBuffer* filebuffer)
     if (buffer_before != buffer_after)
       {
         println("LOG: _buffers shrink with move");
-        for (auto* page : _pages)
-          {
-            auto old_index = (page->buffer - buffer_before);
-            page->buffer = buffer_after + old_index;
-          }
       }
     else
       {
         println("LOG: _buffers shrink without move");
+      }
+
+    for (auto* page : _pages)
+      {
+        auto old_index = (page->buffer - buffer_before);
+
+        // the old_index is one less if we removed an element before it
+        auto removed_index = buffptr - buffer_before;
+        if (old_index > removed_index)
+          {
+            -- old_index;
+          }
+
+        page->buffer = buffer_after + old_index;
       }
 
     // garbage collect from _filebuffers
@@ -299,20 +325,28 @@ void Editor::freeFileBuffer(FileBuffer* filebuffer)
     if (filebuffer_before != filebuffer_after)
       {
         println("LOG: _filebuffers shrink with move");
-
-        // zip(pages_filter, _pages)
-        for (size_t i = 0; i < pages_filter.size(); ++ i)
-          {
-            if (pages_filter[i])
-              {
-                auto old_index = (((FileBuffer*)_pages[i]) - filebuffer_before);
-                _pages[i] = (Page*)(filebuffer_after + old_index);
-              }
-          }
       }
     else
       {
-        println("LOG: _filebuffers grow without move");
+        println("LOG: _filebuffers shrink without move");
+      }
+
+    // zip(pages_filter, _pages)
+    for (size_t i = 0; i < pages_filter.size(); ++ i)
+      {
+        if (pages_filter[i])
+          {
+            auto old_index = (((FileBuffer*)_pages[i]) - filebuffer_before);
+
+            // the old_index is one less if we removed an element before it
+            auto removed_index = filebuffer - filebuffer_before;
+            if (old_index > removed_index)
+              {
+                -- old_index;
+              }
+
+            _pages[i] = (Page*)(filebuffer_after + old_index);
+          }
       }
   }
 
