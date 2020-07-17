@@ -8,7 +8,8 @@
 #include <stdint.h>    // uint32_t, int32_t, similar
 #include <fcntl.h>     // open
 #include <sys/mman.h>  // mmap, munmap
-#include <unistd.h>    // lseek, close
+#include <unistd.h>    // lseek, close, write, ftruncate
+#include <stdlib.h>    // realpath
 
 
 struct File {
@@ -19,6 +20,9 @@ struct File {
     {
       File result;
       result._name = filename.stringCopy();
+      char* abs_path = ::realpath(result._name.c_str(), nullptr);
+      result._name = std::string(abs_path);
+      free(abs_path); // realpath calls malloc
       result._file_descriptor = ::open(filename.data(), flags);
 
       if (-1 == result._file_descriptor)
@@ -30,7 +34,6 @@ struct File {
     }
 
   // TODO open should not create
-  // TODO bug where file is opened but then mmap fails
 
   inline static File open(StringView filename)
     { return _open(filename, O_RDONLY); }
@@ -39,7 +42,7 @@ struct File {
     { return _open(filename, O_RDWR); }
 
   inline int64_t size()
-    { return ::lseek(_file_descriptor, 0, SEEK_END); }
+    { return _lseek(0, SEEK_END); }
 
   inline char* _mmap(char* addr, int64_t file_length, int32_t prot, int32_t flags, int32_t offset)
     {
@@ -63,11 +66,24 @@ struct File {
       return {(char*)(_mmap(nullptr, file_length, PROT_READ | PROT_WRITE , MAP_PRIVATE, 0)), (uint64_t)(file_length) };
     }
 
+  inline ssize_t overwrite(StringView S)
+    {
+      _lseek(0, SEEK_SET); // seek to beginning of file
+      if (int result = ftruncate(_file_descriptor, S.length()); result)
+        {
+          auto status = fcntl(_file_descriptor, F_GETFL);
+          println("readonly? ", (status & O_ACCMODE) == O_RDONLY);
+          perror("ftruncate");
+        }
+      return ::write(_file_descriptor, S.data(), S.length());
+    }
+
+  inline off_t _lseek(off_t offset, int whence)
+    { return ::lseek(_file_descriptor, offset, whence); }
+
   // requires std::move
   inline static void unread(StringView&& view)
-    {
-      ::munmap(view._data, view._length);
-    }
+    { ::munmap(view._data, view._length); }
 
   /// requires std::move
   inline static void close(File&& file)
