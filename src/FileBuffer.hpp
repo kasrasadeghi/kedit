@@ -89,7 +89,10 @@ struct History {
 
 struct FileBuffer {
   Page page;
+
   File file;
+  time_t last_modify_time = 0;
+
   Cursor cursor;
   std::vector<std::string> lines;
   struct History history;
@@ -113,6 +116,7 @@ struct FileBuffer {
     {
       // TODO make sure buffer unreads and closes file
       file = File::openrw(file_path);
+      last_modify_time = file.modify_time();
       StringView file_contents = file.read();
 
       // TODO is there a way to lazily parse into lines?
@@ -485,6 +489,8 @@ struct FileBuffer {
 
   inline void save(void)
     {
+      if (last_modify_time != file.modify_time())
+        { println("WARNING: file modified after opening"); }
       // TODO check for first dirty line to seek and not rewrite pre-dirty segment
       std::string acc;
       for (const auto& line : lines) acc += line + "\n";

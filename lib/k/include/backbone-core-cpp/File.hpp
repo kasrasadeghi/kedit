@@ -7,10 +7,11 @@
 
 #include <stdint.h>    // uint32_t, int32_t, similar
 #include <fcntl.h>     // open
+#include <sys/types.h> // time_t
 #include <sys/mman.h>  // mmap, munmap
 #include <unistd.h>    // lseek, close, write, ftruncate
 #include <stdlib.h>    // realpath
-
+#include <sys/stat.h>  // fstat
 
 struct File {
   std::string _name = "";
@@ -43,6 +44,30 @@ struct File {
 
   inline int64_t size()
     { return _lseek(0, SEEK_END); }
+
+  inline time_t access_time()
+    {
+      struct stat buf;
+      _stat(&buf);
+      return buf.st_atime;
+    }
+
+  inline time_t modify_time()
+    {
+      struct stat buf;
+      _stat(&buf);
+      return buf.st_mtime;
+    }
+
+  inline time_t status_change_time()
+    {
+      struct stat buf;
+      _stat(&buf);
+      return buf.st_ctime;
+    }
+
+  inline int _stat(struct stat* buf)
+    { return ::fstat(_file_descriptor, buf); }
 
   inline char* _mmap(char* addr, int64_t file_length, int32_t prot, int32_t flags, int32_t offset)
     {
