@@ -95,7 +95,7 @@ struct FileBuffer {
 
   Cursor cursor;
   std::vector<std::string> lines;
-  struct History history;
+  History history;
 
   inline void destroy()
     {
