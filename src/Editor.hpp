@@ -309,7 +309,7 @@ struct Editor {
               if (GLFW_KEY_B == key)
                 openBrowser();
 
-              if (GLFW_KEY_S == key)
+              if (GLFW_KEY_E == key)
                 openSwap();
 
               // CONSIDER: opening swap menu after closing current file

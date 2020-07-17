@@ -112,7 +112,7 @@ struct FileBuffer {
   inline void loadFromPath(StringView file_path)
     {
       // TODO make sure buffer unreads and closes file
-      file = File::open(file_path);
+      file = File::openrw(file_path);
       StringView file_contents = file.read();
 
       // TODO is there a way to lazily parse into lines?
@@ -410,6 +410,13 @@ struct FileBuffer {
         {
           undo();
         }
+
+      if (GLFW_PRESS != action) return;
+
+      if (GLFW_KEY_S == key)
+        {
+          save();
+        }
     }
 
   inline void undo(void)
@@ -474,5 +481,13 @@ struct FileBuffer {
         }
 
       println(command);
+    }
+
+  inline void save(void)
+    {
+      // TODO check for first dirty line to seek and not rewrite pre-dirty segment
+      std::string acc;
+      for (const auto& line : lines) acc += line + "\n";
+      file.overwrite(acc);
     }
 };
