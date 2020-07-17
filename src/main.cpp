@@ -122,9 +122,21 @@ int main() {
 
     // TODO translucency on top of text goes after editor render
 
-    if (not editor._menus.empty())
+    status("page list:");
+    int i = 0;
+    for (Page* page : editor._pages)
       {
-        status("menu selection: " + str(editor._menus.back().cursor));
+        switch(page->_type) {
+        case Type::FileBufferT:
+          status(str(i) + ": file '" + ((FileBuffer*)(page))->file._name + "'");
+          break;
+        case Type::MenuT:
+          status(str(i) + ": menu selection '" + str(((Menu*)(page))->cursor) + "'");
+          break;
+        case Type::NoneT:
+          printerrln("ERROR: page of type none");
+        }
+        ++ i;
       }
 
     if constexpr(PROFILING) { pr.event("render to screen"); }
