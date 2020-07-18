@@ -154,22 +154,21 @@ struct FileBuffer {
       uint64_t line_number = 0;
 
       // TODO have constexpr PAGE_OFFSET
-      double xpos = page.position.x + 50;
-      double ypos = page.position.y + 50;
+      double xpos = page.top_left_position.x + page.offset.x;
+      double ypos = page.top_left_position.y + page.offset.y;
 
       for (size_t line_i = 0; line_i < page.buffer->contents.lines.size(); ++line_i)
         {
           StringView line = page.buffer->contents.lines[line_i];
-          double current_offset = (30 * page.buffer->line_scroller.position);
-          double curr_ypos = current_offset + (ypos + (30 * line_number));
+          double current_offset = (gc.line_height * page.buffer->line_scroller.position);
+          double curr_ypos = current_offset + (ypos + (gc.line_height * line_number));
 
-          // TODO "+ 30" should be "+ text_height"
-          if (curr_ypos < (uint64_t)(gc.window->height() + 30) && curr_ypos > (uint64_t)(0))
+          if (curr_ypos < (uint64_t)(gc.window->height() + gc.line_height) && curr_ypos > (uint64_t)(0))
             {
               if (cursor.line == line_i)
-                gc.text(line, xpos, curr_ypos, 1, glm::vec4{1});
+                gc.text(line, xpos, curr_ypos, glm::vec4{1});
               else
-                gc.text(line, xpos, curr_ypos, 1, glm::vec4{0.8, 0.8, 0.8, 1});
+                gc.text(line, xpos, curr_ypos, glm::vec4{0.8, 0.8, 0.8, 1});
             }
           ++ line_number;
         }
@@ -393,6 +392,7 @@ struct FileBuffer {
 
       history.push("char");
       history.addCursor(cursor);
+      history.add(str((char)codepoint));
 
       _insertAtCursor(codepoint);
 
@@ -489,6 +489,8 @@ struct FileBuffer {
 
   inline void save(void)
     {
+      // TODO make sure the write is synchronized and completes before program termination
+
       if (last_modify_time != file.modify_time())
         { println("WARNING: file modified after opening"); }
       // TODO check for first dirty line to seek and not rewrite pre-dirty segment

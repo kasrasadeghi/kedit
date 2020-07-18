@@ -13,7 +13,7 @@
 #include <vector>
 
 #include <cstdlib>
-#include <unistd.h>
+#include <unistd.h> // chdir
 
 struct Editor {
   std::vector<Buffer> _buffers;
@@ -147,7 +147,8 @@ struct Editor {
             }
         }
 
-      auto unquote = [](std::string s) -> std::string { return s.substr(1, s.length() - 2); };
+      auto unquote = [](std::string s) -> std::string
+                     { return s.substr(1, s.length() - 2); };
 
       Menu::FunctionTable function_table {
         {"cd",     [&](const Texp& cmd) -> void {
@@ -266,7 +267,8 @@ struct Editor {
 
   inline void addBackground(GraphicsContext& gc)
     {
-      gc.drawRectangle(currentPage()->position, currentPage()->size, {0.1, 0.1, 0.1, 1}, 0.6);
+      gc.drawRectangle(currentPage()->top_left_position,
+                       currentPage()->size, {0.1, 0.1, 0.1, 1}, 0.6);
     }
 
   inline void addCursor(GraphicsContext& gc)
@@ -275,21 +277,24 @@ struct Editor {
       double text_width = gc.tr.textWidth("a");
 
       auto* fb = currentFileBuffer();
-      double tlx = fb->page.position.x;  // start at the top of the page
-      tlx += 50;  // add page offset
-      tlx += text_width * fb->cursor.column;
+      double tlx = fb->page.top_left_position.x
+                 + fb->page.offset.x
+                 + text_width * fb->cursor.column;
 
-      double tly = fb->page.position.y;
-      tly += 50;
-      tly += 30 * fb->cursor.line;  // add line offset
-      tly += -30; // start at top of line // TODO make this not a full width,
-                                          // but however much it takes to get from the base of the
-                                          // glyph to the bottom of the low flags of the glyph on the line above
-      tly += 30 * fb->page.buffer->line_scroller.position; // add scroll offset
+      double tly = fb->page.top_left_position.y
+                 + fb->page.offset.y
+                 + gc.line_height * fb->cursor.line
+                 + (-(0.8 * gc.line_height)); // start at top of line, 0.8*line_height = line_middle - baseline
 
-      gc.drawRectangle({tlx, tly}, {text_width, 30}, _control_mode ? glm::vec4{0.8, 0.7, 0.7, 1} : glm::vec4{0.7, 0.8, 0.7, 1}, 0.5);
+      tly += gc.line_height * fb->page.buffer->line_scroller.position; // add scroll offset
 
-      // TODO investigate positive z layer being below text? maybe ortho proj doesn't flip?
+      gc.drawRectangle({tlx, tly}, {text_width, gc.line_height},
+                       _control_mode
+                       ? glm::vec4{1, 0.7, 0.7, 0.5}
+                       : glm::vec4{0.7, 1, 0.7, 0.5}, 0.4);
+
+      // TODO investigate positive z layer being below text?
+      // - maybe ortho proj doesn't flip?
     }
 
   inline void handleKey(int key, int scancode, int action, int mods)

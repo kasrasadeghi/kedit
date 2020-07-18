@@ -13,7 +13,8 @@ struct Page {
   Type _type = Type::NoneT;
   Buffer* buffer;
 
-  glm::vec2 position = {100, 100};
+  inline static glm::vec2 offset = {50, 50};
+  glm::vec2 top_left_position = {100, 100};
   glm::vec2 size = {1000, 1000};
 
   void render(GraphicsContext& gc);

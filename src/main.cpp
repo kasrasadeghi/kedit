@@ -39,6 +39,7 @@ int main() {
     editor.handleKey(key, scancode, action, mods);
 
     if (GLFW_PRESS == action && GLFW_KEY_ESCAPE == key) {
+      // TODO save before exit dialogue?
       window.close();
     }
   });
@@ -74,7 +75,7 @@ int main() {
 
   /// Load Screen ===------------------------------------------------------------------------===///
   gc.clear(0, 0, 0, 1);
-  gc.text("loading", window.width()/2 - 100, window.height()/2, 1, glm::vec4(1));
+  gc.text("loading", window.width()/2 - 100, window.height()/2, glm::vec4(1));
   window.swapBuffers();
 
   gc.rectprog.init();
@@ -144,8 +145,8 @@ int main() {
     /// FPS Counter ===------------------------------------------------------===///
 
     auto tilde_width = gc.tr.textWidth("~");
-    gc.text("FPS: " + str(pr.framerate), window.width() - 300 + tilde_width, 50, 1);
-    gc.text("~FPS: " + str(pr.moving_avg_framerate), window.width() - 300, 80, 1);
+    gc.text("FPS: " + str(pr.framerate), window.width() - 300 + tilde_width, 50, glm::vec4(1));
+    gc.text("~FPS: " + str(pr.moving_avg_framerate), window.width() - 300, 80, glm::vec4(1));
 
     /// Render Messages ===--------------------------------------------------===///
 
@@ -153,16 +154,16 @@ int main() {
       int count = 0;
 
       if (title != "") {
-        gc.text(title, start_pos.x, start_pos.y + count++ * 30, 1);
+        gc.text(title, start_pos.x, start_pos.y + count++ * gc.line_height, glm::vec4(1));
         std::string titlebar = "";
         for (uint i = 0; i < title.length(); ++i) {
           titlebar += "-";
         }
-        gc.text(titlebar, start_pos.x, start_pos.y + count++ * 30, 1);
+        gc.text(titlebar, start_pos.x, start_pos.y + count++ * gc.line_height, glm::vec4(1));
       }
 
       for (std::string l : lines) {
-        gc.text(l, start_pos.x, start_pos.y + count++ * 30, 1);
+        gc.text(l, start_pos.x, start_pos.y + count++ * gc.line_height, glm::vec4(1));
       }
     };
 

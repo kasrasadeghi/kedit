@@ -89,27 +89,26 @@ struct Menu {
     {
       uint64_t line_number = 0;
 
-      double xpos = page.position.x + 50;
-      double ypos = page.position.y + 50;
+      double xpos = page.top_left_position.x + page.offset.x;
+      double ypos = page.top_left_position.y + page.offset.y;
 
       for (size_t i = 0; i < page.buffer->contents.lines.size(); ++i)
         {
           StringView line = page.buffer->contents.lines[i];
 
           // TODO make text render clip off viewable area
-          double current_offset = (30 * page.buffer->line_scroller.position);
-          double curr_ypos = current_offset + (ypos + (30 * line_number));
+          double current_offset = (gc.line_height * page.buffer->line_scroller.position);
+          double curr_ypos = current_offset + (ypos + (gc.line_height * line_number));
 
-          // TODO "+ 30" should be "+ text_height"
-          if (curr_ypos < (uint64_t)(gc.window->height() + 30) && curr_ypos > (uint64_t)(0))
+          if (curr_ypos < (uint64_t)(gc.window->height() + gc.line_height) && curr_ypos > (uint64_t)(0))
             {
               if (not selectable_lines.empty() && i == this->selectable_lines[this->cursor])
                 {
-                  gc.text(line, xpos, curr_ypos, 1, glm::vec4(1, 1, 1, 1));
+                  gc.text(line, xpos, curr_ypos, glm::vec4(1, 1, 1, 1));
                 }
               else
                 {
-                  gc.text(line, xpos, curr_ypos, 1, glm::vec4(0.7, 0.7, 0.7, 1));
+                  gc.text(line, xpos, curr_ypos, glm::vec4(0.7, 0.7, 0.7, 1));
                 }
             }
           ++ line_number;

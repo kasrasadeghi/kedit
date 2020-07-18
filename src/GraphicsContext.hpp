@@ -10,16 +10,27 @@ struct GraphicsContext {
   RenderWindow* window;
   TextRenderer tr;
   RectProgramContext rectprog;
+  GLfloat text_scale = 1;
+  GLfloat line_height = 30;
 
   template<int N>
-  inline void text(const char (&text)[N], GLfloat x, GLfloat y, GLfloat scale, glm::vec4 color = glm::vec4(1))
-    { tr.renderText(window->width(), window->height(), text, N - 1, x, y, scale, color); };
+  inline void text(const char (&text)[N], GLfloat x, GLfloat y, glm::vec4 color, GLfloat scale = 0)
+    {
+      tr.renderText(window->width(), window->height(), text, N - 1, x, y,
+                    scale != 0 ? scale : text_scale, color);
+    };
 
-  inline void text(StringView text, GLfloat x, GLfloat y, GLfloat scale, glm::vec4 color = glm::vec4(1))
-    { tr.renderText(window->width(), window->height(), text.data(), text.length(), x, y, scale, color); };
+  inline void text(StringView text, GLfloat x, GLfloat y, glm::vec4 color, GLfloat scale = 0)
+    {
+      tr.renderText(window->width(), window->height(), text.data(), text.length(), x, y,
+                    scale != 0 ? scale : text_scale, color);
+    };
 
-  inline void text(const std::string& text, GLfloat x, GLfloat y, GLfloat scale, glm::vec4 color = glm::vec4(1))
-    { tr.renderText(window->width(), window->height(), text.data(), text.length(), x, y, scale, color); };
+  inline void text(const std::string& text, GLfloat x, GLfloat y, glm::vec4 color, GLfloat scale = 0)
+    {
+      tr.renderText(window->width(), window->height(), text.data(), text.length(), x, y,
+                    scale != 0 ? scale : text_scale, color);
+    };
 
   GraphicsContext(RenderWindow* w): window(w)
     { glViewport(0, 0, window->width(), window->height()); }
