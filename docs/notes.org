@@ -1,3 +1,29 @@
+* save by file overwrite                                           - jul 18 2020
+The current naive save implementation saves by overwriting the entire file.
+There are more efficient ways to do this, even just seeking to the first dirty
+section of the file and writing from that point on, but so far this is fine.
+
+
+* simple undo implementation                                       - jul 18 2020
+Each FileBuffer has a history of commands as a stack.  Commands, upon execution,
+push onto the stack and store enough information in order to recover the
+previous state.  The cursor is a vital component of that information in order to
+be able to undo the command even when the cursor has moved away.
+
+
+* ctrl toggle vs hold                                              - jul 17 2020
+The "ctrl" button (Ctrl) has two usages: toggle and hold.  Press Ctrl without
+pressing anything else and it will toggle "control mode", currently designated
+using a red cursor.  Press Ctrl and hold it while pressing another button and
+it will activate "control mode".
+
+Control mode currently has several actions: undo, save, swap (to open buffer),
+and browse filesystem.  The hold version of of control mode allows you to use
+muscle memory from a variety of other applications to use undo.  The toggle
+version allows you to tap control and enter a variety of commands or a complex
+arpeggiated command without having to worry about holding parts of it.
+
+
 * generalized undo                                                 - jul 13 2020
 Undoing in text editors is usually done on a buffer-local level.  Undoing the
 following actions is buffer-local:
