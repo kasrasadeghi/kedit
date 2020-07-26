@@ -99,7 +99,7 @@ class TextRenderer {
   GLuint _shader_color_loc = 0;
 
 public:
-  inline TextRenderer(const std::string& binary_directory = "") {
+  inline TextRenderer(const std::string& binary_directory) {
     if (_shaderID == 0) {
       _shaderID = makeShader();
     }
@@ -121,18 +121,31 @@ public:
     if (FT_Init_FreeType(&ft))
       std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
 
+    // TODO consider using FT_New_Memory_Face and including at least one font in executable
     // Load font as face
     FT_Face face;
-    if (FT_New_Face(ft, FONT_NAME, 0, &face)) {
-      if ("" == binary_directory) {
-        std::cout << "ERROR::FREETYPE: Failed to load font from current directory" << std::endl;
-      } else {
-        using path = std::filesystem::path;
-        std::string font_path = (path(binary_directory) / path(FONT_NAME)).string();
-        if (FT_New_Face(ft, font_path.c_str(), 0, &face))
-          std::cout << "ERROR::FREETYPE: Failed to load font from " << binary_directory << std::endl;
-      }
-    }
+    using namespace std::filesystem;
+
+    std::string font_path = ([&]() -> std::string
+                             {
+                               path attempt = FONT_NAME;
+                               if (exists(attempt)) return FONT_NAME;
+
+                               attempt = path(binary_directory) / path(FONT_NAME);
+                               if (exists(attempt)) return attempt.string();
+
+                               // TODO this is atrocious. fix this later
+                               attempt = path("/home/kasra/bin") / path(FONT_NAME);
+                               if (exists(attempt)) return attempt.string();
+
+                               std::cout << "ERROR::FREETYPE could not find font in path" << std::endl;
+                               exit(EXIT_FAILURE);
+                             })();
+
+
+    if (FT_New_Face(ft, font_path.c_str(), 0, &face))
+      std::cout << "ERROR::FREETYPE: could not load font at '" << font_path << "'" << std::endl;
+
 
     // Set size to load glyphs as
     FT_Set_Pixel_Sizes(face, 0, 28);
