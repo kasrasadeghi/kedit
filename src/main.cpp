@@ -2,6 +2,7 @@
 #include "RectangleProgramContext.hpp"
 #include "GraphicsContext.hpp"
 
+#include <backbone-core-cpp/Path.hpp>
 #include <kgfx/RenderWindow.hpp>
 #include <kgfx/TextRenderer.hpp>
 #include <kgfx/Profiler.hpp>
@@ -11,7 +12,7 @@
 
 constexpr bool PROFILING = true;
 
-int main() {
+int main(int argc, char* argv[]) {
   std::cout << std::boolalpha;
 
   // TODO support for windowed mode and resizing
@@ -70,7 +71,7 @@ int main() {
     editor.verticalScroll(scroll_y);
   });
 
-  GraphicsContext gc { &window };
+  GraphicsContext gc { &window, parent_dir(argv[0]) };
   gc.initOptions();
 
   /// Load Screen ===------------------------------------------------------------------------===///

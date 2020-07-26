@@ -47,6 +47,11 @@ gdb: build
 clean:
 	rm -rf build
 
+install: release
+	cp bin/kedit ~/bin/kedit
+	[ -d ~/bin/fonts ] || mkdir ~/bin/fonts
+	cp fonts/SourceCodePro-Regular.ttf ~/bin/fonts
+
 .PHONY: profile
 profile:
 	valgrind --tool=callgrind bin/$(execname)
