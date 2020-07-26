@@ -11,6 +11,7 @@
 #include <map>
 #include <stdio.h>
 #include <string>
+#include <filesystem>
 // GLFW
 #include <GLFW/glfw3.h>
 // GLM
@@ -98,7 +99,7 @@ class TextRenderer {
   GLuint _shader_color_loc = 0;
 
 public:
-  inline TextRenderer() {
+  inline TextRenderer(const std::string& binary_directory = "") {
     if (_shaderID == 0) {
       _shaderID = makeShader();
     }
@@ -116,13 +117,22 @@ public:
     // FreeType
     FT_Library ft;
     // All functions return a value different than 0 whenever an error occurred
+
     if (FT_Init_FreeType(&ft))
       std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
 
     // Load font as face
     FT_Face face;
-    if (FT_New_Face(ft, FONT_NAME, 0, &face))
-      std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+    if (FT_New_Face(ft, FONT_NAME, 0, &face)) {
+      if ("" == binary_directory) {
+        std::cout << "ERROR::FREETYPE: Failed to load font from current directory" << std::endl;
+      } else {
+        using path = std::filesystem::path;
+        std::string font_path = (path(binary_directory) / path(FONT_NAME)).string();
+        if (FT_New_Face(ft, font_path.c_str(), 0, &face))
+          std::cout << "ERROR::FREETYPE: Failed to load font from " << binary_directory << std::endl;
+      }
+    }
 
     // Set size to load glyphs as
     FT_Set_Pixel_Sizes(face, 0, 28);
@@ -134,7 +144,7 @@ public:
     for (GLubyte c = 0; c < 128; c++) {
       // Load character glyph
       if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-        std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+        std::cout << "ERROR::FREETYPE: Failed to load Glyph" << std::endl;
         continue;
       }
       // Generate texture

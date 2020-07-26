@@ -32,7 +32,7 @@ struct GraphicsContext {
                     scale != 0 ? scale : text_scale, color);
     };
 
-  GraphicsContext(RenderWindow* w): window(w)
+  GraphicsContext(RenderWindow* w, const std::string& binary_directory): window(w), tr(binary_directory)
     { glViewport(0, 0, window->width(), window->height()); }
 
   inline void initOptions(void)
