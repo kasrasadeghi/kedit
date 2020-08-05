@@ -11,7 +11,7 @@
 // - manual inheritance
 struct Page {
   Type _type = Type::NoneT;
-  Buffer* buffer;
+  Buffer buffer;
 
   inline static glm::vec2 offset = {50, 50};
   glm::vec2 top_left_position = {100, 100};

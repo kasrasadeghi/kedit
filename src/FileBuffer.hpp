@@ -105,10 +105,10 @@ struct FileBuffer {
   inline void preparePageForRender(void)
     {
       // copy from backing store into rendering view to prepare to unmap file
-      page.buffer->contents.lines.clear();
+      page.buffer.contents.lines.clear();
       for (std::string& line : lines)
         {
-          page.buffer->contents.lines.push_back(line);
+          page.buffer.contents.lines.push_back(line);
         }
     }
 
@@ -122,8 +122,8 @@ struct FileBuffer {
       // TODO is there a way to lazily parse into lines?
 
       // parse into lines and making backing store separate from mapped file
-      page.buffer->contents.make(file_contents);
-      for (StringView& line : page.buffer->contents.lines)
+      page.buffer.contents.make(file_contents);
+      for (StringView& line : page.buffer.contents.lines)
         {
           lines.push_back(line.stringCopy());
         }
@@ -146,7 +146,7 @@ struct FileBuffer {
     {
       return page._type == Type::FileBufferT
         && file.size() > 0
-        && (uint64_t)(file.size()) > page.buffer->contents.length();
+        && (uint64_t)(file.size()) > page.buffer.contents.length();
     }
 
   inline void render(GraphicsContext& gc)
@@ -157,10 +157,10 @@ struct FileBuffer {
       double xpos = page.top_left_position.x + page.offset.x;
       double ypos = page.top_left_position.y + page.offset.y;
 
-      for (size_t line_i = 0; line_i < page.buffer->contents.lines.size(); ++line_i)
+      for (size_t line_i = 0; line_i < page.buffer.contents.lines.size(); ++line_i)
         {
-          StringView line = page.buffer->contents.lines[line_i];
-          double current_offset = (gc.line_height * page.buffer->line_scroller.position);
+          StringView line = page.buffer.contents.lines[line_i];
+          double current_offset = (gc.line_height * page.buffer.line_scroller.position);
           double curr_ypos = current_offset + (ypos + (gc.line_height * line_number));
 
           if (curr_ypos < (uint64_t)(gc.window->height() + gc.line_height) && curr_ypos > (uint64_t)(0))

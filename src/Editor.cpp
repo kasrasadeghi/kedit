@@ -1,17 +1,11 @@
 #include "Editor.hpp"
 
-// Note: only use this function to allocate buffers put in Pages accounted for
-// in _pages.
-//
+// File: Editor.cpp
 // Commentary:
-//      _filebuffers and _menus refer to _buffers, so when _buffers resizes,
-// they need to move pointers.  FileBuffers and Menus both refer to Buffers in
-// their Pages, which are kept track of in _pages, so we can refer to both
-// _filebuffers and _menus by using _pages.  Thus, when moving _buffers.data(),
-// for each page in _pages, fix page->buffer by apply the delta from the old
-// backing store to the new backing store.  delta = (new - old).
-//      _pages has a similar problem that is also solved by pointer moving.
-//
+//      Implementation of pointer-move garbage collection for managing
+// filebuffers and menus along with the page referencer.
+
+
 // CONSIDER: alternatives to pointer moving
 // - Observable pointers
 // - indexes into each list
@@ -24,43 +18,10 @@
 //           removing _buffers and inlining the Buffer in Page (making it not a
 //           pointer), should make memory management much much easier than
 //           pointer-moving.
-Buffer* Editor::allocBuffer(void)
-  {
-    if (_buffers.size() == _buffers.capacity())
-      {
-        auto* before = _buffers.data();
-        _buffers.push_back(Buffer{});
-        auto* after = _buffers.data();
-        if (before != after)
-          {
-            println("LOG: _buffers grow with move");
-            for (auto* page : _pages)
-              {
-                auto old_index = (page->buffer - before);
-                page->buffer = after + old_index;
-              }
-          }
-        else
-          {
-            println("LOG: _buffers grow without move");
-          }
-      }
-    else
-      {
-        auto* before = _buffers.data();
-        _buffers.push_back(Buffer{});
-        auto* after = _buffers.data();
-        if (before != after)
-          {
-            println("SUSPICIOUS: _buffers move when not at capacity");
-          }
-      }
-    return &_buffers.back();
-  }
 
 // Commentary:
 //    Both allocFileBuffer and allocMenu require pointer moving when
-// their respective backing buffer moves.  When moving _filebuffers,
+// their respective backing store moves.  When moving _filebuffers,
 // find which pages are FileBufferT's and fix them.
 FileBuffer* Editor::allocFileBuffer(void)
   {
@@ -108,7 +69,6 @@ FileBuffer* Editor::allocFileBuffer(void)
 
     FileBuffer& curr = _filebuffers.back();
     curr.page._type = Type::FileBufferT;
-    curr.page.buffer = allocBuffer();
 
     _pages.push_back(&curr.page);
     return &curr;
@@ -160,30 +120,25 @@ Menu* Editor::allocMenu(void)
 
     Menu& curr = _menus.back();
     curr.page._type = Type::MenuT;
-    curr.page.buffer = allocBuffer();
 
     _pages.push_back(&curr.page);
     return &curr;
   }
 
 // Commentary:
-//      A menu exists in 3 different contexts:
-//   1. _buffers, where its buffer lives
-//   2. _menus,   where the Menu itself and the Page lives as a component.
+//      A menu exists in 2 different contexts:
+//   1. _menus,   where the Menu itself and the Page lives as a component.
 //                The Page points to the buffer.
-//   3. _pages,   where a pointer to its Page lives
-//      To free a menu, we must free its buffer, which may move the buffers, which
-// are refered to by the Pages in both _menus and _filebuffers.  We can use _pages
-// to access all Pages, and thus fix all buffers pointers which are equally
-// affected.  We can remove the pointer in _pages for the menu that's being freed.
-// Because neither _menus nor _buffers refers to _pages, and we only use _pages
-// to fix buffer pointers, we can free the Page* in _pages first, as we don't need
-// to fix the Page* for the Menu we are about to remove anyways.
-// So far:
+//   2. _pages,   where a pointer to its Page lives
+//      To free a menu, we must remove the pointer in _pages for the menu that's
+// being freed. Because nothing aliases the contents of _pages, we can free the
+// Page* in _pages first, as we don't need to fix the Page* for the Menu we are
+// about to remove anyways.
+// So:
 //   1. free Page* in _pages.
-//   2. free Buffer in _buffers.  <- Keep track of the buffers delta,
-//                                   fix the pages that remain.
-//   3. free Menu in _menus
+//   2. free Menu in _menus
+//      - decrement page* of all menus that refer to a menu after the one removed
+//      - apply offset to pages if menu backing store moves
 void Editor::freeMenu(Menu* menu)
   {
     // garbage collect from _pages
@@ -191,39 +146,6 @@ void Editor::freeMenu(Menu* menu)
                                 [&](Page* curr_page) { return curr_page == (Page*)menu; }),
                  _pages.end());
     // NOTE: nobody refers to pages, so there's no pointer-moving to do
-
-    // buffer* is in page, in menu
-    auto* buffptr = menu->page.buffer;
-    auto* buffer_before = _buffers.data();
-    // TODO optimize. can just memcpy instead of erase-remove idiom
-    _buffers.erase(std::remove_if(_buffers.begin(), _buffers.end(),
-                                  [&](const Buffer& buf) { return &buf == buffptr; }),
-                   _buffers.end());
-    auto* buffer_after = _buffers.data();
-
-    // pointer-move _pages to handle _buffer move
-    if (buffer_before != buffer_after)
-      {
-        println("LOG: _buffers shrink with move");
-      }
-    else
-      {
-        println("LOG: _buffers shrink without move");
-      }
-
-    for (auto* page : _pages)
-      {
-        auto old_index = (page->buffer - buffer_before);
-
-        // the old_index is one less if we removed an element before it
-        auto removed_index = buffptr - buffer_before;
-        if (old_index > removed_index)
-          {
-            -- old_index;
-          }
-
-        page->buffer = buffer_after + old_index;
-      }
 
     // garbage collect from _menus
     // - pointer-move _pages if _menus moves
@@ -274,39 +196,6 @@ void Editor::freeFileBuffer(FileBuffer* filebuffer)
                                 [&](Page* curr_page) { return curr_page == (Page*)filebuffer; }),
                  _pages.end());
     // NOTE: nobody refers to pages, so there's no pointer-moving to do
-
-    // buffer* is in page, in filebuffer
-    auto* buffptr = filebuffer->page.buffer;
-    auto* buffer_before = _buffers.data();
-    // TODO optimize. can just memcpy instead of erase-remove idiom
-    _buffers.erase(std::remove_if(_buffers.begin(), _buffers.end(),
-                                  [&](const Buffer& buf) { return &buf == buffptr; }),
-                   _buffers.end());
-    auto* buffer_after = _buffers.data();
-
-    // pointer-move _pages to handle _buffer move
-    if (buffer_before != buffer_after)
-      {
-        println("LOG: _buffers shrink with move");
-      }
-    else
-      {
-        println("LOG: _buffers shrink without move");
-      }
-
-    for (auto* page : _pages)
-      {
-        auto old_index = (page->buffer - buffer_before);
-
-        // the old_index is one less if we removed an element before it
-        auto removed_index = buffptr - buffer_before;
-        if (old_index > removed_index)
-          {
-            -- old_index;
-          }
-
-        page->buffer = buffer_after + old_index;
-      }
 
     // garbage collect from _filebuffers
     // - pointer-move _pages if _filebuffers moves

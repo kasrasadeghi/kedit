@@ -92,12 +92,12 @@ struct Menu {
       double xpos = page.top_left_position.x + page.offset.x;
       double ypos = page.top_left_position.y + page.offset.y;
 
-      for (size_t i = 0; i < page.buffer->contents.lines.size(); ++i)
+      for (size_t i = 0; i < page.buffer.contents.lines.size(); ++i)
         {
-          StringView line = page.buffer->contents.lines[i];
+          StringView line = page.buffer.contents.lines[i];
 
           // TODO make text render clip off viewable area
-          double current_offset = (gc.line_height * page.buffer->line_scroller.position);
+          double current_offset = (gc.line_height * page.buffer.line_scroller.position);
           double curr_ypos = current_offset + (ypos + (gc.line_height * line_number));
 
           if (curr_ypos < (uint64_t)(gc.window->height() + gc.line_height) && curr_ypos > (uint64_t)(0))
@@ -129,8 +129,8 @@ struct Menu {
 
       // render texp to rope
       _repr_alloc = repr.tabs();
-      page.buffer->contents.make(_repr_alloc);
-      page.buffer->line_scroller.reset();
+      page.buffer.contents.make(_repr_alloc);
+      page.buffer.line_scroller.reset();
     }
 
   inline Texp _createMenuRepr(const Texp& layout, uint64_t& curr_line)
