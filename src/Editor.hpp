@@ -16,8 +16,6 @@
 #include <unistd.h> // chdir
 
 struct Editor {
-  std::vector<Buffer> _buffers;
-
   std::vector<FileBuffer> _filebuffers;
   std::vector<Menu>   _menus;
 
@@ -30,7 +28,6 @@ struct Editor {
 
   /// Memory Management ===-------------------------------------------------------------------===///
 
-  Buffer* allocBuffer(void);
   FileBuffer* allocFileBuffer(void);
   Menu* allocMenu(void);
 
@@ -66,14 +63,14 @@ struct Editor {
 
   inline void verticalScroll(double scroll_y)
     {
-      currentPage()->buffer->line_scroller.target += scroll_y;
+      currentPage()->buffer.line_scroller.target += scroll_y;
     }
 
   inline void tick(double delta_time)
     {
-      for (auto& buffer : _buffers)
+      for (Page* page : _pages)
         {
-          buffer.tick(delta_time);
+          page->buffer.tick(delta_time);
         }
     }
 
@@ -286,7 +283,7 @@ struct Editor {
                  + gc.line_height * fb->cursor.line
                  + (-(0.8 * gc.line_height)); // start at top of line, 0.8*line_height = line_middle - baseline
 
-      tly += gc.line_height * fb->page.buffer->line_scroller.position; // add scroll offset
+      tly += gc.line_height * fb->page.buffer.line_scroller.position; // add scroll offset
 
       gc.drawRectangle({tlx, tly}, {text_width, gc.line_height},
                        _control_mode
@@ -321,6 +318,8 @@ struct Editor {
               if (GLFW_KEY_W == key)
                 if (_pages.size() > 1)
                   freeCurrent();
+
+              // CONSIDER: closing file if it is the only one open and opening a menu
             }
         }
 

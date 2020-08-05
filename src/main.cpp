@@ -112,7 +112,6 @@ int main(int argc, char* argv[]) {
 
     status(str(editor.currentPage()->_type) + " :current page type ");
     status(str(editor._pages.size())        + " :page count "       );
-    status(str(editor._buffers.size())      + " :buffer count "     );
     status(str(editor._menus.size())        + " :menu count "       );
     status(str(editor._filebuffers.size())  + " :filebuffer count " );
     status(str(editor._control_mode)        + " :control mode "     );
