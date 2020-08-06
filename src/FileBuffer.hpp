@@ -153,7 +153,6 @@ struct FileBuffer {
     {
       uint64_t line_number = 0;
 
-      // TODO have constexpr PAGE_OFFSET
       double xpos = page.top_left_position.x + page.offset.x;
       double ypos = page.top_left_position.y + page.offset.y;
 
@@ -173,6 +172,23 @@ struct FileBuffer {
           ++ line_number;
         }
     }
+
+  inline void addCursor(GraphicsContext& gc, bool control_mode)
+    {
+      glm::vec2 tlcoord = page.textCoord(gc, cursor);
+
+      // TODO change for variable text width fonts
+      float text_width = gc.tr.textWidth("a");
+
+      gc.drawRectangle(tlcoord, {text_width, gc.line_height},
+                       control_mode
+                       ? glm::vec4{1, 0.7, 0.7, 0.5}
+                       : glm::vec4{0.7, 1, 0.7, 0.5}, 0.4);
+
+      // TODO investigate positive z layer being below text?
+      // - maybe ortho proj doesn't flip?
+    }
+
 
   /// Interaction ===-------------------------------------------------------------------===///
 
