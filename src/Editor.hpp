@@ -258,7 +258,7 @@ struct Editor {
       addBackground(gc);
       if (Type::FileBufferT == currentPage()->_type)
         {
-          addCursor(gc);
+          currentFileBuffer()->addCursor(gc, _control_mode);
         }
     }
 
@@ -266,32 +266,6 @@ struct Editor {
     {
       gc.drawRectangle(currentPage()->top_left_position,
                        currentPage()->size, {0.1, 0.1, 0.1, 1}, 0.6);
-    }
-
-  inline void addCursor(GraphicsContext& gc)
-    {
-      // TODO change for variable text width fonts
-      double text_width = gc.tr.textWidth("a");
-
-      auto* fb = currentFileBuffer();
-      double tlx = fb->page.top_left_position.x
-                 + fb->page.offset.x
-                 + text_width * fb->cursor.column;
-
-      double tly = fb->page.top_left_position.y
-                 + fb->page.offset.y
-                 + gc.line_height * fb->cursor.line
-                 + (-(0.8 * gc.line_height)); // start at top of line, 0.8*line_height = line_middle - baseline
-
-      tly += gc.line_height * fb->page.buffer.line_scroller.position; // add scroll offset
-
-      gc.drawRectangle({tlx, tly}, {text_width, gc.line_height},
-                       _control_mode
-                       ? glm::vec4{1, 0.7, 0.7, 0.5}
-                       : glm::vec4{0.7, 1, 0.7, 0.5}, 0.4);
-
-      // TODO investigate positive z layer being below text?
-      // - maybe ortho proj doesn't flip?
     }
 
   inline void handleKey(int key, int scancode, int action, int mods)
