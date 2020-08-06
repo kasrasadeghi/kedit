@@ -174,6 +174,23 @@ struct FileBuffer {
         }
     }
 
+  inline void addCursor(GraphicsContext& gc, bool control_mode)
+    {
+      glm::vec2 tlcoord = page.textCoord(gc, cursor);
+
+      // TODO change for variable text width fonts
+      float text_width = gc.tr.textWidth("a");
+
+      gc.drawRectangle(tlcoord, {text_width, gc.line_height},
+                       control_mode
+                       ? glm::vec4{1, 0.7, 0.7, 0.5}
+                       : glm::vec4{0.7, 1, 0.7, 0.5}, 0.4);
+
+      // TODO investigate positive z layer being below text?
+      // - maybe ortho proj doesn't flip?
+    }
+
+
   /// Interaction ===-------------------------------------------------------------------===///
 
   inline void handleKey(int key, int scancode, int action, int mods)

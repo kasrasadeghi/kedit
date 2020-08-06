@@ -19,4 +19,28 @@ struct Page {
 
   void render(GraphicsContext& gc);
   void handleKey(int key, int scancode, int action, int mods);
+
+  glm::vec2 lineCoord(GraphicsContext& gc, Cursor c)
+    {
+      float tlx = top_left_position.x
+                + offset.x;
+
+      float tly = top_left_position.y
+                + offset.y
+                + (gc.line_height * c.line)
+                + (-(0.8 * gc.line_height))  // start at top of line, 0.8*line_height = line_middle - baseline
+                + (gc.line_height * buffer.line_scroller.position);  // add scroll offset
+
+      return glm::vec2{tlx, tly};
+    }
+
+  /// get the top left coordinate for a cursor position
+  glm::vec2 textCoord(GraphicsContext& gc, Cursor c)
+    {
+      // TODO change for variable text width fonts
+      float text_width = gc.tr.textWidth("a");
+
+      auto coord = lineCoord(gc, c);
+      return coord + glm::vec2{(text_width * c.column), 0};
+    }
 };
