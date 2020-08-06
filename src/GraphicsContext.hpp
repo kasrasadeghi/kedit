@@ -75,6 +75,7 @@ struct GraphicsContext {
       rectprog.instances.clear();
     }
 
+  // CONSIDER: rename to "queue" or "add"
   inline void drawRectangle(glm::vec2 topleft, glm::vec2 size, glm::vec4 color, float z)
     { rectprog.instances.emplace_back(topleft, size, color, z); }
 };

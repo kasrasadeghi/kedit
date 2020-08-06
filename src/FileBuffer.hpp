@@ -153,7 +153,6 @@ struct FileBuffer {
     {
       uint64_t line_number = 0;
 
-      // TODO have constexpr PAGE_OFFSET
       double xpos = page.top_left_position.x + page.offset.x;
       double ypos = page.top_left_position.y + page.offset.y;
 
