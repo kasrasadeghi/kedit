@@ -253,6 +253,17 @@ struct Editor {
   inline void render(GraphicsContext& gc)
     { currentPage()->render(gc); }
 
+  inline Cursor getCurrentCursor(void)
+    {
+      switch (currentPage()->_type) {
+      case Type::FileBufferT: return currentFileBuffer()->cursor;
+      case Type::MenuT: return Cursor{currentMenu()->cursor, 0};
+      default:
+        printerrln("WARNING: Page of type ", currentPage()->_type, " encountered.");
+        return Cursor{0, 0};
+      }
+    }
+
   inline void addRectangles(GraphicsContext& gc)
     {
       addBackground(gc);
@@ -260,6 +271,8 @@ struct Editor {
         {
           currentFileBuffer()->addCursor(gc, _control_mode);
         }
+      currentPage()->scrollToCursor(gc, getCurrentCursor());
+      currentPage()->highlightLine(gc, getCurrentCursor());
     }
 
   inline void addBackground(GraphicsContext& gc)
