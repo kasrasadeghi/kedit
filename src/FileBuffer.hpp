@@ -282,6 +282,38 @@ struct FileBuffer {
               _cursorMoveToEndOfLine();
             }
 
+          constexpr uint64_t PAGE_LINE_COUNT = 5;
+
+          if (GLFW_KEY_PAGE_DOWN == key)
+            {
+              // TODO: replace with std::min?
+              if (cursor.line < lines.size() - 1 - PAGE_LINE_COUNT)
+                {
+                  cursor.line += PAGE_LINE_COUNT;
+                }
+              else
+                {
+                  cursor.line = lines.size() - 1;
+                }
+
+              _correctCursorPastEndOfLine();
+              return;
+            }
+
+          if (GLFW_KEY_PAGE_UP == key)
+            {
+              // TODO: replace with std::min?
+              if (cursor.line > PAGE_LINE_COUNT)
+                {
+                  cursor.line -= PAGE_LINE_COUNT;
+                }
+              else
+                {
+                  cursor.line = 0;
+                }
+
+              _correctCursorPastEndOfLine();
+              return;
             }
         }
     }
