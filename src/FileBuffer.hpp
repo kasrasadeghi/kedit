@@ -192,6 +192,21 @@ struct FileBuffer {
 
   /// Interaction ===-------------------------------------------------------------------===///
 
+  inline void _cursorMoveToEndOfLine()
+    {
+      cursor.column = lines.at(cursor.line).length();
+    }
+
+  inline void _correctCursorPastEndOfLine()
+    {
+      // TODO: implement phantom cursor
+      // correct cursor if off the end
+      if (lines.at(cursor.line).length() < cursor.column)
+        {
+          _cursorMoveToEndOfLine();
+        }
+    }
+
   inline void handleKey(int key, int scancode, int action, int mods)
     {
 
@@ -205,11 +220,7 @@ struct FileBuffer {
             {
               -- cursor.line;
 
-              // correct cursor if off the end
-              if (lines.at(cursor.line).length() < cursor.column)
-                {
-                  cursor.column = lines.at(cursor.line).length();
-                }
+              _correctCursorPastEndOfLine();
               return;
             }
 
@@ -217,12 +228,7 @@ struct FileBuffer {
             {
               ++ cursor.line;
 
-              // TODO implement phantom cursor
-              // correct cursor if off the end
-              if (lines.at(cursor.line).length() < cursor.column)
-                {
-                  cursor.column = lines.at(cursor.line).length();
-                }
+              _correctCursorPastEndOfLine();
               return;
             }
 
@@ -240,7 +246,7 @@ struct FileBuffer {
                   if (cursor.line != 0)
                     {
                       -- cursor.line;
-                      cursor.column = lines.at(cursor.line).length();
+                      _cursorMoveToEndOfLine();
                     }
                   return;
                 }
@@ -273,7 +279,9 @@ struct FileBuffer {
 
           if (GLFW_KEY_END == key)
             {
-              cursor.column = lines.at(cursor.line).length();
+              _cursorMoveToEndOfLine();
+            }
+
             }
         }
     }
