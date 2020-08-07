@@ -23,8 +23,8 @@ int main(int argc, char* argv[]) {
   glfwSwapInterval(1); // framerate set: 0 for uncapped, 1 for monitor refresh rate
 
   Editor editor;
-  // editor.openBrowser();
-  editor.loadFile("README.md");
+  editor.openBrowser();
+  // editor.loadFile("README.md");
 
   bool wireframe_mode = false;
 
