@@ -109,6 +109,7 @@ int main(int argc, char* argv[]) {
     gc.renderOptions();
 
     gc.alignViewport();
+    gc.scissorFull();
     glScissor(0, 0, window.width(), window.height());
 
     gc.clear(0.5, 0.5, 0.5, 1);
@@ -124,16 +125,11 @@ int main(int argc, char* argv[]) {
 
     // glScissor uses lower left coordinates, (1,1) is first bottom left coordinate
     auto* page = editor.currentPage();
-    glScissor(page->top_left_position.x,
-              window.height()
-              - page->top_left_position.y
-              - page->size.y,
-              page->size.x,
-              page->size.y);
+    gc.scissorRect(page->top_left_position, page->size);
 
     editor.render(gc);
 
-    glScissor(0, 0, window.width(), window.height());
+    gc.scissorFull();
 
     // TODO translucency on top of text goes after editor render
 
