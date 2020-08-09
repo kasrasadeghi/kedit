@@ -107,7 +107,10 @@ int main(int argc, char* argv[]) {
 
     /// Render to Screen ===-----------------------------------------------------===///
     gc.renderOptions();
+
     gc.alignViewport();
+    glScissor(0, 0, window.width(), window.height());
+
     gc.clear(0.5, 0.5, 0.5, 1);
 
     status(str(editor.currentPage()->_type) + " :current page type ");
@@ -119,7 +122,18 @@ int main(int argc, char* argv[]) {
     editor.addRectangles(gc);
     gc.renderRectangles();
 
+    // glScissor uses lower left coordinates, (1,1) is first bottom left coordinate
+    auto* page = editor.currentPage();
+    glScissor(page->top_left_position.x,
+              window.height()
+              - page->top_left_position.y
+              - page->size.y,
+              page->size.x,
+              page->size.y);
+
     editor.render(gc);
+
+    glScissor(0, 0, window.width(), window.height());
 
     // TODO translucency on top of text goes after editor render
 
