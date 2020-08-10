@@ -372,7 +372,7 @@ struct Editor {
           print("  ", i, " ");
           auto* page = _pages[i];
           print("  (type, ", page->_type, ")");
-          print("  (addr, 0x", std::hex, (uintptr_t)page, std::oct, ")");
+          print("  (addr, 0x", std::hex, (uintptr_t)page, std::dec, ")");
           println();
         }
       println("]");
