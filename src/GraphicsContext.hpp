@@ -45,7 +45,7 @@ struct GraphicsContext {
     { glViewport(0, 0, window->width(), window->height()); }
 
   inline void scissorFull(void)
-    { glViewport(0, 0, window->width(), window->height()); }
+    { glScissor(0, 0, window->width(), window->height()); }
 
   /// Translates top-left coordinate to lower-left coordinate.
   // glScissor uses lower left coordinates,
