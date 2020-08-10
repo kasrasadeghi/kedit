@@ -76,6 +76,7 @@ int main(int argc, char* argv[]) {
 
   /// Load Screen ===------------------------------------------------------------------------===///
   gc.clear(0, 0, 0, 1);
+  gc.scissorFull();
   gc.text("loading", window.width()/2 - 100, window.height()/2, glm::vec4(1));
   window.swapBuffers();
 
@@ -110,7 +111,6 @@ int main(int argc, char* argv[]) {
 
     gc.alignViewport();
     gc.scissorFull();
-    glScissor(0, 0, window.width(), window.height());
 
     gc.clear(0.5, 0.5, 0.5, 1);
 
