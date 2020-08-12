@@ -94,7 +94,7 @@ struct FileBuffer {
   time_t last_modify_time = 0;
 
   Cursor cursor;
-  std::vector<std::string> lines;
+  Rope rope;
   History history;
 
   inline void destroy()
@@ -106,7 +106,7 @@ struct FileBuffer {
     {
       // copy from backing store into rendering view to prepare to unmap file
       page.buffer.contents.lines.clear();
-      for (std::string& line : lines)
+      for (std::string& line : rope.lines)
         {
           page.buffer.contents.lines.push_back(line);
         }
@@ -125,7 +125,7 @@ struct FileBuffer {
       page.buffer.contents.make(file_contents);
       for (StringView& line : page.buffer.contents.lines)
         {
-          lines.push_back(line.stringCopy());
+          rope.lines.push_back(line.stringCopy());
         }
 
       // TODO probably be more efficient than this
@@ -194,14 +194,14 @@ struct FileBuffer {
 
   inline void _cursorMoveToEndOfLine()
     {
-      cursor.column = lines.at(cursor.line).length();
+      cursor.column = rope.lines.at(cursor.line).length();
     }
 
   inline void _correctCursorPastEndOfLine()
     {
       // TODO: implement phantom cursor
       // correct cursor if off the end
-      if (lines.at(cursor.line).length() < cursor.column)
+      if (rope.lines.at(cursor.line).length() < cursor.column)
         {
           _cursorMoveToEndOfLine();
         }
@@ -212,7 +212,7 @@ struct FileBuffer {
 
       if (GLFW_PRESS == action || GLFW_REPEAT == action)
         {
-          if (not cursor.invariant(lines)) return;
+          if (not cursor.invariant(rope.lines)) return;
 
           // DIRECTIONS
 
@@ -224,7 +224,7 @@ struct FileBuffer {
               return;
             }
 
-          if (GLFW_KEY_DOWN == key && cursor.line < lines.size() - 1)
+          if (GLFW_KEY_DOWN == key && cursor.line < rope.lines.size() - 1)
             {
               ++ cursor.line;
 
@@ -254,15 +254,15 @@ struct FileBuffer {
 
           if (GLFW_KEY_RIGHT == key)
             {
-              if (cursor.column < lines.at(cursor.line).size())
+              if (cursor.column < rope.lines.at(cursor.line).size())
                 {
                   ++ cursor.column;
                   return;
                 }
 
               // roll over to next line
-              if (cursor.column == lines.at(cursor.line).size()
-                  && cursor.line < lines.size() - 1)
+              if (cursor.column == rope.lines.at(cursor.line).size()
+                  && cursor.line < rope.lines.size() - 1)
                 {
                   cursor.column = 0;
                   ++ cursor.line;
@@ -287,13 +287,13 @@ struct FileBuffer {
           if (GLFW_KEY_PAGE_DOWN == key)
             {
               // TODO: replace with std::min?
-              if (cursor.line < lines.size() - 1 - PAGE_LINE_COUNT)
+              if (cursor.line < rope.lines.size() - 1 - PAGE_LINE_COUNT)
                 {
                   cursor.line += PAGE_LINE_COUNT;
                 }
               else
                 {
-                  cursor.line = lines.size() - 1;
+                  cursor.line = rope.lines.size() - 1;
                 }
 
               _correctCursorPastEndOfLine();
@@ -320,8 +320,8 @@ struct FileBuffer {
 
   inline void _mergeLineWithNext(void)
     {
-      lines.at(cursor.line) += lines.at(cursor.line + 1);
-      lines.erase(lines.begin() + cursor.line + 1);
+      rope.lines.at(cursor.line) += rope.lines.at(cursor.line + 1);
+      rope.lines.erase(rope.lines.begin() + cursor.line + 1);
     }
 
   inline void _splitLineAtCursor(void)
@@ -336,7 +336,7 @@ struct FileBuffer {
 
   inline char _deleteAtCursor(void)
     {
-      auto& line = lines.at(cursor.line);
+      auto& line = rope.lines.at(cursor.line);
       char to_remove = line.at(cursor.column);
       line.erase(line.begin() + cursor.column);
       return to_remove;
@@ -344,14 +344,14 @@ struct FileBuffer {
 
   inline void _insertAtCursor(char c)
     {
-      auto& line = lines.at(cursor.line);
+      auto& line = rope.lines.at(cursor.line);
       line.insert(line.begin() + cursor.column, c);
     }
 
   inline void handleKeyEdit(int key, int scancode, int action, int mods)
     {
       // guards
-      if (not cursor.invariant(lines)) return;
+      if (not cursor.invariant(rope.lines)) return;
 
 
       if (GLFW_PRESS != action and GLFW_REPEAT != action) return;
@@ -367,7 +367,7 @@ struct FileBuffer {
 
               if (0 == cursor.line) return;
               -- cursor.line;
-              cursor.column = lines.at(cursor.line).length();
+              cursor.column = rope.lines.at(cursor.line).length();
               history.add("\n");
               history.addCursor(cursor);
               _mergeLineWithNext();
@@ -391,11 +391,11 @@ struct FileBuffer {
           history.push("delete");
           history.addCursor(cursor);
 
-          if (lines.at(cursor.line).length() == cursor.column)
+          if (rope.lines.at(cursor.line).length() == cursor.column)
             {
               // cannot delete anything at the end of the last line,
               //   line_index = size - 1
-              if (lines.size() - 1 == cursor.line) return;
+              if (rope.lines.size() - 1 == cursor.line) return;
               history.add("\n");
               _mergeLineWithNext();
             }
@@ -417,20 +417,20 @@ struct FileBuffer {
 
           if (0 == cursor.column)
             {
-              lines.insert(lines.begin() + cursor.line, "");
+              rope.lines.insert(rope.lines.begin() + cursor.line, "");
               ++ cursor.line;
             }
 
-          else if (lines.at(cursor.line).length() == cursor.column)
+          else if (rope.lines.at(cursor.line).length() == cursor.column)
             {
-              lines.insert(lines.begin() + cursor.line + 1, "");
+              rope.lines.insert(rope.lines.begin() + cursor.line + 1, "");
               ++ cursor.line;
               cursor.column = 0;
             }
 
           else
             {
-              _splitLineAtCursor();
+              rope.linebreak(cursor);
 
               ++ cursor.line;
               cursor.column = 0;
@@ -444,7 +444,7 @@ struct FileBuffer {
   inline void handleChar(unsigned int codepoint)
     {
       // TODO check cursor in bounds/ check that lines is big enough to contain cursor
-      if (not cursor.invariant(lines)) return;
+      if (not cursor.invariant(rope.lines)) return;
 
       history.push("char");
       history.addCursor(cursor);
@@ -460,7 +460,7 @@ struct FileBuffer {
   inline void handleKeyControl(int key, int scancode, int action, int mods)
     {
       // guards
-      if (not cursor.invariant(lines)) return;
+      if (not cursor.invariant(rope.lines)) return;
 
       // CONTROL
 
@@ -551,7 +551,7 @@ struct FileBuffer {
         { println("WARNING: file modified after opening"); }
       // TODO check for first dirty line to seek and not rewrite pre-dirty segment
       std::string acc;
-      for (const auto& line : lines) acc += line + "\n";
+      for (const auto& line : rope.lines) acc += line + "\n";
       file.overwrite(acc);
     }
 };
