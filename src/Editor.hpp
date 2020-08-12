@@ -275,7 +275,7 @@ struct Editor {
       addBackground(gc);
       if (Type::FileBufferT == currentPage()->_type)
         {
-          currentFileBuffer()->addCursor(gc, _control_mode);
+          currentFileBuffer()->addCursors(gc, _control_mode);
         }
       // TODO: fix mouse scrolling
       // - should only scroll to cursor when cursor is interacted with (arrow keys)
