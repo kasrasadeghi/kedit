@@ -10,7 +10,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-constexpr bool PROFILING = true;
+constexpr bool PROFILING = false;
 
 int main(int argc, char* argv[]) {
   std::cout << std::boolalpha;
@@ -99,6 +99,23 @@ int main(int argc, char* argv[]) {
       status_messages.push_back(m);
     };
 
+    auto list_text = [&](std::vector<std::string> lines, glm::ivec2 start_pos, std::string title = "") {
+      int count = 0;
+
+      if (title != "") {
+        gc.text(title, start_pos.x, start_pos.y + count++ * gc.line_height, glm::vec4(1));
+        std::string titlebar = "";
+        for (uint i = 0; i < title.length(); ++i) {
+          titlebar += "-";
+        }
+        gc.text(titlebar, start_pos.x, start_pos.y + count++ * gc.line_height, glm::vec4(1));
+      }
+
+      for (std::string l : lines) {
+        gc.text(l, start_pos.x, start_pos.y + count++ * gc.line_height, glm::vec4(1));
+      }
+    };
+
     /// Handle Updates ===-------------------------------------------------------------------===///
     // handle updates that need delta_time, e.g. physics, movement
 
@@ -160,28 +177,12 @@ int main(int argc, char* argv[]) {
 
     /// Render Messages ===--------------------------------------------------===///
 
-    auto list_text = [&](std::vector<std::string> lines, glm::ivec2 start_pos, std::string title = "") {
-      int count = 0;
 
-      if (title != "") {
-        gc.text(title, start_pos.x, start_pos.y + count++ * gc.line_height, glm::vec4(1));
-        std::string titlebar = "";
-        for (uint i = 0; i < title.length(); ++i) {
-          titlebar += "-";
-        }
-        gc.text(titlebar, start_pos.x, start_pos.y + count++ * gc.line_height, glm::vec4(1));
-      }
+    // if (not editor._menus.empty()) {
+    //  list_text(editor.command_history, {window.width() - 500, window.height() - 700}, "history");
+    // }
 
-      for (std::string l : lines) {
-        gc.text(l, start_pos.x, start_pos.y + count++ * gc.line_height, glm::vec4(1));
-      }
-    };
-
-    if (not editor._menus.empty()) {
-      list_text(editor.command_history, {window.width() - 500, window.height() - 700}, "history");
-    }
-
-    list_text(status_messages, {window.width() - 500, window.height() - 500}, "status");
+    // list_text(status_messages, {window.width() - 500, window.height() - 500}, "status");
 
     if constexpr(PROFILING) { pr.event("render text"); }
 
