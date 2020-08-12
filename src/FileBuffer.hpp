@@ -574,5 +574,10 @@ struct FileBuffer {
 
       store.make(rope, shadow_cursor, cursor);
     }
+
+  inline void paste(const Rope& store)
+    {
+      rope.insert(store, cursor);
+      preparePageForRender();
     }
 };
