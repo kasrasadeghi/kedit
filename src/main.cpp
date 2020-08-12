@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
   std::cout << std::boolalpha;
 
   // TODO support for windowed mode and resizing
-  RenderWindow window {"Kedit", 1920, 1080};
+  RenderWindow window {"Kedit", 2360, 1400};
   // RenderWindow window {"kedit"};
   window.setMousePos(window.width()/2.f, window.height()/2.f);
 
