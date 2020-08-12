@@ -16,7 +16,7 @@ struct Page {
 
   glm::vec2 offset = {50, 50};
   glm::vec2 top_left_position = {100, 100};
-  glm::vec2 size = {1200, 900};
+  glm::vec2 size = {1800, 1200};
 
   glm::vec2 bottomRight(void) { return top_left_position + size; }
 
