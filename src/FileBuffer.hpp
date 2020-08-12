@@ -561,10 +561,14 @@ struct FileBuffer {
 
       if (last_modify_time != file.modify_time())
         { println("WARNING: file modified after opening"); }
+
       // TODO check for first dirty line to seek and not rewrite pre-dirty segment
       std::string acc;
       for (const auto& line : rope.lines) acc += line + "\n";
       file.overwrite(acc);
+
+      last_modify_time = file.modify_time();
+    }
 
   // copy selection between shadow cursor and main cursor
   //
