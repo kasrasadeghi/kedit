@@ -55,3 +55,8 @@ struct ViewRope {
       return acc;
     }
 };
+
+
+struct Rope {
+  std::vector<std::string> lines;
+};

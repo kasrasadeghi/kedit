@@ -3,7 +3,13 @@
 // TODO ensure compatibility with backbone cursor
 // TODO move to backbone-core-cpp
 
+#include <backbone-core-cpp/Print.hpp>
+
 #include <ostream>
+#include <utility>
+#include <compare>
+#include <vector>
+
 
 struct Cursor {
   uint64_t line = 0; // cursor can go one past the last character to append to the line
@@ -37,5 +43,25 @@ struct Cursor {
   inline friend std::ostream& operator<<(std::ostream& o, const Cursor& cursor)
     {
       return o << "cursor(" << cursor.line << "," << cursor.column << ")";
+    }
+
+  inline bool operator==(const Cursor& other)
+    {
+      return this->line == other.line && this->column == other.column;
+    }
+
+  inline std::strong_ordering operator<=>(const Cursor& other)
+    {
+      if (auto cmp = this->line <=> other.line; cmp != 0)
+        {
+          return cmp;
+        }
+      return this->column <=> other.column;
+    }
+
+  inline void swap(Cursor& other)
+    {
+      std::swap(this->line, other.line);
+      std::swap(this->column, other.column);
     }
 };
