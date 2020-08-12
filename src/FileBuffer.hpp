@@ -94,6 +94,7 @@ struct FileBuffer {
   time_t last_modify_time = 0;
 
   Cursor cursor;
+  Cursor shadow_cursor;
   Rope rope;
   History history;
 
@@ -173,17 +174,19 @@ struct FileBuffer {
         }
     }
 
-  inline void addCursor(GraphicsContext& gc, bool control_mode)
+  inline void addCursors(GraphicsContext& gc, bool control_mode)
     {
-      glm::vec2 tlcoord = page.textCoord(gc, cursor);
-
       // TODO change for variable text width fonts
       float text_width = gc.tr.textWidth("a");
 
-      gc.drawRectangle(tlcoord, {text_width, gc.line_height},
+      gc.drawRectangle(page.textCoord(gc, cursor), {text_width, gc.line_height},
                        control_mode
                        ? glm::vec4{1, 0.7, 0.7, 0.5}
                        : glm::vec4{0.7, 1, 0.7, 0.5}, 0.4);
+
+      gc.drawRectangle(page.textCoord(gc, shadow_cursor),
+                       {text_width, gc.line_height},
+                       {0.7, 0.7, 1.0, 0.5}, 0.4);
 
       // TODO investigate positive z layer being below text?
       // - maybe ortho proj doesn't flip?
@@ -476,6 +479,15 @@ struct FileBuffer {
       if (GLFW_KEY_S == key)
         {
           save();
+        }
+
+      if (GLFW_KEY_SPACE == key)
+        {
+          // drop shadow cursor
+          shadow_cursor = cursor;
+          // CONSIDER: two shadow cursors for direct buffer to buffer yanks
+          // TODO: move shadow cursor when region resizes to not allow for that shape
+          // TODO: move shadow cursor when text is deleted before the shadow cursor
         }
     }
 
