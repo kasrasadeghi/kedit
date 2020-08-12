@@ -4,7 +4,12 @@
 
 #include <vector>
 
-/// Rope
+// None of these are actually a Rope, which is a binary tree of strings.
+// Efficient use of a classic Rope with copy-on-write and reference
+// counting for garbage collection requires more machinery, and will be
+// implemented when that much optimization is needed for this data structure.
+
+/// ViewRope
 //
 // not actually a rope
 // normal rope = bst of strings
@@ -14,7 +19,7 @@
 // future ideas:
 // - deque of string
 // - n-ary trees of string
-struct Rope {
+struct ViewRope {
   std::vector<StringView> lines;
 
   inline void make(const StringView text)
