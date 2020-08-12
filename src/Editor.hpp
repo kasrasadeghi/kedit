@@ -353,6 +353,14 @@ struct Editor {
             }
         }
 
+      if (GLFW_KEY_V == key)
+        {
+          if (Type::FileBufferT == currentPage()->_type)
+            {
+              currentFileBuffer()->paste(clipboard.kill_ring.back());
+            }
+        }
+
       if (GLFW_KEY_B == key)
         openBrowser();
 

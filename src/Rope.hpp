@@ -104,4 +104,30 @@ struct Rope {
       line = head;
       lines.insert(lines.begin() + cursor.line + 1, tail);
     }
+
+  /// insert a rope at a cursor
+  inline void insert(const Rope& other, Cursor cursor)
+    {
+      if (not cursor.invariant(this->lines)) return;
+
+      if (other.lines.size() == 1)
+        {
+          lines.at(cursor.line).insert(cursor.column, other.lines.at(0));
+          return;
+        }
+
+      // other.lines.size() > 1
+
+      // if the clipboard contains a multiline entry:
+      //   line_under_cursor must be broken into before_cursor and after_cursor
+      //   first line of entry is appended to before_cursor
+      //   last line is prepended to after_cursor
+      //   lines in between are inserted between before_cursor and after_cursor
+
+      linebreak(cursor);
+      lines.at(cursor.line) += other.lines.at(0);
+      lines.at(cursor.line + 1).insert(0, other.lines.back());
+      lines.insert(lines.begin() + cursor.line + 1,
+                   other.lines.begin() + 1, other.lines.end() - 1);
+    }
 };
