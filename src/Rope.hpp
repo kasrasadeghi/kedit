@@ -91,4 +91,17 @@ struct Rope {
       lines.push_back(last_chunk);
       // NOTE: if end.column == 0 then last_chunk is ""
     }
+
+  /// breaks a line into two at a cursor
+  //
+  // NOTE: not split, split makes 2 ropes
+  inline void linebreak(Cursor cursor)
+    {
+      std::string& line = lines.at(cursor.line);
+      std::string head = line.substr(0, cursor.column);
+      std::string tail = line.substr(cursor.column);
+
+      line = head;
+      lines.insert(lines.begin() + cursor.line + 1, tail);
+    }
 };
