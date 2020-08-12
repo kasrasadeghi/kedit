@@ -167,6 +167,24 @@ int main(int argc, char* argv[]) {
         ++ i;
       }
 
+    // render clipboard
+    auto clipboard_count_position =
+      editor.currentPage()->top_left_position
+      + glm::vec2{editor.currentPage()->size.x + 10, gc.line_height};
+    gc.text("clipboard count: " + str(editor.clipboard.kill_ring.size()),
+            clipboard_count_position.x, clipboard_count_position.y,
+            {1, 1, 1, 1});
+
+    size_t line_offset = 1;
+    for (size_t i = 1; i < 4 && i < editor.clipboard.kill_ring.size() + 1; ++i)
+      {
+        auto curr = (editor.clipboard.kill_ring.end() - i)->lines;
+        list_text(curr,
+                  clipboard_count_position + glm::vec2{0, gc.line_height * line_offset},
+                  "clipboard" + str(i));
+        line_offset += (2 + curr.size());
+      }
+
     if constexpr(PROFILING) { pr.event("render to screen"); }
 
     /// FPS Counter ===------------------------------------------------------===///
