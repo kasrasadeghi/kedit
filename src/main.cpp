@@ -123,7 +123,7 @@ int main(int argc, char* argv[]) {
     editor.addRectangles(gc);
     gc.renderRectangles();
 
-    // glScissor uses lower left coordinates, (1,1) is first bottom left coordinate
+    // glScissor uses lower left coordinates, (1,1) is first bottom left pixel
     auto* page = editor.currentPage();
     gc.scissorRect(page->top_left_position, page->size);
 
