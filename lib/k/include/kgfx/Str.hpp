@@ -29,6 +29,8 @@ concept HasStdToString = requires(T t)
   };
 
 
+// TODO: make a str() that takes in multiple arguments
+
 template <typename T>
 inline std::string str(T o) {
   if constexpr(HasStdToString<T>) {

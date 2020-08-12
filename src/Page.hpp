@@ -54,7 +54,7 @@ struct Page {
 
   void scrollToCursor(GraphicsContext& gc, Cursor c)
     {
-      // center scrolling mode
+      // center-follow scrolling mode
       // TODO replace magic number with computation from size and line height
       buffer.line_scroller.target = 13 - ((int64_t)c.line);
 
