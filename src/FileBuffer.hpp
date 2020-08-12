@@ -565,5 +565,19 @@ struct FileBuffer {
       std::string acc;
       for (const auto& line : rope.lines) acc += line + "\n";
       file.overwrite(acc);
+
+  // copy selection between shadow cursor and main cursor
+  //
+  // NOTE: filebuffer takes care of selection,
+  // rope takes care of copying text area,
+  // and editor takes care of storing ropes in clipboard kill ring
+  // - you can interchange selection strategies without changing filebuffer's interface
+  inline void copy(Rope& store)
+    {
+      // TODO: should copy line
+      if (shadow_cursor == cursor) return;
+
+      store.make(rope, shadow_cursor, cursor);
+    }
     }
 };

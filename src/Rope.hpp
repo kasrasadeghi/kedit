@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Cursor.hpp"
+
 #include <backbone-core-cpp/StrView.hpp>
 
 #include <vector>
@@ -59,4 +61,34 @@ struct ViewRope {
 
 struct Rope {
   std::vector<std::string> lines;
+
+  /// get area between begin cursor and end cursor
+  inline void make(const Rope& other, Cursor begin, Cursor end)
+    {
+      lines.clear();
+
+      if (end < begin) std::swap(begin, end);
+
+      if (begin.line == end.line)
+        {
+          std::string selection = other.lines.at(begin.line).substr(begin.column, end.column - begin.column);
+          lines.push_back(selection);
+          return;
+        }
+
+      // begin.line != end.line
+
+      // copy chunk til end of line of first line in selection
+      auto first_chunk = other.lines.at(begin.line).substr(begin.column);
+      lines.push_back(first_chunk);
+
+      for (size_t i = begin.line + 1; i <= end.line - 1; ++i)
+        {
+          lines.push_back(other.lines.at(i));
+        }
+
+      auto last_chunk = other.lines.at(end.line).substr(0, end.column);
+      lines.push_back(last_chunk);
+      // NOTE: if end.column == 0 then last_chunk is ""
+    }
 };

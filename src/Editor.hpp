@@ -4,6 +4,7 @@
 #include "Menu.hpp"
 #include "Page.hpp"
 #include "GraphicsContext.hpp"
+#include "Clipboard.hpp"
 
 #include <kgfx/TextRenderer.hpp>
 #include <backbone-core-cpp/StrView.hpp>
@@ -22,6 +23,8 @@ struct Editor {
   std::vector<Page*> _pages;
 
   std::vector<std::string> command_history;
+
+  Clipboard clipboard;
 
   bool _control_mode = true;
   bool _control_mode_release_exit = false;
@@ -338,6 +341,17 @@ struct Editor {
   inline void handleKeyControl(int key, int scancode, int action, int mods)
     {
       if (GLFW_PRESS != action) return;
+
+      if (GLFW_KEY_C == key)
+        {
+          clipboard.kill_ring.push_back(Rope{});
+
+          // consider changing "Type" enum to "PageType"
+          if (Type::FileBufferT == currentPage()->_type)
+            {
+              currentFileBuffer()->copy(clipboard.kill_ring.back());
+            }
+        }
 
       if (GLFW_KEY_B == key)
         openBrowser();
