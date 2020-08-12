@@ -327,15 +327,6 @@ struct FileBuffer {
       rope.lines.erase(rope.lines.begin() + cursor.line + 1);
     }
 
-  inline void _splitLineAtCursor(void)
-    {
-      std::string& line = lines.at(cursor.line);
-      std::string head = line.substr(0, cursor.column);
-      std::string tail = line.substr(cursor.column);
-
-      line = head;
-      lines.insert(lines.begin() + cursor.line + 1, tail);
-    }
 
   inline char _deleteAtCursor(void)
     {
@@ -523,7 +514,7 @@ struct FileBuffer {
             }
           else
             {
-              _splitLineAtCursor();
+              rope.linebreak(cursor);
             }
 
           preparePageForRender();
@@ -544,7 +535,7 @@ struct FileBuffer {
           else
             {
               history.setFromCursor(cursor, command[2]);
-              _splitLineAtCursor();
+              rope.linebreak(cursor);
               history.setFromCursor(cursor, command[0]);
             }
 
