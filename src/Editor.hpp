@@ -300,22 +300,11 @@ struct Editor {
             {
               _control_mode = not _control_mode;
             }
+        }
 
-          if (_control_mode)
-            {
-              if (GLFW_KEY_B == key)
-                openBrowser();
-
-              if (GLFW_KEY_E == key)
-                openSwap();
-
-              // CONSIDER: opening swap menu after closing current file
-              if (GLFW_KEY_W == key)
-                if (_pages.size() > 1)
-                  freeCurrent();
-
-              // CONSIDER: closing file if it is the only one open and opening a menu
-            }
+      if (_control_mode)
+        {
+          handleKeyControl(key, scancode, action, mods);
         }
 
       if (GLFW_RELEASE == action)
@@ -344,6 +333,24 @@ struct Editor {
           else
             currentFileBuffer()->handleKeyEdit(key, scancode, action, mods);
         }
+    }
+
+  inline void handleKeyControl(int key, int scancode, int action, int mods)
+    {
+      if (GLFW_PRESS != action) return;
+
+      if (GLFW_KEY_B == key)
+        openBrowser();
+
+      if (GLFW_KEY_E == key)
+        openSwap();
+
+      // CONSIDER: opening swap menu after closing current file
+      if (GLFW_KEY_W == key)
+        if (_pages.size() > 1)
+          freeCurrent();
+
+      // CONSIDER: closing file if it is the only one open and opening a menu
     }
 
   inline void handleChar(unsigned char codepoint)
