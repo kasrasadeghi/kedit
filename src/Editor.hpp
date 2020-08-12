@@ -327,6 +327,8 @@ struct Editor {
             {
               // if you press a key while ctrl is held,
               //   releasing ctrl exits control mode
+              // TODO: check that the key that is pressed while control is held is not control
+              //       (right control, for example)
               if (GLFW_PRESS == action && (GLFW_MOD_CONTROL & mods))
                 {
                   _control_mode_release_exit = true;
