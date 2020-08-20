@@ -395,26 +395,9 @@ struct FileBuffer {
           history.push("enter");
           history.addCursor(cursor, "before-cursor");
 
-          if (0 == cursor.column)
-            {
-              rope.lines.insert(rope.lines.begin() + cursor.line, "");
-              ++ cursor.line;
-            }
-
-          else if (rope.lines.at(cursor.line).length() == cursor.column)
-            {
-              rope.lines.insert(rope.lines.begin() + cursor.line + 1, "");
-              ++ cursor.line;
-              cursor.column = 0;
-            }
-
-          else
-            {
-              rope.linebreak(cursor);
-
-              ++ cursor.line;
-              cursor.column = 0;
-            }
+          rope.linebreak(cursor);
+          ++ cursor.line;
+          cursor.column = 0;
 
           preparePageForRender();
           return;
