@@ -27,7 +27,7 @@ struct History {
       return copy;
     }
 
-  inline void addCursor(const Cursor& cursor)
+  inline void addCursor(const Cursor& cursor, std::string_view name)
     {
       if (commands.empty())
         {
@@ -35,41 +35,28 @@ struct History {
           return;
         }
 
-      Texp cursor_texp {"cursor"};
+      Texp cursor_texp {str(name)};
       cursor_texp.push(str(cursor.line));
       cursor_texp.push(str(cursor.column));
 
       commands.back().push(cursor_texp);
     }
 
-  inline void setFromCursorChild(Cursor& cursor, const Texp& texp)
+  inline void setFromChild(Cursor& cursor, const Texp& texp, std::string_view name)
     {
-      constexpr auto int_parse = [](const std::string& s) -> size_t {
-                                   return std::stoull(s);
-                                 };
-
-      for (auto& child : texp)
+      if (auto result = texp.maybe_find(name); result)
         {
-          if (child.value == "cursor")
-            {
-              cursor = Cursor{int_parse(child[0].value), int_parse(child[1].value)};
-              return;
-            }
+          set(cursor, *result.value());
+          return;
         }
       println("ERROR: could not find cursor in '" + texp.paren() + "'");
     }
 
-  inline void setFromCursor(Cursor& cursor, const Texp& texp)
+  inline void set(Cursor& cursor, const Texp& texp)
     {
       constexpr auto int_parse = [](const std::string& s) -> size_t {
                                    return std::stoull(s);
                                  };
-
-      if (texp.value != "cursor")
-        {
-          println("ERROR: '" + texp.paren() + "' is not a cursor");
-          return;
-        }
 
       cursor = Cursor{int_parse(texp[0].value), int_parse(texp[1].value)};
     }
@@ -327,7 +314,6 @@ struct FileBuffer {
       rope.lines.erase(rope.lines.begin() + cursor.line + 1);
     }
 
-
   inline char _deleteAtCursor(void)
     {
       auto& line = rope.lines.at(cursor.line);
@@ -357,23 +343,23 @@ struct FileBuffer {
 
           if (0 == cursor.column)
             {
-              history.addCursor(cursor);
+              history.addCursor(cursor, "before-cursor");
 
               if (0 == cursor.line) return;
               -- cursor.line;
               cursor.column = rope.lines.at(cursor.line).length();
               history.add("\n");
-              history.addCursor(cursor);
+              history.addCursor(cursor, "after-cursor");
               _mergeLineWithNext();
             }
 
           else
             {
-              history.addCursor(cursor);
+              history.addCursor(cursor, "before-cursor");
               -- cursor.column;
               char removed = _deleteAtCursor();
               history.add(str(removed));
-              history.addCursor(cursor);
+              history.addCursor(cursor, "after-cursor");
             }
 
           preparePageForRender();
@@ -383,7 +369,7 @@ struct FileBuffer {
       if (GLFW_KEY_DELETE == key)
         {
           history.push("delete");
-          history.addCursor(cursor);
+          history.addCursor(cursor, "before-cursor");
 
           if (rope.lines.at(cursor.line).length() == cursor.column)
             {
@@ -407,7 +393,7 @@ struct FileBuffer {
       if (GLFW_KEY_ENTER == key)
         {
           history.push("enter");
-          history.addCursor(cursor);
+          history.addCursor(cursor, "before-cursor");
 
           if (0 == cursor.column)
             {
@@ -441,7 +427,7 @@ struct FileBuffer {
       if (not cursor.invariant(rope.lines)) return;
 
       history.push("char");
-      history.addCursor(cursor);
+      history.addCursor(cursor, "before-cursor");
       history.add(str((char)codepoint));
 
       _insertAtCursor(codepoint);
@@ -490,7 +476,7 @@ struct FileBuffer {
 
       if ("enter" == command.value)
         {
-          history.setFromCursorChild(cursor, command);
+          history.setFromChild(cursor, command, "before-cursor");
           _mergeLineWithNext();
           preparePageForRender();
           return;
@@ -498,7 +484,7 @@ struct FileBuffer {
 
       if ("char" == command.value)
         {
-          history.setFromCursorChild(cursor, command);
+          history.setFromChild(cursor, command, "before-cursor");
           _deleteAtCursor();
           preparePageForRender();
           return;
@@ -507,7 +493,7 @@ struct FileBuffer {
       if ("delete" == command.value)
         {
           auto c = command.back().value;
-          history.setFromCursorChild(cursor, command);
+          history.setFromChild(cursor, command, "before-cursor");
           if (c != "\n")
             {
               _insertAtCursor(command.back().value[0]);
@@ -526,17 +512,17 @@ struct FileBuffer {
         {
           println(command);
           auto c = command[1].value;
-          if (c != "\n")
+          if (c == "\n")
             {
-              history.setFromCursor(cursor, command[2]);
-              _insertAtCursor(c[0]);
-              history.setFromCursor(cursor, command[0]);
+              history.setFromChild(cursor, command, "after-cursor");
+              rope.linebreak(cursor);
+              history.setFromChild(cursor, command, "before-cursor");
             }
           else
             {
-              history.setFromCursor(cursor, command[2]);
-              rope.linebreak(cursor);
-              history.setFromCursor(cursor, command[0]);
+              history.setFromChild(cursor, command, "after-cursor");
+              _insertAtCursor(c[0]);
+              history.setFromChild(cursor, command, "before-cursor");
             }
 
           preparePageForRender();
