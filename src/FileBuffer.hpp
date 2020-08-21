@@ -280,29 +280,24 @@ struct FileBuffer {
       if (GLFW_KEY_BACKSPACE == key)
         {
           history.push("backspace");
-
+          history.addCursor(cursor, "before-cursor");
 
           if (0 == cursor.column)
             {
-              history.addCursor(cursor, "before-cursor");
-
               if (0 == cursor.line) return;
               -- cursor.line;
               cursor.column = rope.lines.at(cursor.line).length();
-              history.add("\n");
-              history.addCursor(cursor, "after-cursor");
               _mergeLineWithNext();
+              history.add("\n");
             }
 
           else
             {
-              history.addCursor(cursor, "before-cursor");
               -- cursor.column;
-              char removed = _deleteAtCursor();
-              history.add(str(removed));
-              history.addCursor(cursor, "after-cursor");
+              history.add(str(_deleteAtCursor()));
             }
 
+          history.addCursor(cursor, "after-cursor");
           preparePageForRender();
           return;
         }
@@ -323,8 +318,7 @@ struct FileBuffer {
 
           else
             {
-              char removed = _deleteAtCursor();
-              history.add(str(removed));
+              history.add(str(_deleteAtCursor()));
             }
 
           preparePageForRender();
@@ -419,13 +413,9 @@ struct FileBuffer {
           auto c = command.back().value;
           history.setFromChild(cursor, command, "before-cursor");
           if (c != "\n")
-            {
-              _insertAtCursor(command.back().value[0]);
-            }
+            { _insertAtCursor(command.back().value[0]); }
           else
-            {
-              rope.linebreak(cursor);
-            }
+            { rope.linebreak(cursor); }
 
           preparePageForRender();
           return;
@@ -434,26 +424,20 @@ struct FileBuffer {
       // backspace after-cursor char before-cursor
       if ("backspace" == command.value)
         {
-          println(command);
           auto c = command[1].value;
+          history.setFromChild(cursor, command, "after-cursor");
           if (c == "\n")
-            {
-              history.setFromChild(cursor, command, "after-cursor");
-              rope.linebreak(cursor);
-              history.setFromChild(cursor, command, "before-cursor");
-            }
+            { rope.linebreak(cursor); }
           else
-            {
-              history.setFromChild(cursor, command, "after-cursor");
-              _insertAtCursor(c[0]);
-              history.setFromChild(cursor, command, "before-cursor");
-            }
+            { _insertAtCursor(c[0]); }
+          history.setFromChild(cursor, command, "before-cursor");
 
           preparePageForRender();
           return;
         }
 
-      println(command);
+      println("UNHANDLED:\n  ");
+      println(command.paren());
     }
 
   inline void save(void)
