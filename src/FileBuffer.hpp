@@ -3,9 +3,9 @@
 #include "Buffer.hpp"
 #include "PageT.hpp"
 #include "Page.hpp"
-
 #include "Cursor.hpp"
 #include "History.hpp"
+#include "CursorMove.hpp"
 
 #include <backbone-core-cpp/File.hpp>
 #include <backbone-core-cpp/Texp.hpp>
@@ -147,57 +147,27 @@ struct FileBuffer {
 
           // DIRECTIONS
 
-          if (GLFW_KEY_UP == key && cursor.line != 0)
+          if (GLFW_KEY_UP == key)
             {
-              -- cursor.line;
-
-              _correctCursorPastEndOfLine();
+              Move::up(cursor, rope);
               return;
             }
 
-          if (GLFW_KEY_DOWN == key && cursor.line < rope.lines.size() - 1)
+          if (GLFW_KEY_DOWN == key)
             {
-              ++ cursor.line;
-
-              _correctCursorPastEndOfLine();
+              Move::down(cursor, rope);
               return;
             }
 
           if (GLFW_KEY_LEFT == key)
             {
-              if (cursor.column != 0)
-                {
-                  -- cursor.column;
-                  return;
-                }
-
-              // zero column, roll to previous line
-              if (cursor.column == 0)
-                {
-                  if (cursor.line != 0)
-                    {
-                      -- cursor.line;
-                      _cursorMoveToEndOfLine();
-                    }
-                  return;
-                }
+              Move::left(cursor, rope);
+              return;
             }
 
           if (GLFW_KEY_RIGHT == key)
             {
-              if (cursor.column < rope.lines.at(cursor.line).size())
-                {
-                  ++ cursor.column;
-                  return;
-                }
-
-              // roll over to next line
-              if (cursor.column == rope.lines.at(cursor.line).size()
-                  && cursor.line < rope.lines.size() - 1)
-                {
-                  cursor.column = 0;
-                  ++ cursor.line;
-                }
+              Move::right(cursor, rope);
               return;
             }
 
