@@ -157,4 +157,10 @@ struct Rope {
       lines.insert(lines.begin() + cursor.line + 1,
                    other.lines.begin() + 1, other.lines.end() - 1);
     }
+
+  inline void insert(char c, Cursor cursor)
+    {
+      auto& line = lines.at(cursor.line);
+      line.insert(line.begin() + cursor.column, c);
+    }
 };

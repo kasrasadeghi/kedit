@@ -299,7 +299,7 @@ struct FileBuffer {
       history.addCursor(cursor, "before-cursor");
       history.add(str((char)codepoint));
 
-      _insertAtCursor(codepoint);
+      rope.insert((char)codepoint, cursor);
 
       ++ cursor.column;
 
@@ -364,7 +364,7 @@ struct FileBuffer {
           auto c = command.back().value;
           history.setFromChild(cursor, command, "before-cursor");
           if (c != "\n")
-            { _insertAtCursor(command.back().value[0]); }
+            { rope.insert(command.back().value[0], cursor); }
           else
             { rope.linebreak(cursor); }
 
@@ -380,7 +380,7 @@ struct FileBuffer {
           if (c == "\n")
             { rope.linebreak(cursor); }
           else
-            { _insertAtCursor(c[0]); }
+            { rope.insert(c[0], cursor); }
           history.setFromChild(cursor, command, "before-cursor");
 
           preparePageForRender();
