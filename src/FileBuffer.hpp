@@ -219,26 +219,6 @@ struct FileBuffer {
         }
     }
 
-  inline void _mergeLineWithNext(void)
-    {
-      rope.lines.at(cursor.line) += rope.lines.at(cursor.line + 1);
-      rope.lines.erase(rope.lines.begin() + cursor.line + 1);
-    }
-
-  inline char _deleteAtCursor(void)
-    {
-      auto& line = rope.lines.at(cursor.line);
-      char to_remove = line.at(cursor.column);
-      line.erase(line.begin() + cursor.column);
-      return to_remove;
-    }
-
-  inline void _insertAtCursor(char c)
-    {
-      auto& line = rope.lines.at(cursor.line);
-      line.insert(line.begin() + cursor.column, c);
-    }
-
   inline void handleKeyEdit(int key, int scancode, int action, int mods)
     {
       // guards
