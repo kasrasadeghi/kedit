@@ -1,6 +1,7 @@
 #pragma once
 
 #include <backbone-core-cpp/Texp.hpp>
+#include <kgfx/Str.hpp>
 
 #include <string>
 #include <string_view>
