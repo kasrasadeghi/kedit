@@ -252,20 +252,10 @@ struct FileBuffer {
           history.push("backspace");
           history.addCursor(cursor, "before-cursor");
 
-          if (0 == cursor.column)
-            {
-              if (0 == cursor.line) return;
-              -- cursor.line;
-              cursor.column = rope.lines.at(cursor.line).length();
-              _mergeLineWithNext();
-              history.add("\n");
-            }
-
+          if (Move::left(cursor, rope))
+            { history.add(str(rope.chardelete(cursor))); }
           else
-            {
-              -- cursor.column;
-              history.add(str(_deleteAtCursor()));
-            }
+            { history.pop(); return; }
 
           history.addCursor(cursor, "after-cursor");
           preparePageForRender();
@@ -277,19 +267,10 @@ struct FileBuffer {
           history.push("delete");
           history.addCursor(cursor, "before-cursor");
 
-          if (rope.lines.at(cursor.line).length() == cursor.column)
-            {
-              // cannot delete anything at the end of the last line,
-              //   line_index = size - 1
-              if (rope.lines.size() - 1 == cursor.line) return;
-              history.add("\n");
-              _mergeLineWithNext();
-            }
-
+          if (char c = rope.chardelete(cursor); c != '\0')
+            { history.add(str(c)); }
           else
-            {
-              history.add(str(_deleteAtCursor()));
-            }
+            { history.pop(); return; }
 
           preparePageForRender();
           return;
@@ -365,7 +346,7 @@ struct FileBuffer {
       if ("enter" == command.value)
         {
           history.setFromChild(cursor, command, "before-cursor");
-          _mergeLineWithNext();
+          rope.linemerge(cursor);
           preparePageForRender();
           return;
         }
@@ -373,7 +354,7 @@ struct FileBuffer {
       if ("char" == command.value)
         {
           history.setFromChild(cursor, command, "before-cursor");
-          _deleteAtCursor();
+          rope.chardelete(cursor);
           preparePageForRender();
           return;
         }

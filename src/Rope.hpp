@@ -92,6 +92,9 @@ struct Rope {
       // NOTE: if end.column == 0 then last_chunk is ""
     }
 
+  inline size_t linelength(Cursor cursor) const
+    { return lines.at(cursor.line).length(); }
+
   /// breaks a line into two at a cursor
   //
   // NOTE: not split, split makes 2 ropes
@@ -103,6 +106,30 @@ struct Rope {
 
       line = head;
       lines.insert(lines.begin() + cursor.line + 1, tail);
+    }
+
+  inline void linemerge(Cursor cursor)
+    {
+      lines.at(cursor.line) += lines.at(cursor.line + 1);
+      lines.erase(lines.begin() + cursor.line + 1);
+    }
+
+  /// NOTE: returns '\n' on line merge, '\0' at the end of the rope
+  inline char chardelete(Cursor cursor)
+    {
+      if (linelength(cursor) == cursor.column)
+        {
+          if (lines.size() - 1 == cursor.line) return '\0';
+          linemerge(cursor);
+          return '\n';
+        }
+      else
+        {
+          auto& line = lines.at(cursor.line);
+          char to_remove = line.at(cursor.column);
+          line.erase(line.begin() + cursor.column);
+          return to_remove;
+        }
     }
 
   /// insert a rope at a cursor
