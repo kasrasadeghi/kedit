@@ -35,23 +35,12 @@ struct History {
       commands.back().push(cursor_texp);
     }
 
-  inline void setFromChild(Cursor& cursor, const Texp& texp, std::string_view name)
-    {
-      if (auto result = texp.maybe_find(name); result)
-        {
-          set(cursor, *result.value());
-          return;
-        }
-      println("ERROR: could not find " + str(name) + " in '" + texp.paren() + "'");
-    }
-
-  inline void set(Cursor& cursor, const Texp& texp)
+  inline Cursor parseCursor(const Texp& texp)
     {
       constexpr auto int_parse = [](const std::string& s) -> size_t {
                                    return std::stoull(s);
                                  };
-
-      cursor = Cursor{int_parse(texp[0].value), int_parse(texp[1].value)};
+      return Cursor{int_parse(texp[0].value), int_parse(texp[1].value)};
     }
 
   inline void add(std::string S)

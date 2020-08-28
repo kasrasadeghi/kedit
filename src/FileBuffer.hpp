@@ -237,7 +237,6 @@ struct FileBuffer {
           else
             { history.pop(); return; }
 
-          history.addCursor(cursor, "after-cursor");
           preparePageForRender();
           return;
         }
@@ -323,9 +322,14 @@ struct FileBuffer {
 
       auto command = history.pop();
 
+      auto cursor_before = [&](){
+                             if (auto before = command.maybe_find("before-cursor"); before)
+                               cursor = history.parseCursor(*before.value());
+                           };
+
       if ("enter" == command.value)
         {
-          history.setFromChild(cursor, command, "before-cursor");
+          cursor_before();
           rope.linemerge(cursor);
           preparePageForRender();
           return;
@@ -333,7 +337,7 @@ struct FileBuffer {
 
       if ("char" == command.value)
         {
-          history.setFromChild(cursor, command, "before-cursor");
+          cursor_before();
           rope.chardelete(cursor);
           preparePageForRender();
           return;
@@ -341,8 +345,8 @@ struct FileBuffer {
 
       if ("delete" == command.value)
         {
+          cursor_before();
           auto c = command.back().value;
-          history.setFromChild(cursor, command, "before-cursor");
           if (c == "\n")
             { rope.linebreak(cursor); }
           else
@@ -352,16 +356,24 @@ struct FileBuffer {
           return;
         }
 
-      // backspace after-cursor char before-cursor
       if ("backspace" == command.value)
         {
+          // TODO CURRENT: backspace's after is its before minus the vector of difference given by the dimensions of removed text
+
+          cursor_before();
+
           auto c = command[1].value;
-          history.setFromChild(cursor, command, "after-cursor");
+
+          Cursor insert_loc = cursor;
           if (c == "\n")
-            { rope.linebreak(cursor); }
+            { Move::up(insert_loc, rope); }
           else
-            { rope.insert(c[0], cursor); }
-          history.setFromChild(cursor, command, "before-cursor");
+            { Move::left(insert_loc, rope); }
+
+          if (c == "\n")
+            { rope.linebreak(insert_loc); }
+          else
+            { rope.insert(c[0], insert_loc); }
 
           preparePageForRender();
           return;
