@@ -343,10 +343,10 @@ struct FileBuffer {
         {
           auto c = command.back().value;
           history.setFromChild(cursor, command, "before-cursor");
-          if (c != "\n")
-            { rope.insert(command.back().value[0], cursor); }
-          else
+          if (c == "\n")
             { rope.linebreak(cursor); }
+          else
+            { rope.insert(command.back().value[0], cursor); }
 
           preparePageForRender();
           return;
