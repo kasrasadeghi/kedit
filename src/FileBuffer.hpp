@@ -415,6 +415,8 @@ struct FileBuffer {
   inline void paste(const Rope& store)
     {
       rope.insert(store, cursor);
+      Move::forwardBlock(cursor, rope, store);
+
       preparePageForRender();
     }
 };
