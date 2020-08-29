@@ -83,4 +83,31 @@ namespace Move {
       _correctCursorPastEndOfLine(cursor, rope);
       return true;
     }
+
+  // PRECONDITION: store has just been inserted into the rope at the cursor
+  // NOTE: returns true on successful cursor move
+  inline bool forwardBlock(Cursor& cursor, const Rope& rope, const Rope& store)
+    {
+      Cursor error_copy = cursor;
+
+      if (1 == store.lines.size())
+        {
+          cursor.column += store.lines[0].length();
+        }
+      else
+        {
+          cursor.line += store.lines.size() - 1;
+          cursor.column = store.lines.back().length();
+        }
+
+      if (cursor.invariant(rope.lines))
+        {
+          return true;
+        }
+      else
+        {
+          cursor = error_copy;
+          return false;
+        }
+    }
 }
