@@ -1,3 +1,12 @@
+* clipboard and history                                            - aug 29 2020
+I've implemented a clipboard and backwards history (undo).
+I'm going to work on forwards history (redo).
+
+One thing that must be carefully considered with both the clipboard and the
+history is the position of the cursor before and after operations.  I've so far
+found it sufficient to just save the position before the operation, but that
+might change once I explore and implement redo.
+
 * save by file overwrite                                           - jul 18 2020
 The current naive save implementation saves by overwriting the entire file.
 There are more efficient ways to do this, even just seeking to the first dirty
