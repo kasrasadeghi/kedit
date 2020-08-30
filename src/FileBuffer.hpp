@@ -6,6 +6,7 @@
 #include "Cursor.hpp"
 #include "History.hpp"
 #include "CursorMove.hpp"
+#include "Clipboard.hpp"
 
 #include <backbone-core-cpp/File.hpp>
 #include <backbone-core-cpp/Texp.hpp>
@@ -380,6 +381,26 @@ struct FileBuffer {
         }
 
       println("UNHANDLED:\n  ");
+      // paste before-cursor@0 index@1 clipboard_addr@2
+      if ("paste" == command.value)
+        {
+          cursor_before();
+
+          constexpr auto int_parse = [](const std::string& s) -> size_t {
+                                       return std::stoull(s);
+                                     };
+          auto index = int_parse(command[1].value);
+          auto clipboard = (Clipboard*)(int_parse(command[2].value));
+          const Rope& store = clipboard->kill_ring[index];
+
+          Cursor end_of_block = cursor;
+          Move::forwardBlock(end_of_block, rope, store);
+          rope.erase(cursor, end_of_block);
+
+          preparePageForRender();
+          return;
+        }
+
       println(command.paren());
     }
 
@@ -412,8 +433,15 @@ struct FileBuffer {
       store.make(rope, shadow_cursor, cursor);
     }
 
-  inline void paste(const Rope& store)
+  inline void paste(const Rope& store, size_t clipboard_index, void* clipboard_addr)
     {
+      history.push("paste");
+      history.addCursor(cursor, "before-cursor");
+
+      // TODO: fix this, maximal janky
+      history.add(str(clipboard_index));
+      history.add(str((size_t)(clipboard_addr)));
+
       rope.insert(store, cursor);
       Move::forwardBlock(cursor, rope, store);
 

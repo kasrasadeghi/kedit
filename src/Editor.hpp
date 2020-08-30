@@ -359,7 +359,7 @@ struct Editor {
         {
           if (Type::FileBufferT == currentPage()->_type)
             {
-              currentFileBuffer()->paste(clipboard.kill_ring.back());
+              currentFileBuffer()->paste(clipboard.kill_ring.back(), clipboard.kill_ring.size() - 1, (void*)(&clipboard));
             }
         }
 
