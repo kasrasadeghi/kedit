@@ -380,7 +380,6 @@ struct FileBuffer {
           return;
         }
 
-      println("UNHANDLED:\n  ");
       // paste before-cursor@0 index@1 clipboard_addr@2
       if ("paste" == command.value)
         {
@@ -401,6 +400,7 @@ struct FileBuffer {
           return;
         }
 
+      print("UNHANDLED:\n  ");
       println(command.paren());
     }
 
