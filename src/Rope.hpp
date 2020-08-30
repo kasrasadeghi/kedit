@@ -132,6 +132,25 @@ struct Rope {
         }
     }
 
+  inline void erase(Cursor begin, Cursor end)
+    {
+      if (not begin.invariant(this->lines)) return;
+      if (not   end.invariant(this->lines)) return;
+
+      if (end < begin) std::swap(begin, end);
+
+      if (begin.line == end.line)
+        {
+          lines.at(begin.line).erase(begin.column, end.column - begin.column);
+          return;
+        }
+
+      lines.at(begin.line).erase(begin.column);
+      lines.at(end.line).erase(0, end.column);
+      lines.erase(lines.begin() + begin.line + 1,
+                  lines.begin() + end.line);
+    }
+
   /// insert a rope at a cursor
   inline void insert(const Rope& other, Cursor cursor)
     {
