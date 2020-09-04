@@ -344,14 +344,22 @@ struct FileBuffer {
           return;
         }
 
+      auto undelete = [&](const std::string& c, Cursor loc) {
+                        assert(c.length() == 1);
+                        if (c == "\n")
+                          { rope.linebreak(loc); }
+                        else
+                          { rope.insert(c, loc); }
+                      };
+
+      // texp([delete,backspace] <before-cursor> <char>)
+
       if ("delete" == command.value)
         {
           cursor_before();
-          auto c = command.back().value;
-          if (c == "\n")
-            { rope.linebreak(cursor); }
-          else
-            { rope.insert(command.back().value[0], cursor); }
+          auto c = command[1].value;
+
+          undelete(c, cursor);
 
           preparePageForRender();
           return;
@@ -371,10 +379,7 @@ struct FileBuffer {
           else
             { Move::left(insert_loc, rope); }
 
-          if (c == "\n")
-            { rope.linebreak(insert_loc); }
-          else
-            { rope.insert(c[0], insert_loc); }
+          undelete(c, insert_loc);
 
           preparePageForRender();
           return;
