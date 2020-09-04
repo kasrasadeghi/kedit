@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include "Buffer.hpp"
@@ -140,6 +141,8 @@ struct Menu {
 
       // TODO support elements with multiline values
       // TODO support line-wrap for long values
+
+      // TODO support: tabs, text views, process FIFOs, text entry
 
       // NOTE: the elements are responsible for incrementing line number themselves
       // - do not increment for the lines of your children
