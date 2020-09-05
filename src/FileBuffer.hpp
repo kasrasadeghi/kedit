@@ -271,11 +271,46 @@ struct FileBuffer {
 
       if (GLFW_KEY_TAB == key)
         {
-          history.push("tab");
-          history.addCursor(cursor, "before-cursor");
+          if (GLFW_MOD_SHIFT & mods)
+            {
+              /// SHIFT TAB
+              size_t whitespace_count = ([&]() -> size_t {
 
-          rope.insert("  ", cursor);
-          cursor.column += 2;
+                  const auto& line = rope.lines.at(cursor.line);
+                  for (size_t i = 0; i < line.length(); ++i)
+                    {
+                      if (line.at(i) != ' ') return i;
+                    }
+                  return line.length();
+                })();
+
+              if (0 == whitespace_count) { return; }
+
+              history.push("shift-tab");
+              history.addCursor(cursor, "before-cursor");
+
+              if (1 == whitespace_count)
+                {
+                  history.add(" ");
+                  rope.lines.at(cursor.line) == "";
+                  cursor.column = 0;
+                }
+              else
+                {
+                  history.add("  ");
+                  rope.lines.at(cursor.line).erase(0, 2);
+                  cursor.column -= 2;
+                }
+            }
+          else
+            {
+              /// TAB
+              history.push("tab");
+              history.addCursor(cursor, "before-cursor");
+
+              rope.insert("  ", cursor);
+              cursor.column += 2;
+            }
 
           preparePageForRender();
           return;
@@ -362,6 +397,14 @@ struct FileBuffer {
           rope.chardelete(cursor);
           rope.chardelete(cursor);
           preparePageForRender();
+          return;
+        }
+
+      // texp(shift-tab <before-cursor> [" ","  "]
+      if ("shift-tab" == command.value)
+        {
+          cursor_before();
+          rope.lines.at(cursor.line).insert(0, command[1].value);
           return;
         }
 
