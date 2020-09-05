@@ -47,8 +47,16 @@ struct FileBuffer {
       // TODO make sure buffer unreads and closes file
       file = File::openrw(file_path);
       last_modify_time = file.modify_time();
-      StringView file_contents = file.read();
 
+      if (0 == file.size())
+        {
+          println("LOG: handle empty file");
+          rope.lines.push_back("");
+          preparePageForRender();
+          return;
+        }
+
+      StringView file_contents = file.read();
       // TODO is there a way to lazily parse into lines?
 
       // parse into lines and making backing store separate from mapped file
