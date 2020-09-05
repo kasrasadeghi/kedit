@@ -268,6 +268,18 @@ struct FileBuffer {
           preparePageForRender();
           return;
         }
+
+      if (GLFW_KEY_TAB == key)
+        {
+          history.push("tab");
+          history.addCursor(cursor, "before-cursor");
+
+          rope.insert("  ", cursor);
+          cursor.column += 2;
+
+          preparePageForRender();
+          return;
+        }
     }
 
   inline void handleChar(unsigned int codepoint)
@@ -339,6 +351,15 @@ struct FileBuffer {
       if ("char" == command.value)
         {
           cursor_before();
+          rope.chardelete(cursor);
+          preparePageForRender();
+          return;
+        }
+
+      if ("tab" == command.value)
+        {
+          cursor_before();
+          rope.chardelete(cursor);
           rope.chardelete(cursor);
           preparePageForRender();
           return;
