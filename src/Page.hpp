@@ -16,7 +16,7 @@ struct Page {
 
   glm::vec2 offset = {50, 50};
   glm::vec2 top_left_position = {100, 100};
-  glm::vec2 size = {1200, 900};
+  glm::vec2 size = {1800, 1200};
 
   glm::vec2 bottomRight(void) { return top_left_position + size; }
 
@@ -54,7 +54,7 @@ struct Page {
 
   void scrollToCursor(GraphicsContext& gc, Cursor c)
     {
-      // center scrolling mode
+      // center-follow scrolling mode
       // TODO replace magic number with computation from size and line height
       buffer.line_scroller.target = 13 - ((int64_t)c.line);
 

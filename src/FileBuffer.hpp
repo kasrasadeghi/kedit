@@ -3,8 +3,10 @@
 #include "Buffer.hpp"
 #include "PageT.hpp"
 #include "Page.hpp"
-
 #include "Cursor.hpp"
+#include "History.hpp"
+#include "CursorMove.hpp"
+#include "Clipboard.hpp"
 
 #include <backbone-core-cpp/File.hpp>
 #include <backbone-core-cpp/Texp.hpp>
@@ -14,79 +16,6 @@
 
 #include <string>
 
-struct History {
-  std::vector<Texp> commands;
-
-  inline void push(std::string S)
-    { commands.push_back(Texp(S)); }
-
-  inline Texp pop(void)
-    {
-      auto copy = commands.back();
-      commands.pop_back();
-      return copy;
-    }
-
-  inline void addCursor(const Cursor& cursor)
-    {
-      if (commands.empty())
-        {
-          printerrln("ERROR: no command to add cursor to");
-          return;
-        }
-
-      Texp cursor_texp {"cursor"};
-      cursor_texp.push(str(cursor.line));
-      cursor_texp.push(str(cursor.column));
-
-      commands.back().push(cursor_texp);
-    }
-
-  inline void setFromCursorChild(Cursor& cursor, const Texp& texp)
-    {
-      constexpr auto int_parse = [](const std::string& s) -> size_t {
-                                   return std::stoull(s);
-                                 };
-
-      for (auto& child : texp)
-        {
-          if (child.value == "cursor")
-            {
-              cursor = Cursor{int_parse(child[0].value), int_parse(child[1].value)};
-              return;
-            }
-        }
-      println("ERROR: could not find cursor in '" + texp.paren() + "'");
-    }
-
-  inline void setFromCursor(Cursor& cursor, const Texp& texp)
-    {
-      constexpr auto int_parse = [](const std::string& s) -> size_t {
-                                   return std::stoull(s);
-                                 };
-
-      if (texp.value != "cursor")
-        {
-          println("ERROR: '" + texp.paren() + "' is not a cursor");
-          return;
-        }
-
-      cursor = Cursor{int_parse(texp[0].value), int_parse(texp[1].value)};
-    }
-
-  inline void add(std::string S)
-    {
-      if (commands.empty())
-        {
-          printerrln("ERROR: no command to add '" + S + "' to");
-          return;
-        }
-
-      commands.back().push(Texp(S));
-    }
-};
-
-
 struct FileBuffer {
   Page page;
 
@@ -94,7 +23,8 @@ struct FileBuffer {
   time_t last_modify_time = 0;
 
   Cursor cursor;
-  std::vector<std::string> lines;
+  Cursor shadow_cursor;
+  Rope rope;
   History history;
 
   inline void destroy()
@@ -106,7 +36,7 @@ struct FileBuffer {
     {
       // copy from backing store into rendering view to prepare to unmap file
       page.buffer.contents.lines.clear();
-      for (std::string& line : lines)
+      for (std::string& line : rope.lines)
         {
           page.buffer.contents.lines.push_back(line);
         }
@@ -125,7 +55,7 @@ struct FileBuffer {
       page.buffer.contents.make(file_contents);
       for (StringView& line : page.buffer.contents.lines)
         {
-          lines.push_back(line.stringCopy());
+          rope.lines.push_back(line.stringCopy());
         }
 
       // TODO probably be more efficient than this
@@ -173,17 +103,19 @@ struct FileBuffer {
         }
     }
 
-  inline void addCursor(GraphicsContext& gc, bool control_mode)
+  inline void addCursors(GraphicsContext& gc, bool control_mode)
     {
-      glm::vec2 tlcoord = page.textCoord(gc, cursor);
-
       // TODO change for variable text width fonts
       float text_width = gc.tr.textWidth("a");
 
-      gc.drawRectangle(tlcoord, {text_width, gc.line_height},
+      gc.drawRectangle(page.textCoord(gc, cursor), {text_width, gc.line_height},
                        control_mode
                        ? glm::vec4{1, 0.7, 0.7, 0.5}
                        : glm::vec4{0.7, 1, 0.7, 0.5}, 0.4);
+
+      gc.drawRectangle(page.textCoord(gc, shadow_cursor),
+                       {text_width, gc.line_height},
+                       {0.7, 0.7, 1.0, 0.5}, 0.4);
 
       // TODO investigate positive z layer being below text?
       // - maybe ortho proj doesn't flip?
@@ -194,14 +126,14 @@ struct FileBuffer {
 
   inline void _cursorMoveToEndOfLine()
     {
-      cursor.column = lines.at(cursor.line).length();
+      cursor.column = rope.lines.at(cursor.line).length();
     }
 
   inline void _correctCursorPastEndOfLine()
     {
       // TODO: implement phantom cursor
       // correct cursor if off the end
-      if (lines.at(cursor.line).length() < cursor.column)
+      if (rope.lines.at(cursor.line).length() < cursor.column)
         {
           _cursorMoveToEndOfLine();
         }
@@ -212,61 +144,31 @@ struct FileBuffer {
 
       if (GLFW_PRESS == action || GLFW_REPEAT == action)
         {
-          if (not cursor.invariant(lines)) return;
+          if (not cursor.invariant(rope.lines)) return;
 
           // DIRECTIONS
 
-          if (GLFW_KEY_UP == key && cursor.line != 0)
+          if (GLFW_KEY_UP == key)
             {
-              -- cursor.line;
-
-              _correctCursorPastEndOfLine();
+              Move::up(cursor, rope);
               return;
             }
 
-          if (GLFW_KEY_DOWN == key && cursor.line < lines.size() - 1)
+          if (GLFW_KEY_DOWN == key)
             {
-              ++ cursor.line;
-
-              _correctCursorPastEndOfLine();
+              Move::down(cursor, rope);
               return;
             }
 
           if (GLFW_KEY_LEFT == key)
             {
-              if (cursor.column != 0)
-                {
-                  -- cursor.column;
-                  return;
-                }
-
-              // zero column, roll to previous line
-              if (cursor.column == 0)
-                {
-                  if (cursor.line != 0)
-                    {
-                      -- cursor.line;
-                      _cursorMoveToEndOfLine();
-                    }
-                  return;
-                }
+              Move::left(cursor, rope);
+              return;
             }
 
           if (GLFW_KEY_RIGHT == key)
             {
-              if (cursor.column < lines.at(cursor.line).size())
-                {
-                  ++ cursor.column;
-                  return;
-                }
-
-              // roll over to next line
-              if (cursor.column == lines.at(cursor.line).size()
-                  && cursor.line < lines.size() - 1)
-                {
-                  cursor.column = 0;
-                  ++ cursor.line;
-                }
+              Move::right(cursor, rope);
               return;
             }
 
@@ -287,13 +189,13 @@ struct FileBuffer {
           if (GLFW_KEY_PAGE_DOWN == key)
             {
               // TODO: replace with std::min?
-              if (cursor.line < lines.size() - 1 - PAGE_LINE_COUNT)
+              if (cursor.line < rope.lines.size() - 1 - PAGE_LINE_COUNT)
                 {
                   cursor.line += PAGE_LINE_COUNT;
                 }
               else
                 {
-                  cursor.line = lines.size() - 1;
+                  cursor.line = rope.lines.size() - 1;
                 }
 
               _correctCursorPastEndOfLine();
@@ -318,40 +220,10 @@ struct FileBuffer {
         }
     }
 
-  inline void _mergeLineWithNext(void)
-    {
-      lines.at(cursor.line) += lines.at(cursor.line + 1);
-      lines.erase(lines.begin() + cursor.line + 1);
-    }
-
-  inline void _splitLineAtCursor(void)
-    {
-      std::string& line = lines.at(cursor.line);
-      std::string head = line.substr(0, cursor.column);
-      std::string tail = line.substr(cursor.column);
-
-      line = head;
-      lines.insert(lines.begin() + cursor.line + 1, tail);
-    }
-
-  inline char _deleteAtCursor(void)
-    {
-      auto& line = lines.at(cursor.line);
-      char to_remove = line.at(cursor.column);
-      line.erase(line.begin() + cursor.column);
-      return to_remove;
-    }
-
-  inline void _insertAtCursor(char c)
-    {
-      auto& line = lines.at(cursor.line);
-      line.insert(line.begin() + cursor.column, c);
-    }
-
   inline void handleKeyEdit(int key, int scancode, int action, int mods)
     {
       // guards
-      if (not cursor.invariant(lines)) return;
+      if (not cursor.invariant(rope.lines)) return;
 
 
       if (GLFW_PRESS != action and GLFW_REPEAT != action) return;
@@ -359,28 +231,12 @@ struct FileBuffer {
       if (GLFW_KEY_BACKSPACE == key)
         {
           history.push("backspace");
+          history.addCursor(cursor, "before-cursor");
 
-
-          if (0 == cursor.column)
-            {
-              history.addCursor(cursor);
-
-              if (0 == cursor.line) return;
-              -- cursor.line;
-              cursor.column = lines.at(cursor.line).length();
-              history.add("\n");
-              history.addCursor(cursor);
-              _mergeLineWithNext();
-            }
-
+          if (Move::left(cursor, rope))
+            { history.add(str(rope.chardelete(cursor))); }
           else
-            {
-              history.addCursor(cursor);
-              -- cursor.column;
-              char removed = _deleteAtCursor();
-              history.add(str(removed));
-              history.addCursor(cursor);
-            }
+            { history.pop(); return; }
 
           preparePageForRender();
           return;
@@ -389,22 +245,12 @@ struct FileBuffer {
       if (GLFW_KEY_DELETE == key)
         {
           history.push("delete");
-          history.addCursor(cursor);
+          history.addCursor(cursor, "before-cursor");
 
-          if (lines.at(cursor.line).length() == cursor.column)
-            {
-              // cannot delete anything at the end of the last line,
-              //   line_index = size - 1
-              if (lines.size() - 1 == cursor.line) return;
-              history.add("\n");
-              _mergeLineWithNext();
-            }
-
+          if (char c = rope.chardelete(cursor); c != '\0')
+            { history.add(str(c)); }
           else
-            {
-              char removed = _deleteAtCursor();
-              history.add(str(removed));
-            }
+            { history.pop(); return; }
 
           preparePageForRender();
           return;
@@ -413,27 +259,57 @@ struct FileBuffer {
       if (GLFW_KEY_ENTER == key)
         {
           history.push("enter");
-          history.addCursor(cursor);
+          history.addCursor(cursor, "before-cursor");
 
-          if (0 == cursor.column)
+          rope.linebreak(cursor);
+          ++ cursor.line;
+          cursor.column = 0;
+
+          preparePageForRender();
+          return;
+        }
+
+      if (GLFW_KEY_TAB == key)
+        {
+          if (GLFW_MOD_SHIFT & mods)
             {
-              lines.insert(lines.begin() + cursor.line, "");
-              ++ cursor.line;
-            }
+              /// SHIFT TAB
+              size_t whitespace_count = ([&]() -> size_t {
 
-          else if (lines.at(cursor.line).length() == cursor.column)
-            {
-              lines.insert(lines.begin() + cursor.line + 1, "");
-              ++ cursor.line;
-              cursor.column = 0;
-            }
+                  const auto& line = rope.lines.at(cursor.line);
+                  for (size_t i = 0; i < line.length(); ++i)
+                    {
+                      if (line.at(i) != ' ') return i;
+                    }
+                  return line.length();
+                })();
 
+              if (0 == whitespace_count) { return; }
+
+              history.push("shift-tab");
+              history.addCursor(cursor, "before-cursor");
+
+              if (1 == whitespace_count)
+                {
+                  history.add(" ");
+                  rope.lines.at(cursor.line) == "";
+                  cursor.column = 0;
+                }
+              else
+                {
+                  history.add("  ");
+                  rope.lines.at(cursor.line).erase(0, 2);
+                  cursor.column -= 2;
+                }
+            }
           else
             {
-              _splitLineAtCursor();
+              /// TAB
+              history.push("tab");
+              history.addCursor(cursor, "before-cursor");
 
-              ++ cursor.line;
-              cursor.column = 0;
+              rope.insert("  ", cursor);
+              cursor.column += 2;
             }
 
           preparePageForRender();
@@ -444,13 +320,13 @@ struct FileBuffer {
   inline void handleChar(unsigned int codepoint)
     {
       // TODO check cursor in bounds/ check that lines is big enough to contain cursor
-      if (not cursor.invariant(lines)) return;
+      if (not cursor.invariant(rope.lines)) return;
 
       history.push("char");
-      history.addCursor(cursor);
+      history.addCursor(cursor, "before-cursor");
       history.add(str((char)codepoint));
 
-      _insertAtCursor(codepoint);
+      rope.insert((char)codepoint, cursor);
 
       ++ cursor.column;
 
@@ -460,7 +336,7 @@ struct FileBuffer {
   inline void handleKeyControl(int key, int scancode, int action, int mods)
     {
       // guards
-      if (not cursor.invariant(lines)) return;
+      if (not cursor.invariant(rope.lines)) return;
 
       // CONTROL
 
@@ -477,6 +353,15 @@ struct FileBuffer {
         {
           save();
         }
+
+      if (GLFW_KEY_SPACE == key)
+        {
+          // drop shadow cursor
+          shadow_cursor = cursor;
+          // CONSIDER: two shadow cursors for direct buffer to buffer yanks
+          // TODO: move shadow cursor when region resizes to not allow for that shape
+          // TODO: move shadow cursor when text is deleted before the shadow cursor
+        }
     }
 
   inline void undo(void)
@@ -485,62 +370,107 @@ struct FileBuffer {
 
       auto command = history.pop();
 
+      auto cursor_before = [&](){
+                             if (auto before = command.maybe_find("before-cursor"); before)
+                               cursor = history.parseCursor(*before.value());
+                           };
+
       if ("enter" == command.value)
         {
-          history.setFromCursorChild(cursor, command);
-          _mergeLineWithNext();
+          cursor_before();
+          rope.linemerge(cursor);
           preparePageForRender();
           return;
         }
 
       if ("char" == command.value)
         {
-          history.setFromCursorChild(cursor, command);
-          _deleteAtCursor();
+          cursor_before();
+          rope.chardelete(cursor);
           preparePageForRender();
           return;
         }
+
+      if ("tab" == command.value)
+        {
+          cursor_before();
+          rope.chardelete(cursor);
+          rope.chardelete(cursor);
+          preparePageForRender();
+          return;
+        }
+
+      // texp(shift-tab <before-cursor> [" ","  "]
+      if ("shift-tab" == command.value)
+        {
+          cursor_before();
+          rope.lines.at(cursor.line).insert(0, command[1].value);
+          return;
+        }
+
+      auto undelete = [&](const std::string& c, Cursor loc) {
+                        assert(c.length() == 1);
+                        if (c == "\n")
+                          { rope.linebreak(loc); }
+                        else
+                          { rope.insert(c, loc); }
+                      };
+
+      // texp([delete,backspace] <before-cursor> <char>)
 
       if ("delete" == command.value)
         {
-          auto c = command.back().value;
-          history.setFromCursorChild(cursor, command);
-          if (c != "\n")
-            {
-              _insertAtCursor(command.back().value[0]);
-            }
-          else
-            {
-              _splitLineAtCursor();
-            }
+          cursor_before();
+          auto c = command[1].value;
+
+          undelete(c, cursor);
 
           preparePageForRender();
           return;
         }
 
-      // backspace after-cursor char before-cursor
       if ("backspace" == command.value)
         {
-          println(command);
+          // TODO CURRENT: backspace's after is its before minus the vector of difference given by the dimensions of removed text
+
+          cursor_before();
+
           auto c = command[1].value;
-          if (c != "\n")
-            {
-              history.setFromCursor(cursor, command[2]);
-              _insertAtCursor(c[0]);
-              history.setFromCursor(cursor, command[0]);
-            }
+
+          Cursor insert_loc = cursor;
+          if (c == "\n")
+            { Move::up(insert_loc, rope); }
           else
-            {
-              history.setFromCursor(cursor, command[2]);
-              _splitLineAtCursor();
-              history.setFromCursor(cursor, command[0]);
-            }
+            { Move::left(insert_loc, rope); }
+
+          undelete(c, insert_loc);
 
           preparePageForRender();
           return;
         }
 
-      println(command);
+      // paste before-cursor@0 index@1 clipboard_addr@2
+      if ("paste" == command.value)
+        {
+          cursor_before();
+
+          constexpr auto int_parse = [](const std::string& s) -> size_t {
+                                       return std::stoull(s);
+                                     };
+          auto index = int_parse(command[1].value);
+          auto clipboard = (Clipboard*)(int_parse(command[2].value));
+          const Rope& store = clipboard->kill_ring[index];
+
+          Cursor end_of_block = cursor;
+          Move::forwardBlock(end_of_block, rope, store);
+          rope.erase(cursor, end_of_block);
+
+          preparePageForRender();
+          return;
+        }
+
+      print("UNHANDLED:\n  ");
+      println(command.paren());
     }
 
   inline void save(void)
@@ -549,9 +479,41 @@ struct FileBuffer {
 
       if (last_modify_time != file.modify_time())
         { println("WARNING: file modified after opening"); }
+
       // TODO check for first dirty line to seek and not rewrite pre-dirty segment
       std::string acc;
-      for (const auto& line : lines) acc += line + "\n";
+      for (const auto& line : rope.lines) acc += line + "\n";
       file.overwrite(acc);
+
+      last_modify_time = file.modify_time();
+    }
+
+  // copy selection between shadow cursor and main cursor
+  //
+  // NOTE: filebuffer takes care of selection,
+  // rope takes care of copying text area,
+  // and editor takes care of storing ropes in clipboard kill ring
+  // - you can interchange selection strategies without changing filebuffer's interface
+  inline void copy(Rope& store)
+    {
+      // TODO: should copy line
+      if (shadow_cursor == cursor) return;
+
+      store.make(rope, shadow_cursor, cursor);
+    }
+
+  inline void paste(const Rope& store, size_t clipboard_index, void* clipboard_addr)
+    {
+      history.push("paste");
+      history.addCursor(cursor, "before-cursor");
+
+      // TODO: fix this, maximal janky
+      history.add(str(clipboard_index));
+      history.add(str((size_t)(clipboard_addr)));
+
+      rope.insert(store, cursor);
+      Move::forwardBlock(cursor, rope, store);
+
+      preparePageForRender();
     }
 };

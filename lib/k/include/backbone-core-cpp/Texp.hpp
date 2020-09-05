@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <utility>
 
 struct Texp {
   std::vector<Texp> _children {};
@@ -32,6 +33,14 @@ struct Texp {
 
   Children::const_iterator find(std::string_view view) const
     { return std::find_if(begin(), end(), [&view](Texp t) -> bool { return t.value == view; }); }
+
+  std::optional<Children::const_iterator> maybe_find(std::string_view view) const
+    {
+      auto result = find(view);
+      if (result == end())
+        return std::nullopt;
+      return result;
+    }
 
   // Representation  ========================================================
   std::string tabs(int indent = 0) const

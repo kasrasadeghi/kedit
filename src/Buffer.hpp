@@ -10,7 +10,7 @@
 #include <string>
 
 struct Buffer {
-  Rope contents;
+  ViewRope contents;
   Scroller line_scroller;
 
   inline void tick(double delta_time)
