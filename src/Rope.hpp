@@ -182,4 +182,10 @@ struct Rope {
       auto& line = lines.at(cursor.line);
       line.insert(line.begin() + cursor.column, c);
     }
+
+  inline void insert(const std::string& str, Cursor cursor)
+    {
+      auto& line = lines.at(cursor.line);
+      line.insert(cursor.column, str);
+    }
 };
