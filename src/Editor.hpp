@@ -222,6 +222,7 @@ struct Editor {
             {
               currentFileBuffer()->copy(clipboard.kill_ring.back());
             }
+          return;
         }
 
       if (GLFW_KEY_V == key)
@@ -230,18 +231,29 @@ struct Editor {
             {
               currentFileBuffer()->paste(clipboard.kill_ring.back(), clipboard.kill_ring.size() - 1, (void*)(&clipboard));
             }
+          return;
         }
 
       if (GLFW_KEY_B == key)
-        openBrowser();
+        {
+          openBrowser();
+          return;
+        }
 
       if (GLFW_KEY_E == key)
-        openSwap();
+        {
+          if (_filebuffers.size() != 0)
+            openSwap();
+          return;
+        }
 
       // CONSIDER: opening swap menu after closing current file
       if (GLFW_KEY_W == key)
-        if (_pages.size() > 1)
-          freeCurrent();
+        {
+          if (_pages.size() > 1)
+            freeCurrent();
+          return;
+        }
 
       // CONSIDER: closing file if it is the only one open and opening a menu
     }
