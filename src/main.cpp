@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
   GraphicsContext gc { &window, parent_dir(argv[0]) };
   gc.initOptions();
 
-  /// Load Screen ===------------------------------------------------------------------------===///
+  /// Load Screen ===-------------------------------------------------------------------------===///
   gc.clear(0, 0, 0, 1);
   gc.scissorFull();
   gc.text("loading", window.width()/2 - 100, window.height()/2, glm::vec4(1));
@@ -82,17 +82,17 @@ int main(int argc, char* argv[]) {
 
   gc.rectprog.init();
 
-  /// Render Loop ===------------------------------------------------------------------------===///
+  /// Render Loop ===-------------------------------------------------------------------------===///
 
   Profiler pr { 60.0 };
 
   while (window.isOpen()) {
 
-    /// Update Frame Data ===----------------------------------------------------------------===///
+    /// Update Frame Data ===-----------------------------------------------------------------===///
 
     pr.startFrame();
 
-    /// Development Messages ===-------------------------------------------------------------===///
+    /// Development Messages ===--------------------------------------------------------------===///
 
     std::vector<std::string> status_messages;
     auto status = [&status_messages](std::string m) {
@@ -116,20 +116,20 @@ int main(int argc, char* argv[]) {
       }
     };
 
-    /// Handle Updates ===-------------------------------------------------------------------===///
+    /// Handle Updates ===--------------------------------------------------------------------===///
     // handle updates that need delta_time, e.g. physics, movement
 
     if constexpr(PROFILING) { pr.event("handle updates"); }
 
     editor.tick(pr.delta_time);
 
-    /// Render to Screen ===-----------------------------------------------------===///
     gc.renderOptions();
 
     gc.alignViewport();
     gc.scissorFull();
 
     gc.clear(0.5, 0.5, 0.5, 1);
+    /// Editor Info Status ===----------------------------------------------------------------===///
 
     status(str(editor.currentPage()->_type) + " :current page type ");
     status(str(editor._pages.size())        + " :page count "       );
@@ -143,6 +143,7 @@ int main(int argc, char* argv[]) {
     // glScissor uses lower left coordinates, (1,1) is first bottom left pixel
     auto* page = editor.currentPage();
     gc.scissorRect(page->top_left_position, page->size);
+    /// Render to Screen ===------------------------------------------------------------------===///
 
     editor.render(gc);
 
@@ -187,13 +188,13 @@ int main(int argc, char* argv[]) {
 
     if constexpr(PROFILING) { pr.event("render to screen"); }
 
-    /// FPS Counter ===------------------------------------------------------===///
+    /// FPS Counter ===-----------------------------------------------------------------------===///
 
     auto tilde_width = gc.tr.textWidth("~");
     gc.text("FPS: " + str(pr.framerate), window.width() - 300 + tilde_width, 50, glm::vec4(1));
     gc.text("~FPS: " + str(pr.moving_avg_framerate), window.width() - 300, 80, glm::vec4(1));
 
-    /// Render Messages ===--------------------------------------------------===///
+    /// Render Messages ===-------------------------------------------------------------------===///
 
 
     // if (not editor._menus.empty()) {
@@ -217,7 +218,7 @@ int main(int argc, char* argv[]) {
       list_text(frame_messages, {window.width() - 500, 200}, "frames");
     }
 
-    /// Poll Events and Swap ===------------------------------------------------------===///
+    /// Poll Events and Swap ===--------------------------------------------------------------===///
 
     window.swapBuffers();
     glfwPollEvents();
