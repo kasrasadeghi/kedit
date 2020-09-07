@@ -5,6 +5,7 @@
 #include "Page.hpp"
 #include "GraphicsContext.hpp"
 #include "Clipboard.hpp"
+#include "Search.hpp"
 
 #include <kgfx/TextRenderer.hpp>
 #include <backbone-core-cpp/StrView.hpp>
@@ -25,6 +26,7 @@ struct Editor {
   std::vector<std::string> command_history;
 
   Clipboard clipboard;
+  Search search;
 
   bool _control_mode = true;
   bool _control_mode_release_exit = false;
@@ -132,11 +134,23 @@ struct Editor {
       addRectangles(gc);
       gc.renderRectangles();
 
-      // glScissor uses lower left coordinates, (1,1) is first bottom left pixel
       auto* page = currentPage();
       gc.scissorRect(page->top_left_position, page->size);
 
-      currentPage()->render(gc);
+      // NOTE: glScissor uses lower left coordinates, (1,1) is first bottom left pixel
+
+      // cut off left and right margin
+      gc.scissorRect(page->top_left_position + glm::vec2{0, page->offset.x},
+                     glm::vec2{page->size.x - (2 * page->offset.x), page->size.y});
+
+      if (Type::FileBufferT == currentPage()->_type && search.query != "")
+        {
+          currentFileBuffer()->addSearchResults(gc, search);
+        }
+
+      gc.renderRectangles();
+
+      page->render(gc);
 
       gc.scissorFull();
     }
@@ -246,6 +260,24 @@ struct Editor {
           if (Type::FileBufferT == currentPage()->_type)
             {
               currentFileBuffer()->paste(clipboard.kill_ring.back(), clipboard.kill_ring.size() - 1, (void*)(&clipboard));
+            }
+          return;
+        }
+
+      if (GLFW_KEY_F == key)
+        {
+          if (Type::FileBufferT == currentPage()->_type)
+            {
+              Rope cache;
+              currentFileBuffer()->copy(cache);
+
+              if (cache.lines.size() != 1)
+                {
+                  println("WARNING: cannot search multiple lines");
+                  return;
+                }
+              search.query = cache.lines.at(0);
+              search.scanAll(currentFileBuffer()->rope, currentFileBuffer()->search_results);
             }
           return;
         }
