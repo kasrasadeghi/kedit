@@ -123,12 +123,6 @@ int main(int argc, char* argv[]) {
 
     editor.tick(pr.delta_time);
 
-    gc.renderOptions();
-
-    gc.alignViewport();
-    gc.scissorFull();
-
-    gc.clear(0.5, 0.5, 0.5, 1);
     /// Editor Info Status ===----------------------------------------------------------------===///
 
     status(str(editor.currentPage()->_type) + " :current page type ");
@@ -137,17 +131,10 @@ int main(int argc, char* argv[]) {
     status(str(editor._filebuffers.size())  + " :filebuffer count " );
     status(str(editor._control_mode)        + " :control mode "     );
 
-    editor.addRectangles(gc);
-    gc.renderRectangles();
-
-    // glScissor uses lower left coordinates, (1,1) is first bottom left pixel
-    auto* page = editor.currentPage();
-    gc.scissorRect(page->top_left_position, page->size);
     /// Render to Screen ===------------------------------------------------------------------===///
+    gc.renderOptions();
 
     editor.render(gc);
-
-    gc.scissorFull();
 
     // TODO translucency on top of text goes after editor render
 

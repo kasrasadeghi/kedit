@@ -123,7 +123,23 @@ struct Editor {
   // TODO text renderer needs to have a Z level argument
   // TODO render background at different Z levels
   inline void render(GraphicsContext& gc)
-    { currentPage()->render(gc); }
+    {
+      gc.alignViewport();
+      gc.scissorFull();
+
+      gc.clear(0.5, 0.5, 0.5, 1);
+
+      addRectangles(gc);
+      gc.renderRectangles();
+
+      // glScissor uses lower left coordinates, (1,1) is first bottom left pixel
+      auto* page = currentPage();
+      gc.scissorRect(page->top_left_position, page->size);
+
+      currentPage()->render(gc);
+
+      gc.scissorFull();
+    }
 
   inline Cursor getCurrentCursor(void)
     {
