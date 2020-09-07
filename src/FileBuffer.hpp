@@ -7,6 +7,7 @@
 #include "History.hpp"
 #include "CursorMove.hpp"
 #include "Clipboard.hpp"
+#include "Search.hpp"
 
 #include <backbone-core-cpp/File.hpp>
 #include <backbone-core-cpp/Texp.hpp>
@@ -26,6 +27,12 @@ struct FileBuffer {
   Cursor shadow_cursor;
   Rope rope;
   History history;
+
+  // CURRENT: search interface
+  std::vector<Cursor> search_results;
+
+  // CONSIDER: implementing some kind of plugin system that adds stuff to FileBuffers and Editor
+  // - probably use some kind of function hook system
 
   inline void destroy()
     {
@@ -128,6 +135,21 @@ struct FileBuffer {
       // - maybe ortho proj doesn't flip?
     }
 
+  inline void addSearchResults(GraphicsContext& gc, Search& search)
+    {
+      // TODO change for variable text width fonts
+      float text_width = gc.tr.textWidth("a");
+
+      for (Cursor result : search_results)
+        {
+          gc.drawRectangle(page.textCoord(gc, result),
+                           {text_width * search.query.length(), gc.line_height},
+                           glm::vec4{1, 1, 0.7, 0.2}, 0.3);
+        }
+
+      // TODO investigate positive z layer being below text?
+      // - maybe ortho proj doesn't flip?
+    }
 
   /// Interaction ===-------------------------------------------------------------------===///
 
