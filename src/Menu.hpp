@@ -78,6 +78,18 @@ struct Menu {
               handler(curr_command[0]);
               return;
             }
+
+          if (GLFW_KEY_PAGE_UP == key)
+            {
+              cursor = 0;
+              return;
+            }
+
+          if (GLFW_KEY_PAGE_DOWN == key)
+            {
+              cursor = selectable_lines.size() - 1;
+              return;
+            }
         }
     }
 
