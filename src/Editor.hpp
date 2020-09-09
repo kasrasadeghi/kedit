@@ -26,7 +26,7 @@ struct Editor {
   std::vector<std::string> command_history;
 
   Clipboard clipboard;
-  Search search;
+  SearchCommon search_common;
 
   bool _control_mode = true;
   bool _control_mode_release_exit = false;
@@ -143,9 +143,9 @@ struct Editor {
       gc.scissorRect(page->top_left_position + glm::vec2{0, page->offset.x},
                      glm::vec2{page->size.x - (2 * page->offset.x), page->size.y});
 
-      if (Type::FileBufferT == currentPage()->_type && search.query != "")
+      if (Type::FileBufferT == currentPage()->_type && currentFileBuffer()->_search.mode)
         {
-          currentFileBuffer()->addSearchResults(gc, search);
+          currentFileBuffer()->addSearchResults(gc);
         }
 
       gc.renderRectangles();
@@ -268,16 +268,7 @@ struct Editor {
         {
           if (Type::FileBufferT == currentPage()->_type)
             {
-              Rope cache;
-              currentFileBuffer()->copy(cache);
-
-              if (cache.lines.size() != 1)
-                {
-                  println("WARNING: cannot search multiple lines");
-                  return;
-                }
-              search.query = cache.lines.at(0);
-              search.scanAll(currentFileBuffer()->rope, currentFileBuffer()->search_results);
+              currentFileBuffer()->search();
             }
           return;
         }

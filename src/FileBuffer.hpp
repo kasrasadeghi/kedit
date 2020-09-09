@@ -17,6 +17,9 @@
 
 #include <string>
 
+/// NOTE: initialization routine
+// _search.common = editor.search_common
+// page._type = FileBufferT | MenuT
 struct FileBuffer {
   Page page;
 
@@ -28,8 +31,7 @@ struct FileBuffer {
   Rope rope;
   History history;
 
-  // CURRENT: search interface
-  std::vector<Cursor> search_results;
+  Search _search;
 
   // CONSIDER: implementing some kind of plugin system that adds stuff to FileBuffers and Editor
   // - probably use some kind of function hook system
@@ -135,15 +137,15 @@ struct FileBuffer {
       // - maybe ortho proj doesn't flip?
     }
 
-  inline void addSearchResults(GraphicsContext& gc, Search& search)
+  inline void addSearchResults(GraphicsContext& gc)
     {
       // TODO change for variable text width fonts
       float text_width = gc.tr.textWidth("a");
 
-      for (Cursor result : search_results)
+      for (Cursor result : _search.results)
         {
           gc.drawRectangle(page.textCoord(gc, result),
-                           {text_width * search.query.length(), gc.line_height},
+                           {text_width * _search.common->query.length(), gc.line_height},
                            glm::vec4{1, 1, 0.7, 0.2}, 0.3);
         }
 
@@ -170,82 +172,129 @@ struct FileBuffer {
 
   inline void handleKey(int key, int scancode, int action, int mods)
     {
-
-      if (GLFW_PRESS == action || GLFW_REPEAT == action)
+      if (_search.mode)
         {
-          if (not cursor.invariant(rope.lines)) return;
+          handleKeySearch(key, scancode, action, mods);
+          return;
+        }
 
-          // DIRECTIONS
+      if (not (GLFW_PRESS == action || GLFW_REPEAT == action)) return;
 
-          if (GLFW_KEY_UP == key)
+      if (not cursor.invariant(rope.lines)) return;
+
+      // DIRECTIONS
+
+      if (GLFW_KEY_UP == key)
+        {
+          Move::up(cursor, rope);
+          return;
+        }
+
+      if (GLFW_KEY_DOWN == key)
+        {
+          Move::down(cursor, rope);
+          return;
+        }
+
+      if (GLFW_KEY_LEFT == key)
+        {
+          Move::left(cursor, rope);
+          return;
+        }
+
+      if (GLFW_KEY_RIGHT == key)
+        {
+          Move::right(cursor, rope);
+          return;
+        }
+
+      // SPECIAL MOVEMENT
+
+      if (GLFW_KEY_HOME == key)
+        {
+          cursor.column = 0;
+        }
+
+      if (GLFW_KEY_END == key)
+        {
+          _cursorMoveToEndOfLine();
+        }
+
+      constexpr uint64_t PAGE_LINE_COUNT = 5;
+
+      if (GLFW_KEY_PAGE_DOWN == key)
+        {
+          // TODO: replace with std::min?
+          if (cursor.line < rope.lines.size() - 1 - PAGE_LINE_COUNT)
             {
-              Move::up(cursor, rope);
-              return;
+              cursor.line += PAGE_LINE_COUNT;
+            }
+          else
+            {
+              cursor.line = rope.lines.size() - 1;
             }
 
-          if (GLFW_KEY_DOWN == key)
+          _correctCursorPastEndOfLine();
+          return;
+        }
+
+      if (GLFW_KEY_PAGE_UP == key)
+        {
+          // TODO: replace with std::min?
+          if (cursor.line > PAGE_LINE_COUNT)
             {
-              Move::down(cursor, rope);
-              return;
+              cursor.line -= PAGE_LINE_COUNT;
+            }
+          else
+            {
+              cursor.line = 0;
             }
 
-          if (GLFW_KEY_LEFT == key)
+          _correctCursorPastEndOfLine();
+          return;
+        }
+    }
+
+  inline void handleKeySearch(int key, int scancode, int action, int mods)
+    {
+      if (not (GLFW_PRESS == action || GLFW_REPEAT == action)) return;
+
+      if (GLFW_KEY_LEFT == key || GLFW_KEY_P == key)
+        {
+          if (0 == _search.index)
             {
-              Move::left(cursor, rope);
-              return;
+              _search.index = _search.results.size() - 1;
             }
-
-          if (GLFW_KEY_RIGHT == key)
+          else
             {
-              Move::right(cursor, rope);
-              return;
+              -- _search.index;
             }
+          cursor = _search.results.at(_search.index);
+          if (_search.offset != (size_t)-1) cursor.column += _search.offset;
+          return;
+        }
 
-          // SPECIAL MOVEMENT
-
-          if (GLFW_KEY_HOME == key)
+      if (GLFW_KEY_RIGHT == key || GLFW_KEY_N == key)
+        {
+          if (_search.results.size() - 1 == _search.index)
             {
-              cursor.column = 0;
+              _search.index = 0;
             }
-
-          if (GLFW_KEY_END == key)
+          else
             {
-              _cursorMoveToEndOfLine();
+              ++ _search.index;
             }
+          cursor = _search.results.at(_search.index);
+          if (_search.offset != (size_t)-1) cursor.column += _search.offset;
+          return;
+        }
 
-          constexpr uint64_t PAGE_LINE_COUNT = 5;
-
-          if (GLFW_KEY_PAGE_DOWN == key)
-            {
-              // TODO: replace with std::min?
-              if (cursor.line < rope.lines.size() - 1 - PAGE_LINE_COUNT)
-                {
-                  cursor.line += PAGE_LINE_COUNT;
-                }
-              else
-                {
-                  cursor.line = rope.lines.size() - 1;
-                }
-
-              _correctCursorPastEndOfLine();
-              return;
-            }
-
-          if (GLFW_KEY_PAGE_UP == key)
-            {
-              // TODO: replace with std::min?
-              if (cursor.line > PAGE_LINE_COUNT)
-                {
-                  cursor.line -= PAGE_LINE_COUNT;
-                }
-              else
-                {
-                  cursor.line = 0;
-                }
-
-              _correctCursorPastEndOfLine();
-              return;
-            }
+      if (GLFW_KEY_ENTER == key)
+        {
+          // TODO erase cursor backup
+          _search.mode = false;
+          // TODO clear index and offsets
+          return;
         }
     }
 
@@ -500,6 +549,51 @@ struct FileBuffer {
 
       print("UNHANDLED:\n  ");
       println(command.paren());
+    }
+
+  inline void search(void)
+    {
+      // TODO when adding non-cursor search query, differentiate between cursor and non-cursor search
+      // - cursor search just searches between the two cursors
+      // - non-cursor makes you type in the query
+      //
+      // if cursor search,
+      //   index should be the lesser cursor
+      //   search.offset should either be 0 or query.length()
+      //
+      // if non-cursor search,
+      //   if cursor is within a result,
+      //     offset is based on that
+      //     index is also zero
+      //   otherwise
+      //     offset is -1 i.e. maximal integer
+      //     index is the first result that is after the cursor
+
+      if (cursor.line != shadow_cursor.line)
+        {
+          println("WARNING: cannot search multiple lines");
+          return;
+        }
+
+      auto begin_column = cursor.column;
+      auto end_column = shadow_cursor.column;
+      if (begin_column > end_column) std::swap(begin_column, end_column);
+
+      _search.common->query = rope.lines.at(cursor.line).substr(begin_column, end_column - begin_column);
+      _search.common->scanAll(rope, _search);
+
+      if (cursor < shadow_cursor)
+        {
+          _search.offset = 0;
+          auto index_ptr = std::find(_search.results.begin(), _search.results.end(), cursor);
+          assert(index_ptr != _search.results.end());
+          _search.index = index_ptr - _search.results.begin();
+        }
+      else
+        {
+          _search.offset = _search.common->query.length();
+          _search.index = std::find(_search.results.begin(), _search.results.end(), shadow_cursor) - _search.results.begin();
+        }
     }
 
   inline void save(void)

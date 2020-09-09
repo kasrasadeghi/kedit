@@ -25,6 +25,7 @@
 // find which pages are FileBufferT's and fix them.
 FileBuffer* Editor::allocFileBuffer(void)
   {
+    // allocation routine
     if (_filebuffers.size() == _filebuffers.capacity())
       {
         std::vector<unsigned char> pages_filter;
@@ -67,8 +68,10 @@ FileBuffer* Editor::allocFileBuffer(void)
           }
       }
 
+    // initialization
     FileBuffer& curr = _filebuffers.back();
     curr.page._type = Type::FileBufferT;
+    curr._search.common = &search_common;
 
     _pages.push_back(&curr.page);
     return &curr;
