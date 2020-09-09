@@ -16,10 +16,9 @@ struct Search {
 
   size_t index = 0;  // TODO: build data structure for easily cycle-able vector, like a ring/ringbuffer/deque
   size_t offset = -1;
-  size_t shadow_offset = -1;
   std::vector<Cursor> results;
 
-  bool mode = false;
+  bool mode = false; // CONSIDER: moving mode into common
 };
 
 /// the search element of the Editor, in global scope
