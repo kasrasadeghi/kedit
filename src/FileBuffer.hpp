@@ -577,6 +577,7 @@ struct FileBuffer {
       _search.common->query = rope.lines.at(cursor.line).substr(begin_column, end_column - begin_column);
       _search.common->scanAll(rope, _search);
 
+      // CONSIDER: std::binary_search instead of std::find
       if (cursor < shadow_cursor)
         {
           _search.offset = 0;
