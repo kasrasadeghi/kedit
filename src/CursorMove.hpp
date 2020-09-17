@@ -4,7 +4,7 @@
 #include <cassert>
 
 namespace Move {
-  inline void _cursorMoveToEndOfLine(Cursor& cursor, const Rope& rope)
+  inline void endOfLine(Cursor& cursor, const Rope& rope)
     {
       cursor.column = rope.linelength(cursor);
     }
@@ -13,7 +13,7 @@ namespace Move {
     {
       if (rope.lines.at(cursor.line).length() < cursor.column)
         {
-          _cursorMoveToEndOfLine(cursor, rope);
+          endOfLine(cursor, rope);
         }
     }
 
@@ -32,7 +32,7 @@ namespace Move {
       if (cursor.line != 0)
         {
           -- cursor.line;
-          _cursorMoveToEndOfLine(cursor, rope);
+          endOfLine(cursor, rope);
           return true;
         }
       else
@@ -70,7 +70,7 @@ namespace Move {
         { return false; }
 
       -- cursor.line;
-      _correctCursorPastEndOfLine(cursor, rope);
+      endOfLine(cursor, rope);
       return true;
     }
 
@@ -80,7 +80,7 @@ namespace Move {
         { return false; }
 
       ++ cursor.line;
-      _correctCursorPastEndOfLine(cursor, rope);
+      endOfLine(cursor, rope);
       return true;
     }
 
