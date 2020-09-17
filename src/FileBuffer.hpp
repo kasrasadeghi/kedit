@@ -155,18 +155,13 @@ struct FileBuffer {
 
   /// Interaction ===-------------------------------------------------------------------===///
 
-  inline void _cursorMoveToEndOfLine()
-    {
-      cursor.column = rope.lines.at(cursor.line).length();
-    }
-
   inline void _correctCursorPastEndOfLine()
     {
       // TODO: implement phantom cursor
       // correct cursor if off the end
       if (rope.lines.at(cursor.line).length() < cursor.column)
         {
-          _cursorMoveToEndOfLine();
+          Move::endOfLine(cursor, rope);
         }
     }
 
@@ -217,7 +212,7 @@ struct FileBuffer {
 
       if (GLFW_KEY_END == key)
         {
-          _cursorMoveToEndOfLine();
+          Move::endOfLine(cursor, rope);
         }
 
       constexpr uint64_t PAGE_LINE_COUNT = 5;
