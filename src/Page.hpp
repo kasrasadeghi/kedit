@@ -21,7 +21,6 @@ struct Page {
   glm::vec2 bottomRight(void) { return top_left_position + size; }
 
   void render(GraphicsContext& gc);
-  void handleKey(int key, int scancode, int action, int mods);
 
   glm::vec2 lineCoord(GraphicsContext& gc, Cursor c)
     {
