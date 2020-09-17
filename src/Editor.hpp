@@ -218,7 +218,14 @@ struct Editor {
             }
         }
 
-      currentPage()->handleKey(key, scancode, action, mods);
+      if (Type::FileBufferT == currentPage()->_type)
+        {
+          currentFileBuffer()->handleKey(key, scancode, action, mods);
+        }
+      else if (Type::MenuT == currentPage()->_type)
+        {
+          currentMenu()->handleKey(key, scancode, action, mods);
+        }
 
       if (Type::FileBufferT == currentPage()->_type)
         {
