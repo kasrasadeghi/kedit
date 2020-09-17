@@ -49,8 +49,9 @@ struct Page {
 
   void highlightLine(GraphicsContext& gc, Cursor c)
     {
-      // TODO: correlate with page width
-      gc.drawRectangle(lineCoord(gc, c), {size.x - (2 * offset.x), gc.line_height}, glm::vec4{1, 1, 1, 0.1}, 0.4);
+      gc.drawRectangle(lineCoord(gc, c),
+                       {size.x - (2 * offset.x), gc.line_height},
+                       glm::vec4{1, 1, 1, 0.1}, 0.4);
     }
 
   void scrollToCursor(GraphicsContext& gc, Cursor c)
