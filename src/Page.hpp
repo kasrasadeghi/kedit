@@ -18,11 +18,11 @@ struct Page {
   glm::vec2 top_left_position = {100, 100};
   glm::vec2 size = {1800, 1200};
 
-  glm::vec2 bottomRight(void) { return top_left_position + size; }
+  inline glm::vec2 bottomRight(void) { return top_left_position + size; }
 
   void render(GraphicsContext& gc);
 
-  glm::vec2 lineCoord(GraphicsContext& gc, Cursor c)
+  inline glm::vec2 lineCoord(GraphicsContext& gc, Cursor c)
     {
       float tlx = top_left_position.x
                 + offset.x;
@@ -37,7 +37,7 @@ struct Page {
     }
 
   /// get the top left coordinate for a cursor position
-  glm::vec2 textCoord(GraphicsContext& gc, Cursor c)
+  inline glm::vec2 textCoord(GraphicsContext& gc, Cursor c)
     {
       // TODO change for variable text width fonts
       float text_width = gc.tr.textWidth("a");
@@ -46,14 +46,14 @@ struct Page {
       return coord + glm::vec2{(text_width * c.column), 0};
     }
 
-  void highlightLine(GraphicsContext& gc, Cursor c)
+  inline void highlightLine(GraphicsContext& gc, Cursor c)
     {
       gc.drawRectangle(lineCoord(gc, c),
                        {size.x - (2 * offset.x), gc.line_height},
                        glm::vec4{1, 1, 1, 0.1}, 0.4);
     }
 
-  void scrollToCursor(GraphicsContext& gc, Cursor c)
+  inline void scrollToCursor(GraphicsContext& gc, Cursor c)
     {
       // center-follow scrolling mode
       // TODO replace magic number with computation from size and line height
