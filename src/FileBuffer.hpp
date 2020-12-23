@@ -208,11 +208,13 @@ struct FileBuffer {
       if (GLFW_KEY_HOME == key)
         {
           cursor.column = 0;
+          return;
         }
 
       if (GLFW_KEY_END == key)
         {
           Move::endOfLine(cursor, rope);
+          return;
         }
 
       constexpr uint64_t PAGE_LINE_COUNT = 5;
