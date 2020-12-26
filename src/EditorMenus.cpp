@@ -3,14 +3,11 @@
 void Editor::openBrowser(void)
   {
     if (menuToMenuTransitionCheck("File Browser")) return;
-    allocMenu();
-    makeBrowser();
+    makeBrowser(*allocMenu());
   }
 
-void Editor::makeBrowser(void)
+void Editor::makeBrowser(Menu& curr)
   {
-    Menu& curr = _menus.back();
-
     curr.name = "File Browser";
     Texp cwd = pwd();
 
@@ -56,12 +53,12 @@ void Editor::makeBrowser(void)
                    std::string c = unquote(cmd.value);
                    int a = chdir(c.c_str());
                    println("'cd ", c.c_str(), "'  exit: ", a);
-                   makeBrowser();
+                   makeBrowser(curr);
                  }},
       {"system", [&](const Texp& cmd) -> void {
                    std::string c = unquote(cmd.value);
                    system(c.c_str());
-                   makeBrowser();
+                   makeBrowser(curr);
                  }},
       {"open",   [&](const Texp& cmd) -> void {
                    command_history.push_back("(open " + cmd.paren() + ")");
@@ -78,14 +75,11 @@ void Editor::makeBrowser(void)
 void Editor::openSwap(void)
   {
     if (menuToMenuTransitionCheck("Swap")) return;
-    allocMenu();
-    makeSwap();
+    makeSwap(*allocMenu());
   }
 
-void Editor::makeSwap(void)
+void Editor::makeSwap(Menu& curr)
   {
-    Menu& curr = _menus.back();
-
     curr.name = "Swap";
     auto unquote = [](const std::string& s) -> std::string { return s.substr(1, s.length() - 2); };
     auto quote = [](const std::string& s) -> std::string {
