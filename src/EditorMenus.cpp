@@ -28,18 +28,25 @@ void Editor::makeBrowser(Menu& curr)
     // TODO incremental/fuzzy search
 
     curr._layout = Texp("text", {cwd.value});
-    curr._layout.push(Texp("button", {Texp("\"..\""), Texp("cd", {Texp("\"..\"")})}));
+    curr._layout.push(Texp("button",
+                           {
+                             Texp("\"..\""),
+                             Texp("on", {Texp("press"), {Texp("cd", {Texp("\"..\"")})}})
+                           })
+                      );
 
     for (auto& child : cwd)
       {
         if (child.value.ends_with("/\""))
           {
-            auto cmd = Texp("cd", {child});
+            // cmd = "(on (press (cd %child)))"_texp
+            auto cmd = Texp("on", {Texp("press"), {Texp("cd", {child})}});
             curr._layout.push(Texp("button", {child, cmd}));
           }
         else
           {
-            auto cmd = Texp("open", {child});
+            // cmd = "(on (press (open %child)))"_texp
+            auto cmd = Texp("on", {Texp("press"), {Texp("open", {child})}});
             curr._layout.push(Texp("button", {child, cmd}));
           }
       }
@@ -107,7 +114,8 @@ void Editor::makeSwap(Menu& curr)
           {
             // TODO file name might need to change if current directory is changed
             auto* filebuffer = (FileBuffer*)page;
-            auto cmd = Texp("swap", {str(page_i)});
+            // (on (press (swap %page_i)))
+            auto cmd = Texp("on", {Texp("press"), { Texp("swap", {str(page_i)}) }});
 
             std::string file_name = quote(filebuffer->file._name);
             curr._layout.push(Texp("button", {file_name, cmd}));
