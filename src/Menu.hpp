@@ -96,9 +96,15 @@ struct Menu {
 
       if (GLFW_KEY_ENTER == key)
         {
-          const Texp& curr_command = commands[cursor];
-          auto& handler = _function_table.at(curr_command.value);
-          handler(curr_command[0]);
+          const Texp& command_set = commands[cursor];
+
+          // (button (press ('key argument)))
+          if ("button" == command_set.value) {
+            auto& press_command = command_set.must_find("press")[0];
+
+            auto& handler = _function_table.at(press_command.value);
+            handler(press_command[0]);
+          }
           return;
         }
     }
@@ -196,7 +202,9 @@ struct Menu {
         {
           ++ curr_line;
 
-          _addCommand(curr_line, layout[1]);
+          Texp command = layout[1];
+          command.value = "button";
+          _addCommand(curr_line, command);
           return result;
         }
 
