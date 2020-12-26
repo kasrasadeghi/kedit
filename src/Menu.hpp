@@ -23,8 +23,7 @@ struct Menu {
   Texp _layout;
   std::string _repr_alloc;  // layout.tabs() stored into a std::string
 
-  uint64_t cursor; // 0 .. selectable_lines.size() - 1
-
+  uint64_t cursor; // a selectable index in [0 .. selectable_lines.size()] - 1
   std::vector<uint64_t> selectable_lines;
 
   // map from selection to command;
