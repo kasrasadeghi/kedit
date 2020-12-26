@@ -307,9 +307,12 @@ struct Editor {
 
   inline void handleChar(unsigned char codepoint)
     {
-      if (not _control_mode && Type::FileBufferT == currentPage()->_type)
+      if (Type::FileBufferT == currentPage()->_type)
         {
-          currentFileBuffer()->handleChar(codepoint);
+          if (not _control_mode)
+            {
+              currentFileBuffer()->handleChar(codepoint);
+            }
         }
     }
 
