@@ -294,6 +294,7 @@ struct Editor {
         }
 
       // CONSIDER: opening swap menu after closing current file
+      // CONSIDER: open file browser/terminal after closing last file
       if (GLFW_KEY_W == key)
         {
           if (_pages.size() > 1)

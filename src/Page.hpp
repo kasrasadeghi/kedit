@@ -22,6 +22,7 @@ struct Page {
 
   void render(GraphicsContext& gc);
 
+  /// get the top left coordinate for the whole line of a cursor
   inline glm::vec2 lineCoord(GraphicsContext& gc, Cursor c)
     {
       float tlx = top_left_position.x
