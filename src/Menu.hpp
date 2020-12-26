@@ -166,7 +166,18 @@ struct Menu {
       // NOTE: the elements are responsible for incrementing line number themselves
       // - do not increment for the lines of your children
 
-      // (text "value" children...)
+      // legend:
+      // "value" - means quoted string value
+      // (* children) - means a text with other elements as children, must recursively call this function
+      // <child> - means a command in the shape of a texp, should call "_addCommand"
+      // ('key ... ) - is a texp with a value that is used, but is not literally some text value
+      //   as opposed to: (button ... )
+      //     which is a texp with a value that is expected to literally be the unquoted string "button"
+      //
+      // <cmd> is a child that specifically looks like ('key argument))
+      //   where [key] is a function and it expects to be passed <argument>
+
+      // (text "value" (* children))
       if ("text" == layout.value)
         {
           //              v- skip text's value
@@ -180,7 +191,7 @@ struct Menu {
           return result;
         }
 
-      // (button "value" "cmd")
+      // (button "value" (on (press <cmd>)))
       if ("button" == layout.value)
         {
           ++ curr_line;
