@@ -56,39 +56,50 @@ struct Menu {
 
   inline void handleKey(int key, int scancode, int action, int mods)
     {
-      if (GLFW_PRESS == action || GLFW_REPEAT == action)
+      // SOON: send key events to selected textfield
+      // CONSIDER: having a default textfield
+      // - or to transition focus to the most recently selected/edited textfield
+
+      // === CURSOR MOVEMENT ================================
+
+      if (not (GLFW_PRESS == action || GLFW_REPEAT == action)) return;
+
+      // CONSIDER: making up and down modulo
+      if (GLFW_KEY_UP == key && cursor != 0)
         {
-          if (GLFW_KEY_UP == key && cursor != 0)
-            {
-              -- cursor;
-              return;
-            }
+          -- cursor;
+          return;
+        }
 
-          if (GLFW_KEY_DOWN == key && cursor < selectable_lines.size() - 1)
-            {
-              ++ cursor;
-              return;
-            }
+      if (GLFW_KEY_DOWN == key && cursor < selectable_lines.size() - 1)
+        {
+          ++ cursor;
+          return;
+        }
 
-          if (GLFW_KEY_ENTER == key)
-            {
-              auto& curr_command = commands[cursor];
-              auto& handler = _function_table.at(curr_command.value);
-              handler(curr_command[0]);
-              return;
-            }
+      if (GLFW_KEY_PAGE_UP == key)
+        {
+          cursor = 0;
+          return;
+        }
 
-          if (GLFW_KEY_PAGE_UP == key)
-            {
-              cursor = 0;
-              return;
-            }
+      if (GLFW_KEY_PAGE_DOWN == key)
+        {
+          cursor = selectable_lines.size() - 1;
+          return;
+        }
 
-          if (GLFW_KEY_PAGE_DOWN == key)
-            {
-              cursor = selectable_lines.size() - 1;
-              return;
-            }
+
+      // === SELECTION AND EVENT HANDLERS  ================================
+
+      if (not (GLFW_PRESS == action)) return;
+
+      if (GLFW_KEY_ENTER == key)
+        {
+          const Texp& curr_command = commands[cursor];
+          auto& handler = _function_table.at(curr_command.value);
+          handler(curr_command[0]);
+          return;
         }
     }
 
