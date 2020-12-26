@@ -114,11 +114,11 @@ struct Editor {
 
   void openBrowser(void);
 
-  void makeBrowser(void);
+  void makeBrowser(Menu&);
 
   void openSwap(void);
 
-  void makeSwap(void);
+  void makeSwap(Menu&);
 
   /// Graphics ===----------------------------------------------------------------------------===///
 
