@@ -2,6 +2,7 @@
 
 #include "Rope.hpp"
 #include "Cursor.hpp"
+#include "Menu.hpp"
 
 #include <string>
 #include <vector>
@@ -17,13 +18,13 @@ struct Search {
   size_t index = 0;  // TODO: build data structure for easily cycle-able vector, like a ring/ringbuffer/deque
   size_t offset = -1;
   std::vector<Cursor> results;
-
-  bool mode = false; // CONSIDER: moving mode into common
 };
 
 /// the search element of the Editor, in global scope
 struct SearchCommon {
+  Menu menu;
   std::string query = "";
+  bool active = false;
 
   inline void scanAll(const Rope& rope, Search& search)
     {
@@ -43,6 +44,6 @@ struct SearchCommon {
             }
         }
 
-      search.mode = true;
+      active = true;
     }
 };

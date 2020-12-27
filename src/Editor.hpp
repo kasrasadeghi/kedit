@@ -143,7 +143,7 @@ struct Editor {
       gc.scissorRect(page->top_left_position + glm::vec2{0, page->offset.x},
                      glm::vec2{page->size.x - (2 * page->offset.x), page->size.y});
 
-      if (Type::FileBufferT == currentPage()->_type && currentFileBuffer()->_search.mode)
+      if (Type::FileBufferT == currentPage()->_type && search_common.active)
         {
           currentFileBuffer()->addSearchResults(gc);
         }
@@ -151,6 +151,7 @@ struct Editor {
       gc.renderRectangles();
 
       page->render(gc);
+      //search_common.menu.render(gc);
 
       gc.scissorFull();
     }
