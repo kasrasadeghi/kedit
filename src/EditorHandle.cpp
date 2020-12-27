@@ -124,6 +124,16 @@ void Editor::handleChar(unsigned char codepoint)
   {
     if (Type::FileBufferT == currentPage()->_type)
       {
+        if (search_common.active)
+          {
+            // TODO: send codepoint to _search_common ?
+            // TODO: send codepoint to _search_common's menu instead of directly to the textfield
+            // - the menu should navigate it to the textField
+            // SOON
+            search_common.menu.handleChar(codepoint);
+            return;
+          }
+
         if (not _control_mode)
           {
             currentFileBuffer()->handleChar(codepoint);
