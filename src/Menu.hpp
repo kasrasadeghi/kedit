@@ -75,62 +75,6 @@ struct Menu {
       _function_table = function_table;
     }
 
-  inline void handleKey(int key, int scancode, int action, int mods)
-    {
-      // SOON: send key events to selected textfield
-      // CONSIDER: having a default textfield
-      // - or to transition focus to the most recently selected/edited textfield
-
-      // === CURSOR MOVEMENT ================================
-
-      if (not (GLFW_PRESS == action || GLFW_REPEAT == action)) return;
-
-      // CONSIDER: making up and down modulo
-      if (GLFW_KEY_UP == key && cursor != 0)
-        {
-          -- cursor;
-          return;
-        }
-
-      if (GLFW_KEY_DOWN == key && cursor < selectable_lines.size() - 1)
-        {
-          ++ cursor;
-          return;
-        }
-
-      if (GLFW_KEY_PAGE_UP == key)
-        {
-          cursor = 0;
-          return;
-        }
-
-      if (GLFW_KEY_PAGE_DOWN == key)
-        {
-          cursor = selectable_lines.size() - 1;
-          return;
-        }
-
-
-      // === SELECTION AND EVENT HANDLERS  ================================
-
-      if (not (GLFW_PRESS == action)) return;
-
-      if (GLFW_KEY_ENTER == key)
-        {
-          const Texp& command_set = commands[cursor];
-
-          // (button (press ('key argument)))
-          if ("button" == command_set.value) {
-            auto& press_command = command_set.must_find("press")[0];
-
-            auto& handler = _function_table.at(press_command.value);
-            handler(press_command[0]);
-          }
-          return;
-        }
-    }
-
-
   // similar, but not inherited from Buffer::render
   // TODO merge this and Buffer's render(). ideas:
   // - pass a lambda for a line handler
@@ -240,4 +184,10 @@ struct Menu {
       selectable_lines.push_back(line_number);
       commands.push_back(command);
     }
+
+  /// Interaction ===-------------------------------------------------------------------===///
+
+  void handleKey(int key, int scancode, int action, int mods);
+  void handleChar(unsigned char codepoint);
+
 };
