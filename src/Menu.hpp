@@ -24,9 +24,30 @@ struct Menu {
   std::string _repr_alloc;  // layout.tabs() stored into a std::string
 
   uint64_t cursor; // a selectable index in [0 .. selectable_lines.size()] - 1
+  //                                                                TODO: "- 1"?
   std::vector<uint64_t> selectable_lines;
 
-  // map from selection to command;
+  // map from selection index to command structure
+  // - command structures are different shapes depending on their type, e.g. button or textfield
+  //
+  //   legend (based on type of selection):
+  //
+  // (button "value" (on (press ('key <argument>))))
+  // ->
+  // (button (press ('key <argument>)))
+  //   ENTER ->
+  //     handler = _function_table[key];
+  //     handler(argument)
+  //
+  // (textfield 'value (on (change ('key1 <arg1>)) (submit ('key2 <arg2>))))
+  // ->
+  // (textfield (change ('key1 <arg1>)) (submit ('key2 <arg2>)))
+  //   ENTER -> /* submit */
+  //     handler = _function_table[key2]
+  //     handler({value, {arg2}})
+  //   SCAN EVENT -> /* change */
+  //     handler = _function_table[key1]
+  //     handler({value, {arg1}})
   std::vector<Texp> commands;
 
   using FunctionTable = std::unordered_map<std::string, std::function<void(const Texp&)>>;
@@ -214,6 +235,8 @@ struct Menu {
 
   inline void _addCommand(const uint64_t line_number, const Texp& command)
     {
+      // TODO grammatical validation of command structure
+
       selectable_lines.push_back(line_number);
       commands.push_back(command);
     }
