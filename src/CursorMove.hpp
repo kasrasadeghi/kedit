@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Cursor.hpp"
 #include "Rope.hpp"
 
