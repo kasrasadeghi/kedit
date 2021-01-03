@@ -25,6 +25,9 @@ struct Texp {
   const Texp& must_find(std::string_view view) const
     {
       auto result = find(view);
+      // CONSIDER using CHECK so that we can refactor hard exits to stack optionals
+      // - instead of hard exitting, there could be some global place to put results
+      // - or we could Texp results
       if (result != end()) return *result;
 
       printerrln("could not find " + std::string(view) + " in :" + tabs());
@@ -36,6 +39,8 @@ struct Texp {
 
   std::optional<Children::const_iterator> maybe_find(std::string_view view) const
     {
+      // TODO this should not return result on the second one, but *result
+      // - the return type should be a const reference to child or even a nonconst ref to child
       auto result = find(view);
       if (result == end())
         return std::nullopt;
