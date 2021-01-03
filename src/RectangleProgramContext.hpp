@@ -62,7 +62,7 @@ struct RectProgramContext {
       /*
        *  A  D        0
        *  |\   order: |\   so it's counter-clockwise (CCW)
-       *  | \         |                         \
+       *  | \         | \
        *  C--B        2--1
        */
 
