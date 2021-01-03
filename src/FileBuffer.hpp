@@ -305,6 +305,12 @@ struct FileBuffer {
           return;
         }
 
+      if (cursor == shadow_cursor)
+        {
+          // TODO handle this case better
+          return;
+        }
+
       if (cursor.line != shadow_cursor.line)
         {
           println("WARNING: cannot search multiple lines");
