@@ -127,7 +127,11 @@ struct Menu {
   inline Texp _createMenuRepr(const Texp& layout, uint64_t& curr_line)
     {
       const auto& value = layout[0].value;
-      Texp result {value.substr(1, value.length() - 2)};
+
+      auto unquote = [](std::string s) -> std::string
+                     { return s.substr(1, s.length() - 2); };
+
+      Texp result { unquote(value) };
 
       // TODO support elements with multiline values
       // TODO support line-wrap for long values
