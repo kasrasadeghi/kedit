@@ -39,9 +39,9 @@ struct Menu {
   //     handler = _function_table[key];
   //     handler(argument)
   //
-  // (textfield 'value (on (change ('key1 <arg1>)) (submit ('key2 <arg2>))))
+  // (textfield "value" (on (change ('key1 [arg1])) (submit ('key2 [arg2]))))
   // ->
-  // (textfield (change ('key1 <arg1>)) (submit ('key2 <arg2>)))
+  // (textfield (change ('key1 [arg1])) (submit ('key2 [arg2])))
   //   ENTER -> /* submit */
   //     handler = _function_table[key2]
   //     handler({value, {arg2}})
@@ -141,6 +141,7 @@ struct Menu {
       // "value" - means quoted string value
       // (* children) - means a text with other elements as children, must recursively call this function
       // <child> - means a command in the shape of a texp, should call "_addCommand"
+      // [child] - means a texp that is extracted with the meta-binding "child"
       // ('key ... ) - is a texp with a value that is used, but is not literally some text value
       //   as opposed to: (button ... )
       //     which is a texp with a value that is expected to literally be the unquoted string "button"
@@ -189,5 +190,4 @@ struct Menu {
 
   void handleKey(int key, int scancode, int action, int mods);
   void handleChar(unsigned char codepoint);
-
 };
