@@ -4,6 +4,7 @@
 #include "Buffer.hpp"
 #include "PageT.hpp"
 #include "Page.hpp"
+#include "TextField.hpp"
 
 #include <backbone-core-cpp/File.hpp>
 #include <backbone-core-cpp/Texp.hpp>
@@ -49,6 +50,9 @@ struct Menu {
   uint64_t cursor; // an index of selectable_lines, in [0 .. selectable_lines.size() - 1]
   std::vector<uint64_t> selectable_lines;
   std::vector<Texp> commands; // each selectable line has a command
+
+  // map from cursor (i.e. selectable index) to TextFields
+  std::unordered_map<uint64_t, TextField> textfields; // some selectable lines have textfields
 
   using FunctionTable = std::unordered_map<std::string, std::function<void(const Texp&)>>;
   FunctionTable _function_table;
@@ -178,6 +182,20 @@ struct Menu {
           return result;
         }
 
+      // TODO this value is ignored? maybe useful for hint, starting value, or default value?
+      // - maybe also a label, like "search: [    ]"
+      // (textfield "value" (on (change <cmd>) (submit <cmd>)))
+      if ("textfield" == layout.value)
+        {
+          ++ curr_line;
+
+          Texp command = layout[1];
+          command.value = "textfield";
+          _addCommand(curr_line, command);
+          _addTextField(curr_line);
+          return result;
+        }
+
       assert(false && "layout element type is not matched");
       exit(1);
     }
@@ -188,6 +206,20 @@ struct Menu {
 
       selectable_lines.push_back(line_number);
       commands.push_back(command);
+    }
+
+  inline void _addTextField(const uint64_t line_number)
+    {
+      TextField tf;
+
+      // tf.setContent(value);
+      // CONSIDER having each of the following for textfields:
+      // - a default value (used when the textfield is empty, but discarded on modification)
+      // - a hint string
+      // - a starting value (the initial value of the textfield, not discarded on any modification)
+
+      tf.setContent("");
+      textfields.insert({line_number, tf});
     }
 
   /// Interaction ===-------------------------------------------------------------------===///

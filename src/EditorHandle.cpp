@@ -33,6 +33,15 @@ void Editor::handleKey(int key, int scancode, int action, int mods)
 
     /// Key Input Handlers ===--------------------------------------------------------------===///
 
+    // modal case
+    if (search_common.active)
+      {
+        println("handle key in search menu");
+        search_common.menu.handleKey(key, scancode, action, mods);
+        // SOON figure out when the buttons should also go to the underlying filebuffer or menu
+      }
+
+    // active page
     if (Type::FileBufferT == currentPage()->_type)
       {
         currentFileBuffer()->handleKey(key, scancode, action, mods);
@@ -42,6 +51,7 @@ void Editor::handleKey(int key, int scancode, int action, int mods)
         currentMenu()->handleKey(key, scancode, action, mods);
       }
 
+    // control mode
     if (Type::FileBufferT == currentPage()->_type)
       {
         if (_control_mode)
