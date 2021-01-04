@@ -15,7 +15,7 @@ release:
 	(cd build; cmake -DCMAKE_BUILD_TYPE=Release -DGTEST=FALSE ..; make -j8)
 
 .PHONY: build
-build:
+debug:
 	rm -rf build
 	mkdir build
 	(cd build; cmake -DCMAKE_BUILD_TYPE=Debug -DGTEST=FALSE ..; scan-build -V make -j8)
@@ -41,7 +41,7 @@ time:
 	(cd build; cmake -DCMAKE_BUILD_TYPE=Release -DGTEST=TRUE ..; make -j8)
 	bin/test
 
-gdb: build
+gdb: debug
 	gdb -q -ex run --args bin/$(execname)
 
 clean:
