@@ -23,10 +23,6 @@ struct Menu {
   Texp _layout;
   std::string _repr_alloc;  // layout.tabs() stored into a std::string
 
-  uint64_t cursor; // a selectable index in [0 .. selectable_lines.size()] - 1
-  //                                                                TODO: "- 1"?
-  std::vector<uint64_t> selectable_lines;
-
   // map from selection index to command structure
   // - command structures are different shapes depending on their type, e.g. button or textfield
   //
@@ -48,7 +44,11 @@ struct Menu {
   //   SCAN EVENT -> /* change */
   //     handler = _function_table[key1]
   //     handler({value, {arg1}})
-  std::vector<Texp> commands;
+
+  // consider restructuring cursor, selection, and element redirection logic
+  uint64_t cursor; // an index of selectable_lines, in [0 .. selectable_lines.size() - 1]
+  std::vector<uint64_t> selectable_lines;
+  std::vector<Texp> commands; // each selectable line has a command
 
   using FunctionTable = std::unordered_map<std::string, std::function<void(const Texp&)>>;
   FunctionTable _function_table;
