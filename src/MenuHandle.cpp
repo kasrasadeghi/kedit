@@ -52,14 +52,47 @@ void Menu::handleKey(int key, int scancode, int action, int mods)
           handler(press_command[0]);
         }
 
+        // (textfield (change ('key1 [arg1])) (submit ('key2 [arg2])))
         if ("textfield" == command_set.value) {
-          // unimplemented
+          auto& submit_command = command_set.must_find("submit")[0];
+
+          auto& handler = _function_table.at(submit_command.value);
+
+          // get value of current textfield
+          auto line_number = selectable_lines[cursor];
+          TextField& tf = textfields.at(line_number);
+
+          auto quote = [](std::string s) -> std::string
+                       { return "\"" + s + "\""; };
+
+          auto content = quote(tf.string());
+
+          handler(Texp{content, {submit_command[0]}});
         }
         return;
       }
+
+    // SOON probably send events to the current textfield if the current is a textfield
   }
 
 void Menu::handleChar(unsigned char codepoint)
   {
-    print("what: ", codepoint);
+    const Texp& command_set = commands[cursor];
+    if ("textfield" == command_set.value) {
+      auto& change_command = command_set.must_find("change")[0];
+
+      auto& handler = _function_table.at(change_command.value);
+
+      auto line_number = selectable_lines[cursor];
+      TextField& tf = textfields.at(line_number);
+
+      tf.handleChar(codepoint);
+
+      auto quote = [](std::string s) -> std::string
+                   { return "\"" + s + "\""; };
+
+      auto content = quote(tf.string());
+
+      handler(Texp{content, {change_command[0]}});
+    }
   }

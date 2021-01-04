@@ -31,6 +31,13 @@ struct Editor {
   bool _control_mode = true;
   bool _control_mode_release_exit = false;
 
+  /// Initialization ===----------------------------------------------------------------------===///
+
+  inline void init(void)
+    {
+      search_common.init();
+    }
+
   /// Memory Management ===-------------------------------------------------------------------===///
 
   FileBuffer* allocFileBuffer(void);
@@ -91,6 +98,7 @@ struct Editor {
   // - returns true if the current menu is the destination
   inline bool menuToMenuTransitionCheck(const std::string& destination)
     {
+      // we're constructing the first page
       if (_pages.empty()) return false;
 
       if (Type::MenuT == currentPage()->_type)

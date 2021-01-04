@@ -20,11 +20,47 @@ struct Search {
   std::vector<Cursor> results;
 };
 
+
+
 /// the search element of the Editor, in global scope
 struct SearchCommon {
   Menu menu;
-  std::string query = "";
+  std::string query = "";  // CURRENT, maybe replace this with something that observes the textfield in the search menu
   bool active = false;
+
+  inline void init()
+    {
+      menu.page._type = Type::MenuT;
+      Texp& root = menu._layout;
+      root = Texp("textfield", {Texp("\"search query\"")});
+
+      auto change = Texp{"change", {Texp{"search-change", {Texp("unused")}}}};
+      auto submit = Texp{"submit", {Texp{"search-submit", {Texp("unused")}}}};
+
+      auto command = Texp("on");
+      command.push(change);
+      command.push(submit);
+
+      root.push(command);
+
+      // CURRENT
+
+      Menu::FunctionTable function_table {
+        {{"search-change", [&](const Texp& arg) {
+                             println("search query changed:");
+                             println(arg);
+                           }},
+         {"search-submit", [&](const Texp& arg) {
+                             println("search query submitted:");
+                             println(arg);
+                             active = false;
+                           }},
+        }
+      };
+
+      menu.setHandlers(function_table);
+      menu.parseLayout(menu._layout);
+    }
 
   inline void scanAll(const Rope& rope, Search& search)
     {

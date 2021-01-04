@@ -23,6 +23,7 @@ int main(int argc, char* argv[]) {
   glfwSwapInterval(1); // framerate set: 0 for uncapped, 1 for monitor refresh rate
 
   Editor editor;
+  editor.init();
   editor.openBrowser();
   // editor.loadFile("README.md");
 
