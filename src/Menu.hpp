@@ -74,11 +74,6 @@ struct Menu {
 
   ///=============/ Methods /=========================================///
 
-  inline void setHandlers(FunctionTable function_table)
-    {
-      _function_table = function_table;
-    }
-
   // similar, but not inherited from Buffer::render
   // TODO merge this and Buffer's render(). ideas:
   // - pass a lambda for a line handler
@@ -108,6 +103,11 @@ struct Menu {
                 }
             }
         }
+    }
+
+  inline void setHandlers(FunctionTable function_table)
+    {
+      _function_table = function_table;
     }
 
   /// NOTE: currently expects this->layout as the argument
