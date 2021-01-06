@@ -7,6 +7,9 @@
 
 
 // TODO gather common editor functionality between filebuffer and textfield in one common area
+// - TODO extract clipboard user
+// - TODO extract history user
+// NOTE many things seem to have a "common" element (that lives in the Editor) and a "user" component (that lives in each page or somehow a child of the editor struct)
 
 struct TextField {
   Rope rope;
