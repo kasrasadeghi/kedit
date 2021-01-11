@@ -15,6 +15,8 @@ struct Cursor {
   uint64_t line = 0; // cursor can go one past the last character to append to the line
   uint64_t column = 0;
 
+  inline void defaultInit() { line = 0; column = 0; }
+
   inline bool invariant(const std::vector<std::string>& lines)
     {
       if (not check_line_bounds(lines)) return false;

@@ -20,6 +20,11 @@ struct TextField {
 
   inline void setContent(const std::string& s)
     {
+      // CONSIDER: instead of default init, they should snap to rope
+      // - maybe for a textarea, but not a textfield
+      cursor.defaultInit();
+      shadow_cursor.defaultInit();
+
       rope.lines.clear();
       rope.lines.push_back(s);
     }
