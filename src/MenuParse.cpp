@@ -53,8 +53,16 @@ Texp Menu::_createMenuRepr(const Texp& layout, uint64_t& curr_line)
     //   where [key] is a function and it expects to be passed <argument>
 
     // (text "value" (* children))
+    // =>
+    // value
+    //   child0
+    //   ...
     if ("text" == layout.value)
       {
+
+        // increment value before children
+        ++ curr_line;
+
         //              v- skip text's value
         for (size_t i = 1; i < layout.size(); ++i)
           {
@@ -62,18 +70,19 @@ Texp Menu::_createMenuRepr(const Texp& layout, uint64_t& curr_line)
             result.push(_createMenuRepr(child, curr_line));
           }
 
-        ++ curr_line;
         return result;
       }
 
     // (button "value" (on (press <cmd>)))
     if ("button" == layout.value)
       {
-        ++ curr_line;
-
         Texp command = layout[1];
         command.value = "button";
         _addCommand(curr_line, command);
+
+        // increment value after finishing making button
+        ++ curr_line;
+
         return result;
       }
 
@@ -82,12 +91,14 @@ Texp Menu::_createMenuRepr(const Texp& layout, uint64_t& curr_line)
     // (textfield "value" (on (change <cmd>) (submit <cmd>)))
     if ("textfield" == layout.value)
       {
-        ++ curr_line;
-
         Texp command = layout[1];
         command.value = "textfield";
         _addCommand(curr_line, command);
         _addTextField(curr_line);
+
+        // increment value after finishing making textfield
+        ++ curr_line;
+
         return result;
       }
 
