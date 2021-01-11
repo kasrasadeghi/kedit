@@ -6,6 +6,8 @@ void Editor::render(GraphicsContext& gc)
     gc.scissorFull();
 
     gc.clear(0.5, 0.5, 0.5, 1);
+    // CONSIDER: not doing this in render
+    currentPage()->scrollToCursor(gc, getCurrentCursor());
 
     addRectangles(gc);
     gc.renderRectangles();
@@ -61,7 +63,6 @@ void Editor::addRectangles(GraphicsContext& gc)
       }
     // TODO: fix mouse scrolling
     // - should only scroll to cursor when cursor is interacted with (arrow keys)
-    currentPage()->scrollToCursor(gc, getCurrentCursor());
     currentPage()->highlightLine(gc, getCurrentCursor());
   }
 
