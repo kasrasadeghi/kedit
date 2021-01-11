@@ -146,7 +146,7 @@ struct FileBuffer {
         {
           gc.drawRectangle(page.textCoord(gc, result),
                            {text_width * _search.common->query.length(), gc.line_height},
-                           glm::vec4{1, 1, 0.7, 0.2}, 0.3);
+                           glm::vec4{1, 1, 0.3, 0.4}, 0.3);
         }
 
       // TODO investigate positive z layer being below text?
