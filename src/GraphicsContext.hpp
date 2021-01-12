@@ -49,7 +49,7 @@ struct GraphicsContext {
 
   /// Translates top-left coordinate to lower-left coordinate.
   // glScissor uses lower left coordinates,
-  //   (1, 1) is first lower left pixel
+  //   (1, 1) is first bottom left pixel
   inline void scissorRect(glm::vec2 top_left, glm::vec2 size)
     {
       glScissor(top_left.x, window->height() - top_left.y - size.y,
