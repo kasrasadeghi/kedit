@@ -84,6 +84,8 @@ bool TextField::handleKeyEdit(int key, int scancode, int action, int mods)
 
         return true;
       }
+
+    return false;
   }
 
 void TextField::handleKeyControl(int key, int scancode, int action, int mods)
