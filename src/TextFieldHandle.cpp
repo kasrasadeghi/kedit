@@ -50,7 +50,8 @@ void TextField::handleKey(int key, int scancode, int action, int mods)
       }
   }
 
-/// returns true if rope has been modified
+/// NOTE: returns true if rope has been modified
+// the filebuffer version of this just refreshes the buffer
 bool TextField::handleKeyEdit(int key, int scancode, int action, int mods)
   {
     // guards

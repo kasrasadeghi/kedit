@@ -66,6 +66,8 @@ namespace Move {
         }
     }
 
+  // CONSIDER: up() should move to beginning of line on first line
+  // - similar for down()
   inline bool up(Cursor& cursor, const Rope& rope)
     {
       if (cursor.line == 0)
