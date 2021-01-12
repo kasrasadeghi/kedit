@@ -15,7 +15,8 @@ void Editor::handleKey(int key, int scancode, int action, int mods)
 
     if (_control_mode)
       {
-        handleKeyControl(key, scancode, action, mods);
+        // control keys are mutually exclusive and toplayer
+        if (handleKeyControl(key, scancode, action, mods)) return;
       }
 
     if (GLFW_RELEASE == action)
@@ -71,9 +72,9 @@ void Editor::handleKey(int key, int scancode, int action, int mods)
       }
   }
 
-void Editor::handleKeyControl(int key, int scancode, int action, int mods)
+bool Editor::handleKeyControl(int key, int scancode, int action, int mods)
   {
-    if (GLFW_PRESS != action) return;
+    if (GLFW_PRESS != action) return false;
 
     if (GLFW_KEY_C == key)
       {
@@ -84,7 +85,7 @@ void Editor::handleKeyControl(int key, int scancode, int action, int mods)
           {
             currentFileBuffer()->copy(clipboard.kill_ring.back());
           }
-        return;
+        return false;
       }
 
     if (GLFW_KEY_V == key)
@@ -93,7 +94,7 @@ void Editor::handleKeyControl(int key, int scancode, int action, int mods)
           {
             currentFileBuffer()->paste(clipboard.kill_ring.back(), clipboard.kill_ring.size() - 1, (void*)(&clipboard));
           }
-        return;
+        return false;
       }
 
     if (GLFW_KEY_F == key)
@@ -102,20 +103,20 @@ void Editor::handleKeyControl(int key, int scancode, int action, int mods)
           {
             currentFileBuffer()->search(GLFW_MOD_SHIFT & mods);
           }
-        return;
+        return true;
       }
 
     if (GLFW_KEY_B == key)
       {
         openBrowser();
-        return;
+        return false;
       }
 
     if (GLFW_KEY_E == key)
       {
         if (_filebuffers.size() != 0)
           openSwap();
-        return;
+        return false;
       }
 
     // CONSIDER: opening swap menu after closing current file
@@ -124,10 +125,11 @@ void Editor::handleKeyControl(int key, int scancode, int action, int mods)
       {
         if (_pages.size() > 1)
           freeCurrent();
-        return;
+        return false;
       }
-
     // CONSIDER: closing file if it is the only one open and opening a menu
+
+    return false;
   }
 
 void Editor::handleChar(unsigned char codepoint)
