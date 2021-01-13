@@ -2,39 +2,58 @@
 
 void Editor::render(GraphicsContext& gc)
   {
-    gc.alignViewport();
     gc.scissorFull();
-
+    gc.alignViewport();
     gc.clear(0.5, 0.5, 0.5, 1);
-    // CONSIDER: not doing this in render
-    currentPage()->scrollToCursor(gc, getCurrentCursor());
 
+    // render page background and line highlighting
     addRectangles(gc);
     gc.renderRectangles();
 
     auto* page = currentPage();
 
-    // TODO why do we have two scissorRects?
-    gc.scissorRect(page->top_left_position, page->size);
+    // CONSIDER: not doing this in render
+    page->scrollToCursor(gc, getCurrentCursor());
 
-    // NOTE: glScissor uses lower left coordinates, (1,1) is first bottom left pixel
-
-    // cut off left and right margin
+    // only render current page within its margin
     gc.scissorRect(page->top_left_position + glm::vec2{0, page->offset.x},
                    glm::vec2{page->size.x - (2 * page->offset.x), page->size.y});
 
+    // CONSIDER: combining searchbox and search result rendering somehow?
+    // - search box rendering should go afterwards to be "on top"
+    // render search results
     if (Type::FileBufferT == currentPage()->_type && search_common.active)
       {
         currentFileBuffer()->addSearchResults(gc);
+        gc.renderRectangles();
       }
 
+    // render page text
+    page->render(gc);
     gc.renderRectangles();
 
-    page->render(gc);
+    // render search box
+    if (search_common.active)
+      {
+        // TODO do this only once, not every frame
+        // - need access to the graphics context
+        auto& tl     = search_common.menu.page.top_left_position;
+        auto& offset = search_common.menu.page.offset;
+        auto& size   = search_common.menu.page.size;
 
-    gc.scissorFull();
+        auto SL = 300; // search box length
+        offset = {gc.line_height, gc.line_height};
+        tl = {1800 - SL, 150};
+        size = {SL, 1.5 * gc.line_height};
 
-    search_common.menu.render(gc);
+        // draw search box
+        gc.drawRectangle(search_common.menu.page.top_left_position,
+                         search_common.menu.page.size, {0.2, 0.2, 0.2, 1}, 0.5);
+
+        gc.renderRectangles();
+
+        search_common.menu.render(gc);
+      }
   }
 
 Cursor Editor::getCurrentCursor(void)
