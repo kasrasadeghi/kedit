@@ -34,8 +34,8 @@ struct SearchCommon {
       Texp& root = menu._layout;
       root = Texp("textfield", {Texp("\"search query\"")});
 
-      auto change = Texp{"change", {Texp{"search-change", {Texp("unused")}}}};
-      auto submit = Texp{"submit", {Texp{"search-submit", {Texp("unused")}}}};
+      auto change = Texp{"change", {Texp{"search-change", {Texp("unused-arg")}}}};
+      auto submit = Texp{"submit", {Texp{"search-submit", {Texp("unused-arg")}}}};
 
       auto command = Texp("on");
       command.push(change);
