@@ -139,6 +139,8 @@ int main(int argc, char* argv[]) {
 
     // TODO translucency on top of text goes after editor render
 
+    gc.scissorFull();
+
     status("page list:");
     int i = 0;
     for (Page* page : editor._pages)
