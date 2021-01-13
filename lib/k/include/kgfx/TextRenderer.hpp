@@ -124,10 +124,10 @@ public:
     // TODO consider using FT_New_Memory_Face and including at least one font in executable
     // Load font as face
     FT_Face face;
-    using namespace std::filesystem;
 
     std::string font_path = ([&]() -> std::string
                              {
+                               using namespace std::filesystem;
                                path attempt = FONT_NAME;
                                if (exists(attempt)) return FONT_NAME;
 
