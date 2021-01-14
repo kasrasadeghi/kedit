@@ -15,13 +15,22 @@ void Menu::render(GraphicsContext& gc)
 
         if (curr_ypos < (uint64_t)(gc.window->height() + gc.line_height) && curr_ypos > (uint64_t)(0))
           {
+            auto color = glm::vec4(0.7, 0.7, 0.7, 1);
+
+            // selected line color is full-white
             if (not selectable_lines.empty() && line_i == this->selectable_lines[this->cursor])
               {
-                gc.text(line, xpos, curr_ypos, glm::vec4(1, 1, 1, 1));
+                color = glm::vec4(1, 1, 1, 1);
+              }
+
+            // textfields must render their content
+            if (not textfields.empty() && textfields.count(line_i) != 0)
+              {
+                gc.text(textfields.at(line_i).string(), xpos, curr_ypos, color);
               }
             else
               {
-                gc.text(line, xpos, curr_ypos, glm::vec4(0.7, 0.7, 0.7, 1));
+                gc.text(line, xpos, curr_ypos, color);
               }
           }
       }
