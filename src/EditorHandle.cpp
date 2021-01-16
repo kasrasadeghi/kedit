@@ -37,9 +37,19 @@ void Editor::handleKey(int key, int scancode, int action, int mods)
     // modal case
     if (search_common.active)
       {
-        println("handle key in search menu");
         search_common.menu.handleKey(key, scancode, action, mods);
         // SOON figure out when the buttons should also go to the underlying filebuffer or menu
+
+        if (_control_mode)
+          {
+            search_common.menu.handleKeyControl(key, scancode, action, mods);
+          }
+        else
+          {
+            search_common.menu.handleKeyEdit(key, scancode, action, mods);
+          }
+
+        return;
       }
 
     // active page
@@ -69,6 +79,18 @@ void Editor::handleKey(int key, int scancode, int action, int mods)
           }
         else
           currentFileBuffer()->handleKeyEdit(key, scancode, action, mods);
+      }
+
+    if (Type::MenuT == currentPage()->_type)
+      {
+        if (_control_mode)
+          {
+            currentMenu()->handleKeyControl(key, scancode, action, mods);
+          }
+        else
+          {
+            currentMenu()->handleKeyEdit(key, scancode, action, mods);
+          }
       }
   }
 
@@ -136,7 +158,7 @@ void Editor::handleChar(unsigned char codepoint)
   {
     if (Type::FileBufferT == currentPage()->_type)
       {
-        if (search_common.active)
+        if (search_common.active && not _control_mode)
           {
             // TODO: send codepoint to _search_common ?
             // TODO: send codepoint to _search_common's menu instead of directly to the textfield
