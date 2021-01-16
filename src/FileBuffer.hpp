@@ -329,6 +329,7 @@ struct FileBuffer {
       // TODO: search binding to cycle through history of searched items, like M-n M-p in emacs
 
       // CONSIDER: std::binary_search instead of std::find
+      // assign cursor offsets because we're searching for the symbol under the cursor/ in the selection
       if (cursor < shadow_cursor)
         {
           _search.offset = 0;
