@@ -307,13 +307,16 @@ struct FileBuffer {
 
       if (cursor == shadow_cursor)
         {
-          // TODO handle this case better
+          _search.common->active = true;
+          // TODO default initialize and clear the search query
           return;
         }
 
       if (cursor.line != shadow_cursor.line)
         {
-          println("WARNING: cannot search multiple lines");
+          // TODO remove warning and consider just going to the empty search query
+          println("WARNING: cannot search multiple lines, using empty search query");
+          _search.common->active = true;
           return;
         }
 

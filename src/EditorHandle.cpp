@@ -32,6 +32,8 @@ void Editor::handleKey(int key, int scancode, int action, int mods)
     // CONSIDER organization of pages
     // TODO there should be a modal case here
 
+    // TODO massive cleanup
+
     /// Key Input Handlers ===--------------------------------------------------------------===///
 
     // modal case
@@ -49,6 +51,15 @@ void Editor::handleKey(int key, int scancode, int action, int mods)
             search_common.menu.handleKeyEdit(key, scancode, action, mods);
           }
 
+        // TODO fix this, WARNING gross incoming
+        // this is a message from the search's edit handling and history handling that we should scan the current page
+        // - the only pages that support search are currently filebuffers (jan 13, 2021)
+        if (search_common.should_scan)
+          {
+            currentFileBuffer()->_search.offset = -1;
+            currentFileBuffer()->_search.index = -1;
+            search_common.scanAll(currentFileBuffer()->rope, currentFileBuffer()->_search);
+          }
         return;
       }
 

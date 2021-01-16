@@ -28,9 +28,15 @@ struct SearchCommon {
   std::string query = "";  // CURRENT, maybe replace this with something that observes the textfield in the search menu
   bool active = false;
 
+  // true to communicate to the editor that the current page should scan
+  // - TODO only currently works for filebuffers
+  bool should_scan = false; // TODO FIXME this is gross, please fix
+
+
   inline void init()
     {
       menu.page._type = Type::MenuT;
+
       Texp& root = menu._layout;
       root = Texp("textfield", {Texp("\"search query\"")});
 
@@ -45,14 +51,25 @@ struct SearchCommon {
 
       // CURRENT
 
+      // TODO index should be set to the first location that is beyond the current cursor
+
       Menu::FunctionTable function_table {
         {{"search-change", [&](const Texp& arg) {
-                             println("search query changed:");
-                             println(arg);
+                             auto unquote = [](std::string s) -> std::string
+                                            { return s.substr(1, s.length() - 2); };
+
+                             this->query = unquote(arg.value);
+                             if ("" != this->query)
+                               {
+                                 this->should_scan = true;
+                               }
                            }},
          {"search-submit", [&](const Texp& arg) {
-                             println("search query submitted:");
-                             println(arg);
+                             this->query = "";
+                             this->should_scan = false;
+                             // TODO consider shouldreset
+                             // - should_reset would tell the editor that the filebuffer's search
+                             //   component should reset the index and all that
                              active = false;
                            }},
         }
