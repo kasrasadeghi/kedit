@@ -43,6 +43,11 @@ struct Editor {
       search_common.init();
     }
 
+  inline void initGraphics(GraphicsContext& gc)
+    {
+      search_common.initGraphics(gc);
+    }
+
   /// Memory Management ===-------------------------------------------------------------------===///
 
   FileBuffer* allocFileBuffer(void);

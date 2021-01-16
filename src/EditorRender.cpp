@@ -36,16 +36,6 @@ void Editor::render(GraphicsContext& gc)
     // CONSIDER should maybe move to SearchRender.hpp
     if (search_common.active)
       {
-        // TODO do this only once, not every frame
-        // - need access to the graphics context
-        auto& tl     = search_common.menu.page.top_left_position;
-        auto& offset = search_common.menu.page.offset;
-        auto& size   = search_common.menu.page.size;
-
-        auto SL = 300; // search box length
-        offset = {gc.line_height, gc.line_height};
-        tl = {1800 - SL, 150};
-        size = {SL, 1.5 * gc.line_height};
 
         // draw search box
         gc.drawRectangle(search_common.menu.page.top_left_position,

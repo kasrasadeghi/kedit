@@ -75,7 +75,8 @@ int main(int argc, char* argv[]) {
   GraphicsContext gc { &window, parent_dir(argv[0]) };
   gc.initOptions();
 
-  // CONSIDER: handling graphics configuration at this point
+  // handle graphics configuration at this point
+  editor.initGraphics(gc);
 
   /// Load Screen ===-------------------------------------------------------------------------===///
   gc.clear(0, 0, 0, 1);
