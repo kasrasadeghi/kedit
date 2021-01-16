@@ -78,6 +78,7 @@ struct Menu {
   // - pass a lambda for a line handler
   // - add bold to rope sections
   void render(GraphicsContext& gc);
+  void addCursors(GraphicsContext& gc, bool control_mode);
 
   /// MenuParse ===---------------------------------------------------------------------===///
 
