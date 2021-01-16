@@ -301,7 +301,7 @@ struct FileBuffer {
       if (shifted)
         {
           _search.common->active = true;
-          // TODO handle character inputs somewhere by changing focus
+          // TODO default initialize and clear the search query
           return;
         }
 

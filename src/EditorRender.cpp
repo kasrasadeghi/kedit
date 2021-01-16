@@ -33,6 +33,7 @@ void Editor::render(GraphicsContext& gc)
     gc.renderRectangles();
 
     // render search box
+    // CONSIDER should maybe move to SearchRender.hpp
     if (search_common.active)
       {
         // TODO do this only once, not every frame
@@ -76,12 +77,14 @@ Cursor Editor::getCurrentCursor(void)
 void Editor::addRectangles(GraphicsContext& gc)
   {
     addBackground(gc);
+
     if (Type::FileBufferT == currentPage()->_type)
       {
         currentFileBuffer()->addCursors(gc, _control_mode);
       }
     // TODO: fix mouse scrolling
     // - should only scroll to cursor when cursor is interacted with (arrow keys)
+    // - this falls under the larger umbrella of general mouse mode support
     currentPage()->highlightLine(gc, getCurrentCursor());
   }
 
