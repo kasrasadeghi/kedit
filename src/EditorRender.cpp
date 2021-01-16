@@ -80,7 +80,14 @@ void Editor::addRectangles(GraphicsContext& gc)
 
     if (Type::FileBufferT == currentPage()->_type)
       {
-        currentFileBuffer()->addCursors(gc, _control_mode);
+        if (search_common.active)
+          {
+            search_common.menu.addCursors(gc, _control_mode);
+          }
+        else
+          {
+            currentFileBuffer()->addCursors(gc, _control_mode);
+          }
       }
     // TODO: fix mouse scrolling
     // - should only scroll to cursor when cursor is interacted with (arrow keys)

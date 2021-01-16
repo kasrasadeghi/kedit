@@ -35,3 +35,25 @@ void Menu::render(GraphicsContext& gc)
           }
       }
   }
+
+void Menu::addCursors(GraphicsContext& gc, bool control_mode)
+  {
+    // only render cursors for textfields
+    if ("textfield" != commands[cursor].value)
+      {
+        return;
+      }
+
+    auto& textfield = textfields.at(selectable_lines[cursor]);
+
+    float text_width = gc.tr.textWidth("a");
+
+    gc.drawRectangle(page.textCoord(gc, textfield.cursor), {text_width, gc.line_height},
+                     control_mode
+                     ? glm::vec4{1, 0.7, 0.7, 0.5}
+                     : glm::vec4{0.7, 1, 0.7, 0.5}, 0.4);
+
+    gc.drawRectangle(page.textCoord(gc, textfield.shadow_cursor),
+                     {text_width, gc.line_height},
+                     {0.7, 0.7, 1.0, 0.5}, 0.4);
+  }
