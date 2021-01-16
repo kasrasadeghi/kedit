@@ -123,6 +123,8 @@ bool Editor::handleKeyControl(int key, int scancode, int action, int mods)
       {
         if (Type::FileBufferT == currentPage()->_type)
           {
+            _control_mode = false;
+            _swallow_char = 1; // TODO maybe increment instead?
             currentFileBuffer()->search(GLFW_MOD_SHIFT & mods);
           }
         return true;
@@ -156,6 +158,20 @@ bool Editor::handleKeyControl(int key, int scancode, int action, int mods)
 
 void Editor::handleChar(unsigned char codepoint)
   {
+    if (_swallow_char < 0)
+      {
+        println("ERROR: negative swallow char state, setting to zero");
+        _swallow_char = 0;
+        return;
+      }
+
+    // only if _swallow_char is zero should we actually handle that char
+    if (_swallow_char > 0)
+      {
+        -- _swallow_char;
+        return;
+      }
+
     if (Type::FileBufferT == currentPage()->_type)
       {
         if (search_common.active && not _control_mode)

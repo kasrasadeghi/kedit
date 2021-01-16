@@ -31,6 +31,11 @@ struct Editor {
   bool _control_mode = true;
   bool _control_mode_release_exit = false;
 
+  // sometimes you need to swallow some characters in handleChar
+  // - because they're leftover GLFW_RELEASEs from handleKey{,Edit,Control}
+  // NOTE: generally when a control key ([a-zA-Z]) turns off control mode, you need to swallow a char
+  int _swallow_char = 0;
+
   /// Initialization ===----------------------------------------------------------------------===///
 
   inline void init(void)
