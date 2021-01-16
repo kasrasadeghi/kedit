@@ -92,5 +92,7 @@ struct Menu {
   /// Interaction ===-------------------------------------------------------------------===///
 
   void handleKey(int key, int scancode, int action, int mods);
+  void handleKeyEdit(int key, int scancode, int action, int mods);
+  void handleKeyControl(int key, int scancode, int action, int mods);
   void handleChar(unsigned char codepoint);
 };

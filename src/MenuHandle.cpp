@@ -73,6 +73,63 @@ void Menu::handleKey(int key, int scancode, int action, int mods)
       }
 
     // SOON probably send events to the current textfield if the current is a textfield
+    if ("textfield" == commands[cursor].value)
+      {
+        textfields.at(selectable_lines[cursor]).handleKey(key, scancode, action, mods);
+      }
+  }
+
+
+void Menu::handleKeyEdit(int key, int scancode, int action, int mods)
+  {
+    if ("textfield" == commands[cursor].value)
+      {
+        TextField& tf = textfields.at(selectable_lines[cursor]);
+        auto before_content = tf.string();
+
+        // edit
+        tf.handleKeyEdit(key, scancode, action, mods);
+        auto after_content = tf.string();
+
+        if (before_content != after_content)
+          {
+            const Texp& command_set = commands[cursor];
+            auto& change_command = command_set.must_find("change")[0];
+            auto& handler = _function_table.at(change_command.value);
+
+            auto quote = [](std::string s) -> std::string
+                         { return "\"" + s + "\""; };
+
+            auto content = quote(tf.string());
+            handler(Texp{content, {change_command[0]}});
+          }
+      }
+  }
+
+void Menu::handleKeyControl(int key, int scancode, int action, int mods)
+  {
+     if ("textfield" == commands[cursor].value)
+      {
+        TextField& tf = textfields.at(selectable_lines[cursor]);
+        auto before_content = tf.string();
+
+        // control
+        tf.handleKeyControl(key, scancode, action, mods);
+        auto after_content = tf.string();
+
+        if (before_content != after_content)
+          {
+            const Texp& command_set = commands[cursor];
+            auto& change_command = command_set.must_find("change")[0];
+            auto& handler = _function_table.at(change_command.value);
+
+            auto quote = [](std::string s) -> std::string
+                         { return "\"" + s + "\""; };
+
+            auto content = quote(tf.string());
+            handler(Texp{content, {change_command[0]}});
+          }
+      }
   }
 
 void Menu::handleChar(unsigned char codepoint)
