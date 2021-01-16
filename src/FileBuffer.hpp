@@ -144,8 +144,9 @@ struct FileBuffer {
 
       for (Cursor result : _search.results)
         {
+          // SOON this needs to change to update search queries updating better
           gc.drawRectangle(page.textCoord(gc, result),
-                           {text_width * _search.common->query.length(), gc.line_height},
+                           {text_width * _search.common->_query.length(), gc.line_height},
                            glm::vec4{1, 1, 0.3, 0.4}, 0.3);
         }
 
@@ -325,8 +326,7 @@ struct FileBuffer {
       if (begin_column > end_column) std::swap(begin_column, end_column);
 
       // NOW SOON: consider how the query string is updated by the content
-      // _search.common->query = rope.lines.at(cursor.line).substr(begin_column, end_column - begin_column);
-      _search.common->query = rope.lines.at(cursor.line).substr(begin_column, end_column - begin_column);
+      _search.common->setQuery(rope.lines.at(cursor.line).substr(begin_column, end_column - begin_column));
       _search.common->scanAll(rope, _search);
 
       // TODO: search binding to cycle through history of searched items, like M-n M-p in emacs
@@ -342,7 +342,7 @@ struct FileBuffer {
         }
       else
         {
-          _search.offset = _search.common->query.length();
+          _search.offset = _search.common->_query.length();
           _search.index = std::find(_search.results.begin(), _search.results.end(), shadow_cursor) - _search.results.begin();
         }
     }

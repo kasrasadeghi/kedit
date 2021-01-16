@@ -22,7 +22,7 @@ struct TextField {
     {
       // CONSIDER: instead of default init, they should snap to rope
       // - maybe for a textarea, but not a textfield
-      cursor.defaultInit();
+      cursor = {0, s.length()}; // {line, column}
       shadow_cursor.defaultInit();
 
       rope.lines.clear();

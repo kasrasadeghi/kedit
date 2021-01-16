@@ -25,13 +25,19 @@ struct Search {
 /// the search element of the Editor, in global scope
 struct SearchCommon {
   Menu menu;
-  std::string query = "";  // CURRENT, maybe replace this with something that observes the textfield in the search menu
+  std::string _query = "";  // CURRENT, maybe replace this with something that observes the textfield in the search menu
   bool active = false;
 
   // true to communicate to the editor that the current page should scan
   // - TODO only currently works for filebuffers
   bool should_scan = false; // TODO FIXME this is gross, please fix
 
+  inline void setQuery(std::string query)
+    {
+      this->_query = query;
+      // NOTE: textfield is on first line of menu
+      menu.textfields[0].setContent(query);
+    }
 
   inline void init()
     {
@@ -51,21 +57,21 @@ struct SearchCommon {
 
       // CURRENT
 
-      // TODO index should be set to the first location that is beyond the current cursor
+      // TODO index should be set to the first location that is beyond(/before?) the current cursor
 
       Menu::FunctionTable function_table {
         {{"search-change", [&](const Texp& arg) {
                              auto unquote = [](std::string s) -> std::string
                                             { return s.substr(1, s.length() - 2); };
 
-                             this->query = unquote(arg.value);
-                             if ("" != this->query)
+                             this->_query = unquote(arg.value);
+                             if ("" != this->_query)
                                {
                                  this->should_scan = true;
                                }
                            }},
          {"search-submit", [&](const Texp& arg) {
-                             this->query = "";
+                             this->_query = "";
                              this->should_scan = false;
                              // TODO consider shouldreset
                              // - should_reset would tell the editor that the filebuffer's search
@@ -83,17 +89,17 @@ struct SearchCommon {
     {
       search.results.clear();
 
-      assert(query != "");
+      assert(this->_query != "");
 
       for (size_t line_i = 0; line_i < rope.lines.size(); ++line_i)
         {
           const auto& line = rope.lines.at(line_i);
 
-          size_t result = line.find(query);
+          size_t result = line.find(this->_query);
           while (result != std::string::npos)
             {
               search.results.push_back(Cursor{line_i, result});
-              result = line.find(query, result + 1);
+              result = line.find(this->_query, result + 1);
             }
         }
 
