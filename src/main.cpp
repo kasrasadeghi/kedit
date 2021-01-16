@@ -75,6 +75,8 @@ int main(int argc, char* argv[]) {
   GraphicsContext gc { &window, parent_dir(argv[0]) };
   gc.initOptions();
 
+  // CONSIDER: handling graphics configuration at this point
+
   /// Load Screen ===-------------------------------------------------------------------------===///
   gc.clear(0, 0, 0, 1);
   gc.scissorFull();
