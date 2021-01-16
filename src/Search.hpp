@@ -3,6 +3,7 @@
 #include "Rope.hpp"
 #include "Cursor.hpp"
 #include "Menu.hpp"
+#include "GraphicsContext.hpp"
 
 #include <string>
 #include <vector>
@@ -83,6 +84,20 @@ struct SearchCommon {
 
       menu.setHandlers(function_table);
       menu.parseLayout(menu._layout);
+    }
+
+  inline void initGraphics(GraphicsContext& gc)
+    {
+      // TODO do this only once, not every frame
+      // - need access to the graphics context
+      auto& tl     = menu.page.top_left_position;
+      auto& offset = menu.page.offset;
+      auto& size   = menu.page.size;
+
+      auto SL = 300; // search box length
+      offset = {gc.line_height, gc.line_height};
+      tl = {1800 - SL, 150};
+      size = {SL, 1.5 * gc.line_height};
     }
 
   inline void scanAll(const Rope& rope, Search& search)
