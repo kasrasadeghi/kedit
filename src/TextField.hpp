@@ -150,8 +150,7 @@ struct TextField {
           return true;
         }
 
-      print("UNHANDLED:\n  ");
-      println(command.paren());
+      println("UNHANDLED:\n  ", command.paren());
       return false;
     }
 

@@ -104,7 +104,6 @@ void Editor::_handleShouldScan()
   {
     if (search_common.should_scan)
       {
-        println("should scan");
         currentFileBuffer()->_search.offset = -1;
         currentFileBuffer()->_search.index = -1;
         search_common.scanAll(currentFileBuffer()->rope, currentFileBuffer()->_search);
