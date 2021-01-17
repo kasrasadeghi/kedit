@@ -54,12 +54,7 @@ void Editor::handleKey(int key, int scancode, int action, int mods)
         // TODO fix this, WARNING gross incoming
         // this is a message from the search's edit handling and history handling that we should scan the current page
         // - the only pages that support search are currently filebuffers (jan 13, 2021)
-        if (search_common.should_scan)
-          {
-            currentFileBuffer()->_search.offset = -1;
-            currentFileBuffer()->_search.index = -1;
-            search_common.scanAll(currentFileBuffer()->rope, currentFileBuffer()->_search);
-          }
+        _handleShouldScan();
         return;
       }
 
@@ -102,6 +97,18 @@ void Editor::handleKey(int key, int scancode, int action, int mods)
           {
             currentMenu()->handleKeyEdit(key, scancode, action, mods);
           }
+      }
+  }
+
+void Editor::_handleShouldScan()
+  {
+    if (search_common.should_scan)
+      {
+        println("should scan");
+        currentFileBuffer()->_search.offset = -1;
+        currentFileBuffer()->_search.index = -1;
+        search_common.scanAll(currentFileBuffer()->rope, currentFileBuffer()->_search);
+        search_common.should_scan = false;
       }
   }
 
@@ -192,6 +199,8 @@ void Editor::handleChar(unsigned char codepoint)
             // - the menu should navigate it to the textField
             // SOON
             search_common.menu.handleChar(codepoint);
+
+            _handleShouldScan();
             return;
           }
 

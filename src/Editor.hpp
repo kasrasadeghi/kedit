@@ -155,6 +155,7 @@ struct Editor {
   void handleKey(int key, int scancode, int action, int mods);
   [[nodiscard]] bool handleKeyControl(int key, int scancode, int action, int mods);
   void handleChar(unsigned char codepoint);
+  void _handleShouldScan(void);
 
   inline bool invariant(void)
     {
