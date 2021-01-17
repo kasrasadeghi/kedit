@@ -36,7 +36,6 @@ void Editor::render(GraphicsContext& gc)
     // CONSIDER should maybe move to SearchRender.hpp
     if (search_common.active)
       {
-
         // draw search box
         gc.drawRectangle(search_common.menu.page.top_left_position,
                          search_common.menu.page.size, {0.2, 0.2, 0.2, 1}, 0.5);
