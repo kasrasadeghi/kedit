@@ -56,8 +56,11 @@ void FileBuffer::handleKey(int key, int scancode, int action, int mods)
 
     if (GLFW_KEY_PAGE_DOWN == key)
       {
+        assert(rope.lines.size() >= 1);
         // TODO: replace with std::min?
-        if (cursor.line < rope.lines.size() - 1 - PAGE_LINE_COUNT)
+
+        // NOTE: prefer addition over subtraction in unsigned comparison to avoid integer underflow
+        if (cursor.line + PAGE_LINE_COUNT + 1 < rope.lines.size())
           {
             cursor.line += PAGE_LINE_COUNT;
           }
