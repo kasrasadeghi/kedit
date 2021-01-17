@@ -70,6 +70,8 @@ struct SearchCommon {
                                {
                                  this->should_scan = true;
                                }
+
+                             // CONSIDER: messaging editor to clear results somehow?
                            }},
          {"search-submit", [&](const Texp& arg) {
                              this->_query = "";
