@@ -65,6 +65,7 @@ void FileBuffer::handleKey(int key, int scancode, int action, int mods)
           }
         else
           {
+            // CONSIDER: setting column to end of line
             cursor.line = rope.lines.size() - 1;
           }
 
