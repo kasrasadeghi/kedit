@@ -225,8 +225,7 @@ struct FileBuffer {
           return;
         }
 
-      print("UNHANDLED:\n  ");
-      println(command.paren());
+      println("UNHANDLED:\n  ", command.paren());
     }
 
   inline void search(bool shifted)
