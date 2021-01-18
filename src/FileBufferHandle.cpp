@@ -93,7 +93,7 @@ void FileBuffer::handleKeySearch(int key, int scancode, int action, int mods)
   {
     if (not (GLFW_PRESS == action || GLFW_REPEAT == action)) return;
 
-    if (GLFW_KEY_LEFT == key || GLFW_KEY_P == key)
+    if (GLFW_KEY_UP == key)
       {
         if (0 == _search.index)
           {
@@ -108,7 +108,7 @@ void FileBuffer::handleKeySearch(int key, int scancode, int action, int mods)
         return;
       }
 
-    if (GLFW_KEY_RIGHT == key || GLFW_KEY_N == key)
+    if (GLFW_KEY_DOWN == key)
       {
         if (_search.results.size() - 1 == _search.index)
           {

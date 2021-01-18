@@ -55,7 +55,12 @@ void Editor::handleKey(int key, int scancode, int action, int mods)
         // this is a message from the search's edit handling and history handling that we should scan the current page
         // - the only pages that support search are currently filebuffers (jan 13, 2021)
         _handleShouldScan();
-        return;
+
+        bool fallthrough = GLFW_KEY_UP == key || GLFW_KEY_DOWN == key;
+        if (not fallthrough)
+          {
+            return;
+          }
       }
 
     // active page
