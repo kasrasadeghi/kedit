@@ -72,10 +72,11 @@ void Editor::addRectangles(GraphicsContext& gc)
         if (search_common.active)
           {
             search_common.menu.addCursors(gc, _control_mode);
+            currentFileBuffer()->addCursors(gc, _control_mode, false);
           }
         else
           {
-            currentFileBuffer()->addCursors(gc, _control_mode);
+            currentFileBuffer()->addCursors(gc, _control_mode, true);
           }
       }
     // TODO: fix mouse scrolling
