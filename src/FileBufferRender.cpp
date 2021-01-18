@@ -23,23 +23,40 @@ void FileBuffer::render(GraphicsContext& gc)
       }
   }
 
-void FileBuffer::addCursors(GraphicsContext& gc, bool control_mode)
+void FileBuffer::addCursors(GraphicsContext& gc, bool control_mode, bool active)
   {
     // TODO change for variable text width fonts
     float text_width = gc.tr.textWidth("a");
 
-    gc.drawRectangle(page.textCoord(gc, cursor), {text_width, gc.line_height},
-                     control_mode
-                     ? glm::vec4{1, 0.7, 0.7, 0.5}
-                     : glm::vec4{0.7, 1, 0.7, 0.5}, 0.4);
+    // change color for active and inactive
+    if (active)
+      {
+        gc.drawRectangle(page.textCoord(gc, cursor), {text_width, gc.line_height},
+                         control_mode
+                         ? glm::vec4{1, 0.7, 0.7, 0.5}
+                         : glm::vec4{0.7, 1, 0.7, 0.5}, 0.4);
 
-    gc.drawRectangle(page.textCoord(gc, shadow_cursor),
-                     {text_width, gc.line_height},
-                     {0.7, 0.7, 1.0, 0.5}, 0.4);
+        gc.drawRectangle(page.textCoord(gc, shadow_cursor),
+                         {text_width, gc.line_height},
+                         {0.7, 0.7, 1.0, 0.5}, 0.4);
+      }
+    else
+      {
+        gc.drawRectangle(page.textCoord(gc, cursor), {text_width, gc.line_height},
+                         control_mode
+                         ? glm::vec4{1, 0.7, 0.7, 0.2}
+                         : glm::vec4{0.7, 1, 0.7, 0.2}, 0.4);
+
+        gc.drawRectangle(page.textCoord(gc, shadow_cursor),
+                         {text_width, gc.line_height},
+                         {0.7, 0.7, 1.0, 0.2}, 0.4);
+
+      }
 
     // TODO investigate positive z layer being below text?
     // - maybe ortho proj doesn't flip?
   }
+
 
 void FileBuffer::addSearchResults(GraphicsContext& gc)
   {

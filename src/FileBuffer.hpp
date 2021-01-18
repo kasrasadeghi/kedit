@@ -99,7 +99,7 @@ struct FileBuffer {
   /// Render ===------------------------------------------------------------------------===///
 
   void render(GraphicsContext& gc);
-  void addCursors(GraphicsContext& gc, bool control_mode);
+  void addCursors(GraphicsContext& gc, bool control_mode, bool active);
   void addSearchResults(GraphicsContext& gc);
 
   /// Interaction ===-------------------------------------------------------------------===///
