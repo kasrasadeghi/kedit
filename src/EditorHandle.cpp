@@ -46,6 +46,44 @@ void Editor::handleKey(int key, int scancode, int action, int mods)
             search_common.closeSearch();
           }
 
+        // NOTE: kinda gross
+        // NOTE: enter is handled both here, pre-emptively, and later in search's handleKey.
+        //       - here, it sets the cursor to either the next or previous search entry if any exist.
+        //       - later, in search.menu.handlekey (textfield submit), it closes search
+        if (GLFW_KEY_ENTER == key && GLFW_PRESS == action)
+          {
+            const auto& fb_results = currentFileBuffer()->_search.results;
+            auto& fb_cursor = currentFileBuffer()->cursor;
+
+            if (not fb_results.empty() && not search_common._query.empty())
+              {
+                // find_if is find_first
+                auto found_cursor = std::find_if(fb_results.cbegin(), fb_results.cend(),
+                                                 [&](Cursor X) { return fb_cursor < X; });
+
+                // CONSIDER: also setting search index because ENTER shouldn't clear the query
+                if (found_cursor != fb_results.cend())
+                  {
+                    // SHIFT + ENTER should go one before the cursor
+                    if (fb_results.size() > 2 && (mods & GLFW_MOD_SHIFT))
+                      {
+                        if (found_cursor == fb_results.cbegin())
+                          {
+                            fb_cursor = fb_results.back();
+                          }
+                        else
+                          {
+                            fb_cursor = *(std::prev(found_cursor));
+                          }
+                      }
+                    else
+                      {
+                        fb_cursor = *found_cursor;
+                      }
+                  }
+              }
+          }
+
         search_common.menu.handleKey(key, scancode, action, mods);
         // SOON figure out when the buttons should also go to the underlying filebuffer or menu
 
