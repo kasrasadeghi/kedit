@@ -36,6 +36,8 @@ struct Editor {
   // NOTE: generally when a control key ([a-zA-Z]) turns off control mode, you need to swallow a char
   int _swallow_char = 0;
 
+  uint64_t _debug_counter = 0;
+
   std::function<void(void)> _window_close;
 
   /// Initialization ===----------------------------------------------------------------------===///

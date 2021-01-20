@@ -187,6 +187,7 @@ int main(int argc, char* argv[]) {
     /// Render Messages ===-------------------------------------------------------------------===///
 
     gc.text(editor.search_common._query, editor.currentPage()->size.x + 100, 100, glm::vec4(1));
+    gc.text(str(editor._debug_counter), editor.currentPage()->size.x + 110, 170, glm::vec4(1));
 
     // if (not editor._menus.empty()) {
     //  list_text(editor.command_history, {window.width() - 500, window.height() - 700}, "history");
