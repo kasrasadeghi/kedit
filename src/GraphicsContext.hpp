@@ -82,6 +82,9 @@ struct GraphicsContext {
 
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+      // NOTE: disable for now, consider fixing and layering in the future
+      glDepthMask(GL_FALSE);
     }
 
   inline void renderRectangles(void)
