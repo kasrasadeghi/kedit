@@ -50,6 +50,7 @@ void Menu::handleKey(int key, int scancode, int action, int mods)
 
           auto& handler = _function_table.at(press_command.value);
           handler(press_command[0]);
+          return;
         }
 
         // (textfield (change ('key1 [arg1])) (submit ('key2 [arg2])))
@@ -68,14 +69,15 @@ void Menu::handleKey(int key, int scancode, int action, int mods)
           auto content = quote(tf.string());
 
           handler(Texp{content, {submit_command[0]}});
+          return;
         }
-        return;
       }
 
     // SOON probably send events to the current textfield if the current is a textfield
     if ("textfield" == commands[cursor].value)
       {
         textfields.at(selectable_lines[cursor]).handleKey(key, scancode, action, mods);
+        return;
       }
   }
 
