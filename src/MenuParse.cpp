@@ -17,6 +17,9 @@ void Menu::parseLayout(const Texp& layout)
     uint64_t curr_line = 0;
     Texp repr = _createMenuRepr(layout, curr_line);
 
+    // commands is bijective to selectable_lines, they both use cursor input
+    assert(commands.size() == selectable_lines.size());
+
     // render texp to rope
     _repr_alloc = repr.tabs();
     page.buffer.contents.make(_repr_alloc);
