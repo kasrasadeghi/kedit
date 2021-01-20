@@ -76,12 +76,10 @@ struct SearchCommon {
                              // CONSIDER: messaging editor to clear results somehow?
                            }},
          {"search-submit", [&](const Texp& arg) {
-                             this->_query = "";
-                             this->should_scan = false;
                              // TODO consider shouldreset
                              // - should_reset would tell the editor that the filebuffer's search
                              //   component should reset the index and all that
-                             active = false;
+                             closeSearch();
                            }},
         }
       };
@@ -123,5 +121,12 @@ struct SearchCommon {
         }
 
       active = true;
+    }
+
+  inline void closeSearch(void)
+    {
+      this->_query = "";
+      this->active = false;
+      this->should_scan = false;
     }
 };

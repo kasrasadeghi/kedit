@@ -39,6 +39,13 @@ void Editor::handleKey(int key, int scancode, int action, int mods)
     // modal case
     if (search_common.active)
       {
+        if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action)
+          {
+            // CONSIDER: clearing query here
+            // - maybe also put clearing the query in the history
+            search_common.closeSearch();
+          }
+
         search_common.menu.handleKey(key, scancode, action, mods);
         // SOON figure out when the buttons should also go to the underlying filebuffer or menu
 
