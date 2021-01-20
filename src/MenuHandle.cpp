@@ -2,6 +2,12 @@
 
 void Menu::handleKey(int key, int scancode, int action, int mods)
   {
+    if (not invariant())
+      {
+        println("ERROR: menu invariant failed when handling key");
+        return;
+      }
+
     // SOON: send key events to selected textfield
     // CONSIDER: having a default textfield
     // - or to transition focus to the most recently selected/edited textfield

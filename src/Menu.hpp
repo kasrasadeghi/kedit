@@ -96,4 +96,12 @@ struct Menu {
   void handleKeyEdit(int key, int scancode, int action, int mods);
   void handleKeyControl(int key, int scancode, int action, int mods);
   void handleChar(unsigned char codepoint);
+
+  /// Debugging ===---------------------------------------------------------------------===///
+
+  inline bool invariant(void)
+    {
+      return commands.size() == selectable_lines.size()
+        && cursor < selectable_lines.size();
+    }
 };
