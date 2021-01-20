@@ -12,17 +12,17 @@ void Editor::render(GraphicsContext& gc)
     // render page background and line highlighting
     addBackground(gc);
 
+    auto* page = currentPage();
+
     // TODO: fix mouse scrolling
     // - should only scroll to cursor when cursor is interacted with (arrow keys)
     // - this falls under the larger umbrella of general mouse mode support
-    currentPage()->highlightLine(gc, getCurrentCursor());
+    page->highlightLine(gc, getCurrentCursor());
 
     // only filebuffer cursor
     addCursors(gc);
 
     gc.renderRectangles();
-
-    auto* page = currentPage();
 
     // CONSIDER: not doing this in render
     page->scrollToCursor(gc, getCurrentCursor());
