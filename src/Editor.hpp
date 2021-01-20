@@ -36,6 +36,8 @@ struct Editor {
   // NOTE: generally when a control key ([a-zA-Z]) turns off control mode, you need to swallow a char
   int _swallow_char = 0;
 
+  std::function<void(void)> _window_close;
+
   /// Initialization ===----------------------------------------------------------------------===///
 
   inline void init(void)
@@ -46,6 +48,11 @@ struct Editor {
   inline void initGraphics(GraphicsContext& gc)
     {
       search_common.initGraphics(gc);
+    }
+
+  inline void setWindowClose(std::function<void(void)> winclose)
+    {
+      _window_close = winclose;
     }
 
   /// Memory Management ===-------------------------------------------------------------------===///

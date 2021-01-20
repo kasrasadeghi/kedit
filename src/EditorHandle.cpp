@@ -120,6 +120,11 @@ bool Editor::handleKeyControl(int key, int scancode, int action, int mods)
   {
     if (GLFW_PRESS != action) return false;
 
+    if (GLFW_KEY_Q == key)
+      {
+        _window_close();
+      }
+
     if (GLFW_KEY_C == key)
       {
         clipboard.kill_ring.push_back(Rope{});
