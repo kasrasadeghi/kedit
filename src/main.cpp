@@ -27,6 +27,8 @@ int main(int argc, char* argv[]) {
   editor.openBrowser();
   // editor.loadFile("README.md");
 
+  editor.setWindowClose([&]() { window.close(); });
+
   bool wireframe_mode = false;
 
   // TODO consider making viewable menu of callback history
@@ -39,11 +41,6 @@ int main(int argc, char* argv[]) {
     }
 
     editor.handleKey(key, scancode, action, mods);
-
-    if (GLFW_PRESS == action && GLFW_KEY_ESCAPE == key) {
-      // TODO save before exit dialogue?
-      window.close();
-    }
   });
 
   window.setCharCallback([&](unsigned int codepoint) {
