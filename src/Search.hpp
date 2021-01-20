@@ -18,6 +18,8 @@ struct Search {
 
   size_t index = 0;  // TODO: build data structure for easily cycle-able vector, like a ring/ringbuffer/deque
   size_t offset = -1;
+
+  // search results are in increasing order
   std::vector<Cursor> results;
 };
 
