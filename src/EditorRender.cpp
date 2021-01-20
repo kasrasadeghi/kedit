@@ -6,6 +6,9 @@ void Editor::render(GraphicsContext& gc)
     gc.alignViewport();
     gc.clear(0.5, 0.5, 0.5, 1);
 
+    // NOTE: disable for now, consider fixing and layering in the future
+    glDepthMask(GL_FALSE);
+
     // render page background and line highlighting
     addRectangles(gc);
     gc.renderRectangles();
@@ -43,6 +46,8 @@ void Editor::render(GraphicsContext& gc)
 
         search_common.menu.render(gc);
       }
+
+    glDepthMask(GL_TRUE);
   }
 
 Cursor Editor::getCurrentCursor(void)
