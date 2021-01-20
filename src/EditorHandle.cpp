@@ -125,6 +125,16 @@ bool Editor::handleKeyControl(int key, int scancode, int action, int mods)
         _window_close();
       }
 
+    if (GLFW_KEY_D == key)
+      {
+        ++ _debug_counter;
+      }
+
+    if (GLFW_KEY_R == key)
+      {
+        _debug_counter = 0;
+      }
+
     if (GLFW_KEY_C == key)
       {
         clipboard.kill_ring.push_back(Rope{});
