@@ -68,6 +68,8 @@ void Editor::handleKey(int key, int scancode, int action, int mods)
           {
             return;
           }
+
+        // CONSIDER: straight up calling FileBuffer.handleKeySearch instead of relying on fallthrough
       }
 
     // active page
@@ -167,6 +169,10 @@ bool Editor::handleKeyControl(int key, int scancode, int action, int mods)
       {
         if (Type::FileBufferT == currentPage()->_type)
           {
+            // CONSIDER if search is reopened with a previous query, it should have the query selected and highlighted
+            // - so that if they start typing, it will replace the selection and exit highlight mode
+            // - TODO implement highlight mode/ selection mode
+
             _control_mode = false;
             _swallow_char = 1; // TODO maybe increment instead?
             currentFileBuffer()->search(GLFW_MOD_SHIFT & mods);
