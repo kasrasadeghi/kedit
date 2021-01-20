@@ -152,11 +152,7 @@ struct Editor {
   // TODO text renderer needs to have a Z level argument
   // TODO render background at different Z levels
   void render(GraphicsContext& gc);
-
   Cursor getCurrentCursor(void);
-
-  void addRectangles(GraphicsContext& gc);
-
   void addBackground(GraphicsContext& gc);
 
   /// Interaction ===-------------------------------------------------------------------===///
