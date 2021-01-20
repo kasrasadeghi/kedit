@@ -46,6 +46,7 @@ void Menu::handleKey(int key, int scancode, int action, int mods)
 
     if (not (GLFW_PRESS == action)) return;
 
+    // NOTE: mutually exclusive branches should early return as soon as they have handled the event
     if (GLFW_KEY_ENTER == key)
       {
         const Texp& command_set = commands[cursor];
