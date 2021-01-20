@@ -17,7 +17,7 @@ void Editor::render(GraphicsContext& gc)
 
     // only render current page within its margin
     gc.scissorRect(page->top_left_position + glm::vec2{0, page->offset.x},
-                   glm::vec2{page->size.x - (2 * page->offset.x), page->size.y});
+                   glm::vec2{page->size.x - (page->offset.x), page->size.y});
 
     // CONSIDER: combining searchbox and search result rendering somehow?
     // - search box rendering should go afterwards to be "on top"

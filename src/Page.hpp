@@ -18,6 +18,9 @@ struct Page {
   glm::vec2 top_left_position = {100, 100};
   glm::vec2 size = {1800, 1200};
 
+  // 1800 = (2 * 50) + (17 * 100)
+  //        offset     100 characters long
+
   inline glm::vec2 bottomRight(void) { return top_left_position + size; }
 
   void render(GraphicsContext& gc);
