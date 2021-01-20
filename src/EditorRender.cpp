@@ -30,7 +30,6 @@ void Editor::render(GraphicsContext& gc)
 
     // render page text
     page->render(gc);
-    gc.renderRectangles();
 
     // render search box
     // CONSIDER should maybe move to SearchRender.hpp
