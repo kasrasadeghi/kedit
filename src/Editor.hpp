@@ -60,7 +60,7 @@ struct Editor {
   void freeCurrentFileBuffer(void);
   void freeCurrent(void);
 
-  /// Memory Management ===-------------------------------------------------------------------===///
+  /// Methods ===-----------------------------------------------------------------------------===///
 
   inline Page* currentPage(void)
     { return _pages.back(); }
