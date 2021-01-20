@@ -10,7 +10,25 @@ void Editor::render(GraphicsContext& gc)
     glDepthMask(GL_FALSE);
 
     // render page background and line highlighting
-    addRectangles(gc);
+    addBackground(gc);
+
+    if (Type::FileBufferT == currentPage()->_type)
+      {
+        if (search_common.active)
+          {
+            search_common.menu.addCursors(gc, _control_mode);
+            currentFileBuffer()->addCursors(gc, _control_mode, false);
+          }
+        else
+          {
+            currentFileBuffer()->addCursors(gc, _control_mode, true);
+          }
+      }
+    // TODO: fix mouse scrolling
+    // - should only scroll to cursor when cursor is interacted with (arrow keys)
+    // - this falls under the larger umbrella of general mouse mode support
+    currentPage()->highlightLine(gc, getCurrentCursor());
+
     gc.renderRectangles();
 
     auto* page = currentPage();
@@ -65,28 +83,6 @@ Cursor Editor::getCurrentCursor(void)
       printerrln("WARNING: Page of type ", currentPage()->_type, " encountered.");
       return Cursor{0, 0};
     }
-  }
-
-void Editor::addRectangles(GraphicsContext& gc)
-  {
-    addBackground(gc);
-
-    if (Type::FileBufferT == currentPage()->_type)
-      {
-        if (search_common.active)
-          {
-            search_common.menu.addCursors(gc, _control_mode);
-            currentFileBuffer()->addCursors(gc, _control_mode, false);
-          }
-        else
-          {
-            currentFileBuffer()->addCursors(gc, _control_mode, true);
-          }
-      }
-    // TODO: fix mouse scrolling
-    // - should only scroll to cursor when cursor is interacted with (arrow keys)
-    // - this falls under the larger umbrella of general mouse mode support
-    currentPage()->highlightLine(gc, getCurrentCursor());
   }
 
 void Editor::addBackground(GraphicsContext& gc)
