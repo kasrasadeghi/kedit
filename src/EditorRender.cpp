@@ -12,22 +12,13 @@ void Editor::render(GraphicsContext& gc)
     // render page background and line highlighting
     addBackground(gc);
 
-    if (Type::FileBufferT == currentPage()->_type)
-      {
-        if (search_common.active)
-          {
-            search_common.menu.addCursors(gc, _control_mode);
-            currentFileBuffer()->addCursors(gc, _control_mode, false);
-          }
-        else
-          {
-            currentFileBuffer()->addCursors(gc, _control_mode, true);
-          }
-      }
     // TODO: fix mouse scrolling
     // - should only scroll to cursor when cursor is interacted with (arrow keys)
     // - this falls under the larger umbrella of general mouse mode support
     currentPage()->highlightLine(gc, getCurrentCursor());
+
+    // only filebuffer cursor
+    addCursors(gc);
 
     gc.renderRectangles();
 
@@ -60,6 +51,13 @@ void Editor::render(GraphicsContext& gc)
         gc.drawRectangle(search_common.menu.page.top_left_position,
                          search_common.menu.page.size, {0.2, 0.2, 0.2, 1}, 0.5);
 
+        // render search cursor
+        if (Type::FileBufferT == currentPage()->_type)
+          {
+            search_common.menu.addCursors(gc, _control_mode);
+            currentFileBuffer()->addCursors(gc, _control_mode, false);
+          }
+
         gc.renderRectangles();
 
         search_common.menu.render(gc);
@@ -83,6 +81,17 @@ Cursor Editor::getCurrentCursor(void)
       printerrln("WARNING: Page of type ", currentPage()->_type, " encountered.");
       return Cursor{0, 0};
     }
+  }
+
+void Editor::addCursors(GraphicsContext& gc)
+  {
+    if (Type::FileBufferT == currentPage()->_type)
+      {
+        if (not search_common.active)
+          {
+            currentFileBuffer()->addCursors(gc, _control_mode, true);
+          }
+      }
   }
 
 void Editor::addBackground(GraphicsContext& gc)

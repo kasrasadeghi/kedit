@@ -153,6 +153,7 @@ struct Editor {
   // TODO render background at different Z levels
   void render(GraphicsContext& gc);
   Cursor getCurrentCursor(void);
+  void addCursors(GraphicsContext& gc);
   void addBackground(GraphicsContext& gc);
 
   /// Interaction ===-------------------------------------------------------------------===///
