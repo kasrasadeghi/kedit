@@ -78,6 +78,14 @@ struct Profiler {
       fps_counter_time = glfwGetTime();
       framerate = 1 / delta_time;
       moving_avg_framerate = ((moving_avg_framerate * (geometric_falloff_rate - 1)) + framerate) / geometric_falloff_rate;
+
+      // the moving geometric rate is, at point i+1,
+      //   one part the current rate and
+      //   n-1 parts the previous moving geometric rate
+      //
+      //                (FR_i * (falloff - 1)) + fr_i
+      //    FR_{i+1} = -------------------------------
+      //                          falloff
     }
 
   inline void endFrame()
