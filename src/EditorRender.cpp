@@ -12,6 +12,9 @@ void Editor::render(GraphicsContext& gc)
     // render page background and line highlighting
     addBackground(gc);
 
+    // NOTE: need to render the background without scissor so that is doesn't clip the offset margin
+    gc.renderRectangles();
+
     auto* page = currentPage();
 
     // TODO: fix mouse scrolling
@@ -22,14 +25,14 @@ void Editor::render(GraphicsContext& gc)
     // only filebuffer cursor
     addCursors(gc);
 
+    // only render current page within its margin
+    gc.scissorRect(page->top_left_position + page->offset,
+                   page->size              - (2.0f * page->offset));
+
     gc.renderRectangles();
 
     // CONSIDER: not doing this in render
     page->scrollToCursor(gc, getCurrentCursor());
-
-    // only render current page within its margin
-    gc.scissorRect(page->top_left_position + page->offset,
-                   page->size              - (2.0f * page->offset));
 
     // CONSIDER: combining searchbox and search result rendering somehow?
     // - search box rendering should go afterwards to be "on top"
