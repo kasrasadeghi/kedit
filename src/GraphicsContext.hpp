@@ -13,6 +13,10 @@ struct GraphicsContext {
   GLfloat text_scale = 1;
   GLfloat line_height = 30;
 
+  static constexpr bool DEBUG_SCISSOR = false;
+  glm::vec2 scissor_tl;
+  glm::vec2 scissor_size;
+
   template<int N>
   inline void text(const char (&text)[N], GLfloat x, GLfloat y, glm::vec4 color, GLfloat scale = 0)
     {
@@ -33,7 +37,11 @@ struct GraphicsContext {
     };
 
   GraphicsContext(RenderWindow* w, const std::string& binary_directory): window(w), tr(binary_directory)
-    { glViewport(0, 0, window->width(), window->height()); }
+    {
+      glViewport(0, 0, window->width(), window->height());
+      scissorFull();
+
+    }
 
   inline void initOptions(void)
     {
@@ -45,13 +53,18 @@ struct GraphicsContext {
     { glViewport(0, 0, window->width(), window->height()); }
 
   inline void scissorFull(void)
-    { glScissor(0, 0, window->width(), window->height()); }
+    { scissorRect({0, 0}, {window->width(), window->height()}); }
 
   /// Translates top-left coordinate to lower-left coordinate.
   // glScissor uses lower left coordinates,
   //   (1, 1) is first bottom left pixel
   inline void scissorRect(glm::vec2 top_left, glm::vec2 size)
     {
+      if constexpr(DEBUG_SCISSOR)
+        {
+          scissor_tl = top_left;
+          scissor_size = size;
+        }
       glScissor(top_left.x, window->height() - top_left.y - size.y,
                 size.x, size.y);
     }
@@ -86,6 +99,11 @@ struct GraphicsContext {
 
   inline void renderRectangles(void)
     {
+      if constexpr(DEBUG_SCISSOR)
+        {
+          rectprog.instances.emplace_back(scissor_tl, scissor_size, glm::vec4{1, 0.1, 0.1, 0.1}, -1.f);
+        }
+
       rectprog.render(window->width(), window->height());
       rectprog.instances.clear();
     }
