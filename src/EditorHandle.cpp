@@ -41,9 +41,15 @@ void Editor::handleKey(int key, int scancode, int action, int mods)
       {
         if (GLFW_KEY_ESCAPE == key && GLFW_PRESS == action)
           {
-            // CONSIDER: clearing query here
-            // - maybe also put clearing the query in the history
-            search_common.closeSearch();
+            if ("" != search_common._query)
+              {
+                // CONSIDER: maybe also put clearing the query in the history
+                search_common._query = "";
+              }
+            else
+              {
+                search_common.closeSearch();
+              }
           }
 
         // NOTE: kinda gross
