@@ -67,6 +67,8 @@ struct SearchCommon {
                              auto unquote = [](std::string s) -> std::string
                                             { return s.substr(1, s.length() - 2); };
 
+                             // NOTE: this doesn't need to use setQuery because
+                             //       the menu should have reacted to the change already
                              this->_query = unquote(arg.value);
                              if ("" != this->_query)
                                {
@@ -125,7 +127,6 @@ struct SearchCommon {
 
   inline void closeSearch(void)
     {
-      this->_query = "";
       this->active = false;
       this->should_scan = false;
     }
