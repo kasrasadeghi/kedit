@@ -44,7 +44,7 @@ void Editor::handleKey(int key, int scancode, int action, int mods)
             if ("" != search_common._query)
               {
                 // CONSIDER: maybe also put clearing the query in the history
-                search_common._query = "";
+                search_common.setQuery("");
               }
             else
               {
