@@ -1,9 +1,7 @@
 default: fast
 
+# execname is the name of the current directory
 execname=$(shell basename "$(shell pwd)")
-
-todo:
-	(cd docs; make)
 
 compile:
 	[ -d build ] || mkdir build

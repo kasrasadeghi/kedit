@@ -71,7 +71,7 @@ void Editor::handleKey(int key, int scancode, int action, int mods)
                 if (found_cursor != fb_results.cend())
                   {
                     // SHIFT + ENTER should go one before the cursor
-                    if (fb_results.size() > 2 && (mods & GLFW_MOD_SHIFT))
+                    if (fb_results.size() >= 2 && (mods & GLFW_MOD_SHIFT))
                       {
                         if (found_cursor == fb_results.cbegin())
                           {
