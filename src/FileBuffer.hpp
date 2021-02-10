@@ -230,15 +230,17 @@ struct FileBuffer {
 
   inline void search(bool shifted)
     {
+      // CONSIDER removing offset
+
       // TODO when adding non-cursor search query, differentiate between cursor and non-cursor search
       // - cursor search just searches between the two cursors
       // - non-cursor makes you type in the query
       //
-      // if cursor search,
+      // if selection search,
       //   index should be the lesser cursor
       //   search.offset should either be 0 or query.length()
       //
-      // if non-cursor search,
+      // if non-selection search,
       //   if cursor is within a result,
       //     offset is based on that
       //     index is also zero
@@ -246,27 +248,32 @@ struct FileBuffer {
       //     offset is -1 i.e. maximal integer
       //     index is the first result that is after the cursor
 
-      if (shifted)
+      bool diffline = cursor.line != shadow_cursor.line;
+
+      /// ==== Search without Valid Selection ====
+      if (not shifted
+          || diffline
+          || cursor == shadow_cursor)
         {
+          if (diffline && shifted && (cursor != shadow_cursor))
+            {
+              println("WARNING: cannot search multiple lines, using empty search query");
+            }
+
           _search.common->active = true;
-          // TODO default initialize and clear the search query
+
+          if ("" != _search.common->_query)
+            {
+              println("LOG: scanning on previous query '" + _search.common->_query + "'");
+              _search.common->scanAll(rope, _search);
+            }
           return;
         }
 
-      if (cursor == shadow_cursor)
-        {
-          _search.common->active = true;
-          // TODO default initialize and clear the search query
-          return;
-        }
-
-      if (cursor.line != shadow_cursor.line)
-        {
-          // TODO remove warning and consider just going to the empty search query
-          println("WARNING: cannot search multiple lines, using empty search query");
-          _search.common->active = true;
-          return;
-        }
+      /// ==== Search on Selection ====
+      // TODO rework on selection mode
+      /// if shift is pressed and there is a valid selection
+      /// - search using the selection
 
       auto begin_column = cursor.column;
       auto end_column = shadow_cursor.column;
