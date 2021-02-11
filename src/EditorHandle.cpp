@@ -87,6 +87,21 @@ void Editor::handleKey(int key, int scancode, int action, int mods)
                         fb_cursor = *found_cursor;
                       }
                   }
+
+                // wrap around end
+                else
+                  {
+                    // shift-enter on wrap is always last result
+                    if (fb_results.size() >= 2 && (mods & GLFW_MOD_SHIFT))
+                      {
+                        fb_cursor = fb_results.back();
+                      }
+                    else
+                      {
+                        // non shift-enter is always first result
+                        fb_cursor = fb_results.front();
+                      }
+                  }
               }
           }
 
