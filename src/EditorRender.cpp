@@ -46,6 +46,30 @@ void Editor::render(GraphicsContext& gc)
     // render page text
     page->render(gc);
 
+    // scissor to full page
+    // gc.scissorRect(page->top_left_position,
+    //                page->size             );
+    gc.scissorFull();
+
+    // render cursor coordinate
+    if (Type::FileBufferT == currentPage()->_type)
+      {
+        // get cursor and figure out how wide its rendered text is
+        const auto& cursor = currentFileBuffer()->cursor;
+        auto text = "(" + str(cursor.line) + "," + str(cursor.column) + ")";
+        auto margin = 10;
+        auto width = gc.tr.textWidth(text) + (2*margin);
+
+        // render background box
+        auto height = (2*margin) + gc.line_height;
+        auto tl = page->top_left_position + page->size - glm::vec2{width, height};
+        gc.drawRectangle(tl, {width, height}, {0.3, 0.3, 0.3, 1}, 0.5);
+        gc.renderRectangles();
+
+        // render cursor text
+        gc.text(text, tl.x+margin, tl.y + height - 1.5*margin, glm::vec4{1});
+      }
+
     // render search box
     // CONSIDER should maybe move to SearchRender.hpp
     if (search_common.active)
