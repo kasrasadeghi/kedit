@@ -28,7 +28,16 @@ struct Scroller {
       if (gone_past())
         {
           position = target;
+          return;
         }
+
+      // if we're lagging, don't worry about smooth scrolling
+      if (delta_time > 0.05 || delta_time < 0.001)
+        {
+          position = target;
+          return;
+        }
+
       position += velocity * delta_time;
     }
 };
