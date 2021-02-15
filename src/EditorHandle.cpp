@@ -96,9 +96,10 @@ void Editor::handleKey(int key, int scancode, int action, int mods)
                       {
                         fb_cursor = fb_results.back();
                       }
+
+                    // non shift-enter is always first result
                     else
                       {
-                        // non shift-enter is always first result
                         fb_cursor = fb_results.front();
                       }
                   }
