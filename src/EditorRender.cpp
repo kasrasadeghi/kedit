@@ -26,8 +26,8 @@ void Editor::render(GraphicsContext& gc)
     addCursors(gc);
 
     // only render current page within its margin
-    gc.scissorRect(page->top_left_position + page->offset,
-                   page->size              - (2.0f * page->offset));
+    gc.scissorRect(page->top_left_position + glm::vec2{page->offset.x, 0},
+                   page->size              - glm::vec2{2.0f * (page->offset.x), 0});
 
     gc.renderRectangles();
 
@@ -46,9 +46,6 @@ void Editor::render(GraphicsContext& gc)
     // render page text
     page->render(gc);
 
-    // scissor to full page
-    // gc.scissorRect(page->top_left_position,
-    //                page->size             );
     gc.scissorFull();
 
     // render cursor coordinate
