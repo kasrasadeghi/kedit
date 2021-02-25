@@ -24,8 +24,33 @@ int main(int argc, char* argv[]) {
 
   Editor editor;
   editor.init();
-  editor.openBrowser();
-  // editor.loadFile("README.md");
+
+  // TODO handle more than one argument?
+  if (argc > 1) {
+    std::string filepath = argv[1];
+
+    if (is_file(filepath)) {
+      std::string parent = parent_dir(filepath);
+      if (0 != chdir(parent.c_str())) {
+        perror(str("kedit (cd '" + parent + "'):").c_str());
+        exit(1);
+      }
+
+      editor.loadFile(filepath);
+    } else if (is_directory(filepath)) {
+      if (0 != chdir(filepath.c_str())) {
+        perror("kedit");
+        exit(1);
+      }
+      editor.openBrowser();
+    } else {
+      print("WARNING: unhandled argument '",
+            filepath, "' is neither file nor directory");
+      editor.openBrowser();
+    }
+  } else {
+    editor.openBrowser();
+  }
 
   editor.setWindowClose([&]() { window.close(); });
 
@@ -141,6 +166,11 @@ int main(int argc, char* argv[]) {
 
     gc.scissorFull();
 
+    status("scroll position: " + str(editor.currentPage()->buffer.line_scroller.position));
+    status("scroll target:   " + str(editor.currentPage()->buffer.line_scroller.target));
+    status("scroll delta:    " + str(pr.delta_time));
+    status("scroll step:     " + str(editor.currentPage()->buffer.line_scroller.velocity * pr.delta_time));
+
     status("page list:");
     int i = 0;
     for (Page* page : editor._pages)
@@ -193,7 +223,7 @@ int main(int argc, char* argv[]) {
     //  list_text(editor.command_history, {window.width() - 500, window.height() - 700}, "history");
     // }
 
-    // list_text(status_messages, {window.width() - 500, window.height() - 500}, "status");
+    list_text(status_messages, {window.width() - 500, window.height() - 500}, "status");
 
     if constexpr(PROFILING) { pr.event("render text"); }
 
