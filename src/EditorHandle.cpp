@@ -28,6 +28,18 @@ void Editor::handleKey(int key, int scancode, int action, int mods)
           }
       }
 
+    if (_control_mode)
+      {
+        // if you press a key while ctrl is held,
+        //   releasing ctrl exits control mode
+        // TODO: check that the key that is pressed while control is held is not control
+        //       (right control, for example)
+        if (GLFW_PRESS == action && (GLFW_MOD_CONTROL & mods))
+          {
+            _control_mode_release_exit = true;
+          }
+      }
+
     // TODO handle modal pages better
     // CONSIDER organization of pages
     // TODO there should be a modal case here
@@ -147,14 +159,6 @@ void Editor::handleKey(int key, int scancode, int action, int mods)
       {
         if (_control_mode)
           {
-            // if you press a key while ctrl is held,
-            //   releasing ctrl exits control mode
-            // TODO: check that the key that is pressed while control is held is not control
-            //       (right control, for example)
-            if (GLFW_PRESS == action && (GLFW_MOD_CONTROL & mods))
-              {
-                _control_mode_release_exit = true;
-              }
             currentFileBuffer()->handleKeyControl(key, scancode, action, mods);
           }
         else

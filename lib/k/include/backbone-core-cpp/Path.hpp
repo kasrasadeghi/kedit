@@ -11,3 +11,9 @@ std::string pathcat(const std::string& path_A, const std::string& path_B)
 
 std::string abs_path(const std::string& filepath)
   { using namespace std::filesystem; return absolute(path(filepath)).string(); }
+
+inline bool is_file(std::string_view s)
+  { return std::filesystem::is_regular_file(s); }
+
+inline bool is_directory(std::string_view s)
+  { return std::filesystem::is_directory(s); }
